@@ -6,7 +6,7 @@ import { useChatbot } from '../hooks/useChatbot';
 
 
 const Chat: React.FC = () => {
-  const { messages, sendMessage } = useChatbot();
+  const { messages, userTokens, botTokens, userCost, botCost, sendMessage } = useChatbot();
   const [inputText, setInputText] = useState('');
 
   const sendMessages = async () => {
@@ -19,6 +19,7 @@ const Chat: React.FC = () => {
   return (
     <div className="flex flex-col h-3/4 w-1/2 my-16">
       <header className="text-center p-4 ">CyberGuardian GPT</header>
+      <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p>
       <div className="flex-grow overflow-y-auto p-4 space-y-2">
         {messages.map((msg, index) => (
           <div key={index} className={`w-2/5 p-2 rounded-lg ${msg.sender === 'user' ? 'ml-auto bg-blue-500 text-white' : 'mr-auto bg-gray-200'}`}>

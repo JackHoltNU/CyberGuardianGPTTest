@@ -6,6 +6,8 @@ import { ThreadMessage } from "openai/resources/beta/threads/index.mjs";
 interface ChatResponses {
     messages: string[];
     threadID: string | undefined;
+    userTokens: number | undefined;
+    botTokens: number | undefined;
 }
 
 export const sendMessageToBot = async (userMessage: string, threadID: string | undefined): Promise<ChatResponses> => {
@@ -65,7 +67,7 @@ export const sendMessageToBot = async (userMessage: string, threadID: string | u
                             const stringMessages = textMessages.map((msg) => msg.text.value);
                             console.log(stringMessages);
                         
-                            resolve({messages: stringMessages, threadID: thread.id});
+                            resolve({messages: stringMessages, threadID: thread.id, userTokens: run.usage?.prompt_tokens, botTokens: run.usage?.completion_tokens});
                         } catch (error) {
                             console.error("Failed to retrieve message");
                         }    
@@ -78,7 +80,7 @@ export const sendMessageToBot = async (userMessage: string, threadID: string | u
         });     
     }
 
-    let ChatResponses = { messages: [], threadID };
+    let ChatResponses = { messages: [], threadID, userTokens: undefined, botTokens: undefined };
     if(threadID){
         console.log("Found thread id, retrieving");
         try {
@@ -86,9 +88,7 @@ export const sendMessageToBot = async (userMessage: string, threadID: string | u
             await openai.beta.threads.messages.create(thread.id, {
                 role: "user",
                 content: userMessage
-            });
-            response: ChatResponses = { messages:[], threadID: thread.id};
-            console.log("thread retrieved");
+            });            
 
             return getResponse(thread);
         } catch (error) {
@@ -103,9 +103,7 @@ export const sendMessageToBot = async (userMessage: string, threadID: string | u
             await openai.beta.threads.messages.create(thread.id, {
                 role: "user",
                 content: userMessage
-            });
-            response: ChatResponses = { messages:[], threadID: thread.id};
-            console.log("Thread created");
+            });            
 
             return getResponse(thread);
         } catch (error) {
