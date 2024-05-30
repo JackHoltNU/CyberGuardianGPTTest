@@ -3,17 +3,21 @@
 
 import React, { useState } from 'react';
 import { useChatbot } from '../hooks/useChatbot';
+import LoadingDots from '../components/loadingdots';
 
 
 const Chat: React.FC = () => {
   const { messages, userTokens, botTokens, userCost, botCost, sendMessage } = useChatbot();
   const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const sendMessages = async () => {
     let sendText = inputText;
     setInputText("");
+    setLoading(true);
     if (sendText.trim()) {      
-      await sendMessage(sendText);      
+      await sendMessage(sendText);  
+      setLoading(false);    
     }
   };
 
@@ -24,9 +28,14 @@ const Chat: React.FC = () => {
       <div className="flex-grow overflow-y-auto p-4 space-y-2">
         {messages.map((msg, index) => (
           <div key={index} className={`w-2/5 p-2 rounded-lg ${msg.sender === 'user' ? 'ml-auto bg-blue-500 text-white' : 'mr-auto bg-gray-200'}`}>
-            {typeof msg.text == "string" ? msg.text : "loading"}
+            {msg.text}
           </div>
         ))}
+        {loading && (
+          <div key={"loading"} className={`flex items-center justify-center w-2/5 px-2 py-4 rounded-lg mr-auto bg-gray-200`}>
+            <LoadingDots />
+        </div>
+        )}
       </div>
       <div className="p-4 flex">
         <input
