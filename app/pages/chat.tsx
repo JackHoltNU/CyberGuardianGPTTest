@@ -1,7 +1,7 @@
 'use client'
 
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useChatbot } from '../hooks/useChatbot';
 import LoadingDots from '../components/loadingdots';
 
@@ -10,6 +10,14 @@ const Chat: React.FC = () => {
   const { messages, userTokens, botTokens, userCost, botCost, sendMessage } = useChatbot();
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const sendMessages = async () => {
     let sendText = inputText;
@@ -25,7 +33,7 @@ const Chat: React.FC = () => {
     <div className="flex flex-col h-3/4 w-1/2 my-16">
       <header className="text-center p-4 ">CyberGuardian GPT</header>
       <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p>
-      <div className="flex-grow overflow-y-auto p-4 space-y-2">
+      <div className="flex-grow overflow-y-auto p-4 space-y-2" ref={scrollRef}>
         {messages.map((msg, index) => (
           <div key={index} className={`w-2/5 p-2 rounded-lg ${msg.sender === 'user' ? 'ml-auto bg-blue-500 text-white' : 'mr-auto bg-gray-200'}`}>
             {msg.text}
