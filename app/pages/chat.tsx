@@ -4,6 +4,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useChatbot } from '../hooks/useChatbot';
 import LoadingDots from '../components/loadingdots';
+import ReactMarkdown from 'react-markdown';
 
 
 const Chat: React.FC = () => {
@@ -33,10 +34,10 @@ const Chat: React.FC = () => {
     <div className="flex flex-col h-3/4 w-1/2 my-16">
       <header className="text-center p-4 ">CyberGuardian GPT</header>
       <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p>
-      <div className="flex-grow overflow-y-auto p-4 space-y-2" ref={scrollRef}>
+      <div className="flex-grow overflow-y-auto p-4 space-y-2" ref={scrollRef} style={{ whiteSpace: 'pre-wrap' }}>
         {messages.map((msg, index) => (
           <div key={index} className={`w-2/5 p-2 rounded-lg ${msg.sender === 'user' ? 'ml-auto bg-blue-500 text-white' : 'mr-auto bg-gray-200'}`}>
-            {msg.text}
+            { typeof msg.text == "string" ? <ReactMarkdown>{msg.text}</ReactMarkdown> : <>{msg.text}</>}
           </div>
         ))}
         {loading && (
