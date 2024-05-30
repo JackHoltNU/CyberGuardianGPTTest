@@ -16,6 +16,7 @@ const Chat: React.FC = () => {
 
   useEffect(() => {
     if (scrollRef.current) {
+      // scroll to the bottom with each new message
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
@@ -31,17 +32,17 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-3/4 w-1/2 my-16">
-      <header className="text-center p-4 ">CyberGuardian GPT</header>
+    <div className="flex flex-col h-screen w-4/5">
+      <header className="text-center p-4 text-large font-bold">CyberGuardian GPT</header>
       <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p>
-      <div className="flex-grow overflow-y-auto p-4 space-y-2" ref={scrollRef} style={{ whiteSpace: 'pre-wrap' }}>
+      <div className="flex-grow overflow-y-auto p-4 space-y-2 " ref={scrollRef} style={{ whiteSpace: 'pre-wrap' }}>
         {messages.map((msg, index) => (
-          <div key={index} className={`w-2/5 p-2 rounded-lg ${msg.sender === 'user' ? 'ml-auto bg-blue-500 text-white' : 'mr-auto bg-gray-200'}`}>
+          <div key={index} className={`w-fit max-w-prose p-2 m-2 rounded-lg ${msg.sender === 'user' ? 'ml-auto bg-blue-500 text-white' : 'mr-auto bg-gray-200'}`}>
             { typeof msg.text == "string" ? <ReactMarkdown>{msg.text}</ReactMarkdown> : <>{msg.text}</>}
           </div>
         ))}
         {loading && (
-          <div key={"loading"} className={`flex items-center justify-center w-2/5 px-2 py-4 rounded-lg mr-auto bg-gray-200`}>
+          <div key={"loading"} className={`flex items-center justify-center w-1/5 px-2 py-4 rounded-lg mr-auto bg-gray-200`}>
             <LoadingDots />
         </div>
         )}
@@ -49,7 +50,7 @@ const Chat: React.FC = () => {
       <div className="p-4 flex">
         <input
           type="text"
-          className="flex-grow mr-4 p-2 border border-gray-300 rounded-lg"
+          className="flex-grow w-2/5 sm:w-3/5 mr-4 p-2 border border-gray-300 rounded-lg"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => {
