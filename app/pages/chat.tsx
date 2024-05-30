@@ -47,7 +47,7 @@ const Chat: React.FC = () => {
         </div>
         )}
       </div>
-      <div className="p-4 flex">
+      <div className="p-12 md:p-8 flex">
         <input
           type="text"
           className="flex-grow w-2/5 sm:w-3/5 mr-4 p-2 border border-gray-300 rounded-lg"
