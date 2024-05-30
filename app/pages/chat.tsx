@@ -10,10 +10,11 @@ const Chat: React.FC = () => {
   const [inputText, setInputText] = useState('');
 
   const sendMessages = async () => {
-    if (inputText.trim()) {      
-      await sendMessage(inputText);      
-    }
+    let sendText = inputText;
     setInputText("");
+    if (sendText.trim()) {      
+      await sendMessage(sendText);      
+    }
   };
 
   return (
@@ -33,7 +34,11 @@ const Chat: React.FC = () => {
           className="flex-grow mr-4 p-2 border border-gray-300 rounded-lg"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && sendMessages()}
+          onKeyDown={(e) => {
+            if(e.key === 'Enter'){
+              sendMessages();
+            }
+          }}
         />
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"
