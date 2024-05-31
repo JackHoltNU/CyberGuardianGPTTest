@@ -38,10 +38,10 @@ const Chat: React.FC = () => {
     <div className="flex flex-col h-dvh w-4/5">
       <header className="text-center p-4 mt-4 text-xl font-bold">CyberGuardian GPT</header>
       <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p>
-      <div className="flex-grow overflow-y-auto p-4 space-y-2 " ref={scrollRef} style={{ whiteSpace: 'pre-wrap' }}>
+      <div className="flex-grow overflow-y-auto p-4 space-y-2 " ref={scrollRef} >
         {messages.map((msg, index) => (
           <div key={index} className={`w-fit p-2 rounded-lg ${msg.sender === 'user' ? 'ml-auto -mr-2 bg-blue-500 text-white' : 'mr-auto -ml-2 bg-yellow-200'}`}>
-            { typeof msg.text == "string" ? <ReactMarkdown>{msg.text}</ReactMarkdown> : <>{msg.text}</>}
+            { typeof msg.text == "string" ? <ReactMarkdown className="markdown">{msg.text}</ReactMarkdown> : <>{msg.text}</>}
           </div>
         ))}
         {loading && (
