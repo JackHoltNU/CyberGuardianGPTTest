@@ -32,7 +32,7 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen w-4/5">
+    <div className="flex flex-col h-dvh w-4/5">
       <header className="text-center p-4 text-large font-bold">CyberGuardian GPT</header>
       <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p>
       <div className="flex-grow overflow-y-auto p-4 space-y-2 " ref={scrollRef} style={{ whiteSpace: 'pre-wrap' }}>
@@ -47,7 +47,7 @@ const Chat: React.FC = () => {
         </div>
         )}
       </div>
-      <div className="p-12 md:p-8 flex">
+      <div className="p-4 md:p-8 flex w-full">
         <input
           type="text"
           className="flex-grow w-2/5 sm:w-3/5 mr-4 p-2 border border-gray-300 rounded-lg"
