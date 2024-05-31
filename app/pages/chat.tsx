@@ -23,7 +23,10 @@ const Chat: React.FC = () => {
 
   const sendMessages = async () => {
     let sendText = inputText;
-    setInputText("");
+    setInputText("");    
+    if(sendText == ""){
+      return;
+    }
     setLoading(true);
     if (sendText.trim()) {      
       await sendMessage(sendText);  
