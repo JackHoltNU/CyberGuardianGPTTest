@@ -5,6 +5,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useChatbot } from '../hooks/useChatbot';
 import LoadingDots from '../components/loadingdots';
 import ReactMarkdown from 'react-markdown';
+import exportChatAsText from '../utils/exporttxt';
+import exportChatAsPdf from '../utils/exportpdf';
 
 
 const Chat: React.FC = () => {
@@ -36,8 +38,27 @@ const Chat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-dvh w-4/5">
-      <header className="text-center p-4 mt-4 text-xl font-bold">CyberGuardian GPT</header>
-      <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p>
+      <header className="text-center p-2 mt-4 text-xl font-bold">CyberGuardian GPT</header>
+      <div className="flex w-full items-center justify-center">
+        {/* <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p> */}
+        <div className="p-1 flex w-fit">        
+          <button
+            className="bg-gray-500 hover:bg-gray-700 text-white p-2 rounded-lg"
+            onClick={() => exportChatAsPdf(messages)}
+          >
+            Save as PDF
+          </button>
+        </div>
+        <div className="p-1 md:p-4 flex w-fit">        
+          <button
+            className="bg-gray-500 hover:bg-gray-700 text-white p-2 rounded-lg"
+            onClick={() => exportChatAsText(messages)}
+          >
+            Save as TXT
+          </button>
+        </div>
+      </div>
+      
       <div className="flex-grow overflow-y-auto p-4 space-y-2 " ref={scrollRef} >
         {messages.map((msg, index) => (
           <div key={index} className={`w-fit p-2 rounded-lg ${msg.sender === 'user' ? 'ml-auto -mr-2 bg-blue-500 text-white' : 'mr-auto -ml-2 bg-yellow-200'}`}>
@@ -68,7 +89,7 @@ const Chat: React.FC = () => {
         >
           Send
         </button>
-      </div>
+      </div>      
     </div>
   );
 };
