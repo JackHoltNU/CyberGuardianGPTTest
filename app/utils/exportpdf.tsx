@@ -1,4 +1,3 @@
-import React from 'react';
 import { jsPDF } from 'jspdf';
 
 const exportChatAsPdf = async (chatData: Array<{ sender: 'user' | 'bot', text: string | Promise<string> }>) => {
