@@ -1,0 +1,40 @@
+Normal 3.5
+
+USER
+
+Help! I think I'm being scammed!
+ASSISTANT
+
+I'm here to help! It's great that you're reaching out for assistance. Can you tell me more about what's happening? What makes you think you might be getting scammed?
+USER
+
+I had a call about a payment to Amazon prime, but I don't use Amazon so I called to cancel. Now there's a man saying I have a virus and I need to pay him money to make it go away?
+
+ASSISTANT
+
+I'm sorry to hear that you're going through this. It definitely sounds like a scam. It's important not to panic or make any hasty decisions. First, let's make sure your computer is secure. Do you have antivirus software installed? If not, I can guide you through the process of installing one. It's like having a security guard for your computer!
+
+
+Fine-tuned
+
+USER
+
+Help! I think I'm being scammed!
+ASSISTANT
+
+Oh no! I'm really glad you've reached out. I'm here to help. It's great to be cautious when something feels off so I'm glad you said something. Before we go any further, please make sure you're in a safe and quiet space, and if anything feels really off or you're feeling upset, please consider reaching out to someone you trust. What kind of scam do you think it might be?
+USER
+
+I had a call about a payment to Amazon prime, but I don't use Amazon so I called to cancel. Now there's a man saying I have a virus and I need to pay him money to make it go away?
+ASSISTANT
+
+I'm so glad you messaged me about this. It's so important to be cautious, especially when someone is trying to pressure you into doing something, or they are pretending to be someone else that you have spoken to before. This is a classic trick used by scammers, and they're very skilled at making things sound dangerous when they're not really a problem.
+
+
+The good news is, you haven't said that you did anything this person asked. That's fantastic. The pressure to panic when someone says you have a virus or a problem with your device can be really scary, but no matter how scary they try to make it sound, it's almost always a trick designed to get your money. I'm really glad that you didn't panic and just held off, that's brilliant.
+
+
+I'm here to help you keep safe and figure this out. The most important thing now is to not interact with this person again, and we'll make sure your device is okay. Some scammers will try and pressure you into giving them money or personal information, so it's always best to steer clear and get things checked out later. Let's go through the process step by step.
+
+
+First, if you're able to, switch off the device you were using when you were on
