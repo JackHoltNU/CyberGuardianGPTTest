@@ -1,7 +1,7 @@
 "use server"
 
+import { MessageHistory } from "@/app/hooks/useChatbot";
 import OpenAI from "openai";
-import { ThreadMessage } from "openai/resources/beta/threads/index.mjs";
 
 interface ChatResponses {
     messages: string[];
@@ -10,7 +10,33 @@ interface ChatResponses {
     botTokens: number | undefined;
 }
 
-export const sendMessageToBot = async (userMessage: string, threadID: string | undefined): Promise<ChatResponses> => {
+interface ChatCompletionRequestMessage {
+    role: 'system' | 'user' | 'assistant';
+    content: string;
+  }
+
+export const sendMessageToChat = async (messageHistory: MessageHistory[]): Promise<ChatResponses> => {
+    const openai = new OpenAI({ apiKey: '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'});
+
+    let messagesParam: ChatCompletionRequestMessage[] = [{role: "system", content: "You assist users with online safety, emphasizing essential security practices such as strong password creation, scam identification, and software updates, in clear, simple UK English. In particular, you help with overcoming technological difficulties. Many of your users will be older adults who aren't heavy technology users and aren't confident with technology. You avoid technical jargon, sometimes using analogies to help yourself be understood when talking about complex matters. You never use analogies for things that are already easy to understand. In both urgent and non-urgent situations, you provide guidance in a conversational style, avoiding long lists of instructions unless explicitly instructed. Instead, you offer step-by-step advice one step at a time, allowing for back-and-forth interaction to ensure clarity and support. This approach helps users feel more comfortable and supported, making the guidance more accessible and effective. You discourage users from disclosing personal details to you. In cases of high risk, you suggest that the user contact a friend or family member, or suggest they contact a cyberguardian, whose contact details should be available on the cyberguardians website."}];
+    messageHistory.forEach((item) => {
+        messagesParam = [...messagesParam, {role: item.sender, content: item.text as string}]
+    })          
+
+    const completion = await openai.chat.completions.create({
+        messages: messagesParam,
+        model: "ft:gpt-3.5-turbo-1106:personal:test-finetune:9WLpJhZj",
+      });
+    
+    console.log(completion.choices[0]);
+
+    let ChatResponses = { messages: [completion.choices[0].message.content ?? ""], threadID: "1", userTokens: undefined, botTokens: undefined };
+    
+    return ChatResponses;
+}
+
+// Assistant API not needed and at present doesn't support fine-tuned models
+export const sendMessageToAssistant = async (userMessage: string, threadID: string | undefined): Promise<ChatResponses> => {
     const openai = new OpenAI({ apiKey: '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'});
     let thread: OpenAI.Beta.Threads.Thread;
 
@@ -111,12 +137,5 @@ export const sendMessageToBot = async (userMessage: string, threadID: string | u
         }
     }     
 
-    return ChatResponses;      
-
-    // try {
-    //     const messagethread = await openai.beta.threads.messages.list(thread.id);
-    // } catch (error) {
-    //     console.error("Failed to retrieve thread:", error)
-    // }
-    
+    return ChatResponses;          
   };

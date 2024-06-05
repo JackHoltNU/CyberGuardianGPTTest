@@ -1,4 +1,6 @@
-const exportChatAsText = (chatData: Array<{ sender: 'user' | 'bot', text: string | Promise<string> }>) => {
+import { MessageHistory } from "../hooks/useChatbot";
+
+const exportChatAsText = (chatData: Array<MessageHistory>) => {
   const formattedChat = chatData.map(({ sender, text }) => {
     const resolvedText = typeof text === 'string' ? text : 'Loading...';
     return `${sender === 'user' ? 'User' : 'CyberGuardian GPT'}: ${resolvedText}`;
