@@ -3,7 +3,7 @@
 import { MessageHistory } from "@/app/hooks/useChatbot";
 import OpenAI from "openai";
 
-interface ChatResponses {
+export interface ChatResponses {
     messages: string[];
     threadID: string | undefined;
     userTokens: number | undefined;
