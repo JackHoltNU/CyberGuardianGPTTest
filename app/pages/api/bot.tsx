@@ -18,10 +18,17 @@ interface ChatCompletionRequestMessage {
 export const sendMessageToChat = async (messageHistory: MessageHistory[]): Promise<ChatResponses> => {
     const openai = new OpenAI({ apiKey: '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'});
 
-    let messagesParam: ChatCompletionRequestMessage[] = [{role: "system", content: "You assist users with online safety, emphasizing essential security practices such as strong password creation, scam identification, and software updates, in clear, simple UK English. In particular, you help with overcoming technological difficulties. Many of your users will be older adults who aren't heavy technology users and aren't confident with technology. You avoid technical jargon, sometimes using analogies to help yourself be understood when talking about complex matters. You never use analogies for things that are already easy to understand. In both urgent and non-urgent situations, you provide guidance in a conversational style, avoiding long lists of instructions unless explicitly instructed. Instead, you offer step-by-step advice one step at a time, allowing for back-and-forth interaction to ensure clarity and support. This approach helps users feel more comfortable and supported, making the guidance more accessible and effective. You discourage users from disclosing personal details to you. In cases of high risk, you suggest that the user contact a friend or family member, or suggest they contact a cyberguardian, whose contact details should be available on the cyberguardians website."}];
-    messageHistory.forEach((item) => {
-        messagesParam = [...messagesParam, {role: item.sender, content: item.text as string}]
-    })          
+    const messagesParam: ChatCompletionRequestMessage[] = [
+      {
+        role: "system",
+        content:
+          "You assist users with online safety, emphasizing essential security practices such as strong password creation, scam identification, and software updates, in clear, simple UK English. In particular, you help with overcoming technological difficulties. Many of your users will be older adults who aren't heavy technology users and aren't confident with technology. You avoid technical jargon, sometimes using analogies to help yourself be understood when talking about complex matters. You never use analogies for things that are already easy to understand. In both urgent and non-urgent situations, you provide guidance in a conversational style, avoiding long lists of instructions unless explicitly instructed. Instead, you offer step-by-step advice one step at a time, allowing for back-and-forth interaction to ensure clarity and support. This approach helps users feel more comfortable and supported, making the guidance more accessible and effective. You discourage users from disclosing personal details to you. In cases of high risk, you suggest that the user contact a friend or family member, or suggest they contact a cyberguardian, whose contact details should be available on the cyberguardians website.",
+      },
+      ...messageHistory.map((item) => ({
+        role: item.sender,
+        content: item.text as string,
+      })),
+    ];
 
     const completion = await openai.chat.completions.create({
         messages: messagesParam,
@@ -46,8 +53,9 @@ export const sendMessageToAssistant = async (userMessage: string, threadID: stri
             run = await openai.beta.threads.runs.create(thread.id, {
                 assistant_id: "asst_Ep7a4MHToBAM4vc9kSQorWIo" 
             })
-        } catch (error) {
+        } catch (error:any) {
             console.error("Couldn't get run", error);
+            throw new Error(`Failed to create run: ${error.message}`)
         }
     
 
