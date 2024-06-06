@@ -21,6 +21,11 @@ const Chat: React.FC = () => {
       // scroll to the bottom with each new message
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
+    console.log(`User tokens: ${userTokens}`);
+    console.log(`User cost: ${userCost}`);
+    console.log(`Bot tokens: ${botTokens}`);
+    console.log(`Bot cost: ${botCost}`);
+
   }, [messages]);
 
   const sendMessages = async () => {

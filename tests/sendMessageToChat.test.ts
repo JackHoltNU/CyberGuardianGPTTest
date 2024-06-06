@@ -7,6 +7,7 @@ jest.mock("openai", () => {
           completions: {
             create: jest.fn().mockResolvedValue({
               choices: [{ message: { content: 'Hello there!' } }],
+              usage: {prompt_tokens:2, completion_tokens:3}
             }),
           },
         },
@@ -19,8 +20,8 @@ describe("generateChatCompletion", () => {
     const mockResponse: ChatResponses = {
       messages: ["Hello there!"],
       threadID: "1",
-      userTokens: undefined,
-      botTokens: undefined,
+      userTokens: 2,
+      botTokens: 3,
     };
 
     const message: MessageHistory[] = [{ sender: "user", text: "Hi" }];

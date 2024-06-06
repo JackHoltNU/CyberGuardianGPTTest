@@ -37,7 +37,7 @@ export const sendMessageToChat = async (messageHistory: MessageHistory[]): Promi
     
     console.log(completion.choices[0]);
 
-    let ChatResponses = { messages: [completion.choices[0].message.content ?? ""], threadID: "1", userTokens: undefined, botTokens: undefined };
+    let ChatResponses = { messages: [completion.choices[0].message.content ?? ""], threadID: "1", userTokens: completion.usage?.prompt_tokens, botTokens: completion.usage?.completion_tokens };
     
     return ChatResponses;
 }
