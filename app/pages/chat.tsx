@@ -26,7 +26,7 @@ const Chat: React.FC = () => {
     console.log(`Bot tokens: ${botTokens}`);
     console.log(`Bot cost: ${botCost}`);
 
-  }, [messages]);
+  }, [messages, userTokens, botTokens, userCost, botCost]);
 
   const sendMessages = async () => {
     let sendText = inputText;
