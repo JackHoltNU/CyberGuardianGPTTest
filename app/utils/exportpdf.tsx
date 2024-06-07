@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { MessageHistory } from '../hooks/useChatbot';
+import { MessageHistory } from '../types/types';
 
 const exportChatAsPdf = async (chatData: Array<MessageHistory>) => {
   const doc = new jsPDF();

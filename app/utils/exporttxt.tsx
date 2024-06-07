@@ -1,4 +1,4 @@
-import { MessageHistory } from "../hooks/useChatbot";
+import { MessageHistory } from "../types/types";
 
 const exportChatAsText = (chatData: Array<MessageHistory>) => {
   const formattedChat = chatData.map(({ sender, text }) => {

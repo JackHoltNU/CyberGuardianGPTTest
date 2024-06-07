@@ -1,16 +1,9 @@
 "use server"
 
-import { MessageHistory } from "@/app/hooks/useChatbot";
 import OpenAI from "openai";
 import dotenv from 'dotenv';
+import { ChatResponses, MessageHistory } from "@/app/types/types";
 dotenv.config();
-
-export interface ChatResponses {
-    messages: string[];
-    threadID: string | undefined;
-    userTokens: number | undefined;
-    botTokens: number | undefined;
-}
 
 interface ChatCompletionRequestMessage {
     role: 'system' | 'user' | 'assistant';
@@ -32,16 +25,19 @@ export const sendMessageToChat = async (messageHistory: MessageHistory[]): Promi
       })),
     ];
 
-    const completion = await openai.chat.completions.create({
-        messages: messagesParam,
-        model: "ft:gpt-3.5-turbo-1106:personal:test-finetune:9WLpJhZj",
-      });
-    
-    console.log(completion.choices[0]);
+    try {
+        const completion = await openai.chat.completions.create({
+            messages: messagesParam,
+            model: "ft:gpt-3.5-turbo-1106:personal:test-finetune:9WLpJhZj",
+        });
+        console.log(completion.choices[0]);
 
-    let ChatResponses = { messages: [completion.choices[0].message.content ?? ""], threadID: "1", userTokens: completion.usage?.prompt_tokens, botTokens: completion.usage?.completion_tokens };
-    
-    return ChatResponses;
+        let chatResponses = { messages: [completion.choices[0].message.content ?? ""], threadID: "1", userTokens: completion.usage?.prompt_tokens, botTokens: completion.usage?.completion_tokens };
+        return chatResponses;
+    } catch (error:any) {
+        console.error("Couldn't create chat completion", error);
+        throw new Error(`Failed to create run: ${error.message}`)
+    }
 }
 
 // Assistant API not needed and at present doesn't support fine-tuned models
@@ -109,9 +105,7 @@ export const sendMessageToAssistant = async (userMessage: string, threadID: stri
                         }    
                     })();                         
                 }
-            }
-        
-        
+            }     
             const intervalId = setInterval(checkStatus,2000);
         });     
     }
