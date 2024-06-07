@@ -13,6 +13,7 @@ const Chat: React.FC = () => {
   const { messages, userTokens, botTokens, userCost, botCost, sendMessage } = useChatbot();
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -29,16 +30,25 @@ const Chat: React.FC = () => {
   }, [messages, userTokens, botTokens, userCost, botCost]);
 
   const sendMessages = async () => {
-    let sendText = inputText;
+    let sendText = inputText.trim();
     setInputText("");    
     if(sendText == ""){
       return;
     }
     setLoading(true);
-    if (sendText.trim()) {      
+    try {
       await sendMessage(sendText);  
-      setLoading(false);    
-    }
+    } catch (error: any) {
+      console.error("Failed to send message:", error);
+      setShowError(true);
+    } finally {
+      setLoading(false);
+      if(showError){
+        setShowError(false);
+      }
+    } 
+      
+    
   };
 
   return (
@@ -64,7 +74,7 @@ const Chat: React.FC = () => {
         </div>
       </div>
       
-      <div className="flex-grow overflow-y-auto p-4 space-y-2 " ref={scrollRef} >
+      <div className="flex-grow overflow-y-auto p-4 space-y-2 " ref={scrollRef} aria-live="polite">
         {messages.map((msg, index) => (
           <div key={index} className={`w-fit p-2 rounded-lg ${msg.sender === 'user' ? 'ml-auto -mr-2 bg-blue-500 text-white' : 'mr-auto -ml-2 bg-yellow-200'}`}>
             { typeof msg.text == "string" ? <ReactMarkdown className="markdown">{msg.text}</ReactMarkdown> : <>{msg.text}</>}
@@ -75,8 +85,12 @@ const Chat: React.FC = () => {
             <LoadingDots />
         </div>
         )}
+        {showError && (
+          <p className="w-fit p-2 rounded-lg ml-auto -mr-2 bg-red-500 text-white">There has been an error, please try again</p>
+        )}
       </div>
       <div className="p-4 md:p-8 flex w-full">
+        <label htmlFor="chat-input" className="sr-only">Type your message</label>
         <input
           type="text"
           className="flex-grow w-2/5 sm:w-3/5 mr-4 p-2 border border-gray-300 rounded-lg"
