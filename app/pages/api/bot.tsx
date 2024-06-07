@@ -2,6 +2,8 @@
 
 import { MessageHistory } from "@/app/hooks/useChatbot";
 import OpenAI from "openai";
+import dotenv from 'dotenv';
+dotenv.config();
 
 export interface ChatResponses {
     messages: string[];
@@ -16,7 +18,7 @@ interface ChatCompletionRequestMessage {
   }
 
 export const sendMessageToChat = async (messageHistory: MessageHistory[]): Promise<ChatResponses> => {
-    const openai = new OpenAI({ apiKey: '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'});
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const messagesParam: ChatCompletionRequestMessage[] = [
       {
