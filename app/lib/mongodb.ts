@@ -39,9 +39,7 @@ const connectToDatabase = async(): Promise<mongoose.Connection> => {
   }
 
   if (!cached.promise) {
-    const opts = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    const opts = {      
       bufferCommands: false,
     };
 
