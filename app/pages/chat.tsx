@@ -7,7 +7,6 @@ import LoadingDots from '../components/loadingdots';
 import ReactMarkdown from 'react-markdown';
 import exportChatAsText from '../utils/exporttxt';
 import exportChatAsPdf from '../utils/exportpdf';
-import { debounce } from '../utils/debounce';
 
 
 const Chat: React.FC = () => {
@@ -47,9 +46,7 @@ const Chat: React.FC = () => {
       if(showError){
         setShowError(false);
       }
-    } 
-      
-    
+    }          
   };
 
   return (

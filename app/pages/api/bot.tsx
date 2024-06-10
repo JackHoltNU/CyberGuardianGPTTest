@@ -12,6 +12,24 @@ interface ChatCompletionRequestMessage {
   content: string;
 }
 
+const createOrContinueChat = async (threadID: string, newMessage: MessageHistory, messageHistory: MessageHistory[]) => {
+  const chat = await Chat.findOne({ threadID });
+
+  try {
+    if (chat) {
+        chat.messages.push(newMessage);
+        await chat.save();
+      } else {
+        await Chat.create({
+          threadID,
+          messages: [...messageHistory],
+        });
+      }
+  } catch (error) {
+    console.error(`Couldn't save chat to database`)
+  }  
+}
+
 export const sendMessageToChat = async (
   messageHistory: MessageHistory[]
 ): Promise<ChatResponses> => {
@@ -20,17 +38,7 @@ export const sendMessageToChat = async (
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   const threadID = "test"; // needs to be argument to function
-  const chat = await Chat.findOne({ threadID });
-
-  if (chat && messageHistory.length > 0) {
-    chat.messages.push(messageHistory[messageHistory.length - 1]);
-    await chat.save();
-  } else {
-    await Chat.create({
-      threadID,
-      messages: [...messageHistory],
-    });
-  }
+  await createOrContinueChat(threadID, messageHistory[messageHistory.length - 1], messageHistory);
 
   const messagesParam: ChatCompletionRequestMessage[] = [
     {
@@ -52,19 +60,7 @@ export const sendMessageToChat = async (
 
     const responseMessage = completion.choices[0].message.content ?? "";
 
-    // TODO extrapolate to function
-    if (chat) {
-      chat.messages.push({
-        sender: "assistant",
-        text: responseMessage,
-      });
-      await chat.save();
-    } else {
-      await Chat.create({
-        threadID,
-        messages: [...messageHistory],
-      });
-    }
+    await createOrContinueChat(threadID, {sender: "assistant", text: responseMessage},messageHistory);
 
     return {
       messages: [completion.choices[0].message.content ?? ""],
@@ -74,7 +70,7 @@ export const sendMessageToChat = async (
     };
   } catch (error: any) {
     console.error("Couldn't create chat completion", error);
-    throw new Error(`Failed to create run: ${error.message}`);
+    throw new Error(`Failed to create chat completion: ${error.message}`);
   }
 };
 
