@@ -31,13 +31,16 @@ const createOrContinueChat = async (threadID: string, newMessage: MessageHistory
 }
 
 export const sendMessageToChat = async (
-  messageHistory: MessageHistory[]
+  messageHistory: MessageHistory[], threadID: string | undefined
 ): Promise<ChatResponses> => {
   console.log("sendMessageToChat called");
   await connectToDatabase();
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const threadID = "test"; // needs to be argument to function
+  if(threadID === undefined){
+    threadID = crypto.randomUUID();
+  }
+
   await createOrContinueChat(threadID, messageHistory[messageHistory.length - 1], messageHistory);
 
   const messagesParam: ChatCompletionRequestMessage[] = [

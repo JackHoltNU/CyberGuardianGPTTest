@@ -16,7 +16,8 @@ export const useChatbot = () => {
     setMessages(prev => [...prev, { sender: 'user', text }]);
     console.log("sending message");
     try {
-      const response: ChatResponses = await sendMessageToChat(updatedMessages);
+      const response: ChatResponses = await sendMessageToChat(updatedMessages, threadId);
+      setThreadID(response.threadID);
       let latest = response.messages[response.messages.length - 1];
 
       setMessages(prev => [...prev, { sender: 'assistant', text: latest }]);
