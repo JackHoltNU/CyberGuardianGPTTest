@@ -68,7 +68,7 @@ export const sendMessageToChat = async (
 
     return {
       messages: [completion.choices[0].message.content ?? ""],
-      threadID: "1",
+      threadID: threadID,
       userTokens: completion.usage?.prompt_tokens,
       botTokens: completion.usage?.completion_tokens,
     };
