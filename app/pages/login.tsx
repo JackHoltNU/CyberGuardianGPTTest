@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from "react"
-import { useChatbot } from "../hooks/useChatbot";
+import { useChatbot } from "../context/useChatbot";
 
 interface Props {
     toggleDisplayChatCallback: (state: boolean) => void;
@@ -11,6 +11,7 @@ const LogIn = ({toggleDisplayChatCallback} :Props) => {
     const {setUser} = useChatbot();
 
     const logIn = () => {
+        console.log(`Settings username to: ${username}`);
         setUser(username);
         toggleDisplayChatCallback(true);
     };

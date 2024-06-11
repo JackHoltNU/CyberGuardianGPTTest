@@ -12,7 +12,7 @@ interface ChatCompletionRequestMessage {
   content: string;
 }
 
-const createOrContinueChat = async (threadID: string, newMessage: MessageHistory, messageHistory: MessageHistory[]) => {
+const createOrContinueChat = async (threadID: string, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[]) => {
   const chat = await Chat.findOne({ threadID });
 
   try {
@@ -22,6 +22,7 @@ const createOrContinueChat = async (threadID: string, newMessage: MessageHistory
       } else {
         await Chat.create({
           threadID,
+          user,
           messages: [...messageHistory],
         });
       }
@@ -31,7 +32,7 @@ const createOrContinueChat = async (threadID: string, newMessage: MessageHistory
 }
 
 export const sendMessageToChat = async (
-  messageHistory: MessageHistory[], threadID: string | undefined
+  messageHistory: MessageHistory[], user: string, threadID: string | undefined
 ): Promise<ChatResponses> => {
   console.log("sendMessageToChat called");
   await connectToDatabase();
@@ -41,7 +42,7 @@ export const sendMessageToChat = async (
     threadID = crypto.randomUUID();
   }
 
-  await createOrContinueChat(threadID, messageHistory[messageHistory.length - 1], messageHistory);
+  await createOrContinueChat(threadID, user, messageHistory[messageHistory.length - 1], messageHistory);
 
   const messagesParam: ChatCompletionRequestMessage[] = [
     {
@@ -63,7 +64,7 @@ export const sendMessageToChat = async (
 
     const responseMessage = completion.choices[0].message.content ?? "";
 
-    await createOrContinueChat(threadID, {sender: "assistant", text: responseMessage},messageHistory);
+    await createOrContinueChat(threadID, user, {sender: "assistant", text: responseMessage},messageHistory);
 
     return {
       messages: [completion.choices[0].message.content ?? ""],

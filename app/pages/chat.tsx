@@ -2,7 +2,7 @@
 
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useChatbot } from '../hooks/useChatbot';
+import { useChatbot } from '../context/useChatbot';
 import LoadingDots from '../components/loadingdots';
 import ReactMarkdown from 'react-markdown';
 import exportChatAsText from '../utils/exporttxt';
