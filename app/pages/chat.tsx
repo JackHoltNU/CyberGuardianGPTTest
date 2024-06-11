@@ -9,7 +9,7 @@ import exportChatAsText from '../utils/exporttxt';
 import exportChatAsPdf from '../utils/exportpdf';
 
 
-const Chat: React.FC = () => {
+const Chat = () => {
   const { messages, userTokens, botTokens, userCost, botCost, sendMessage } = useChatbot();
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);

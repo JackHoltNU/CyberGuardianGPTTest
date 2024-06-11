@@ -5,6 +5,7 @@ import { ChatResponses, MessageHistory } from '../types/types';
 export const useChatbot = () => {
   const [messages, setMessages] = useState<Array<MessageHistory>>([]);
   const [threadId, setThreadID] = useState<string | undefined>();
+  const [user, setUser] = useState<string>();
   const [userTokens, setUserTokens] = useState(0);
   const [userCost, setUserCost] = useState(0);
   const [botTokens, setBotTokens] = useState(0);
@@ -43,6 +44,8 @@ export const useChatbot = () => {
   return {
     messages,
     sendMessage,
+    user,
+    setUser,
     userTokens,
     botTokens,
     userCost,
