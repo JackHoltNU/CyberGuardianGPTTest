@@ -6,14 +6,14 @@ interface Props {
     toggleDisplayChatCallback: (state: boolean) => void;
 }
 
-const LogIn = ({toggleDisplayChatCallback} :Props) => {
+const LogIn = () => {
     const [username, setUsername] = useState("");
     const {setUser} = useChatbot();
 
     const logIn = () => {
         console.log(`Settings username to: ${username}`);
         setUser(username);
-        toggleDisplayChatCallback(true);
+        // toggleDisplayChatCallback(true);
     };
 
     return (

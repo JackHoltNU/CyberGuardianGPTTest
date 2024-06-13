@@ -1,5 +1,5 @@
 import { ChatResponses, MessageHistory } from "@/app/types/types";
-import { sendMessageToChat } from "../app/pages/api/bot";
+import { sendMessageToChat } from "../app/api/bot
 
 jest.mock("openai", () => {
   return jest.fn().mockImplementation(() => ({

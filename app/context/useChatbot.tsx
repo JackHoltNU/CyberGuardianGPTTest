@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { sendMessageToChat } from '../pages/api/bot';
+import { sendMessageToChat } from '../api/bot';
 import { ChatResponses, MessageHistory } from '../types/types';
 
 interface ChatbotContextType {
