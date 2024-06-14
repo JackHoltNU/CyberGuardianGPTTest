@@ -1,4 +1,4 @@
-import type { Account, NextAuthOptions, User } from "next-auth";
+import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import connectToDatabase from "@/app/lib/mongodb";
 import Users from "@/app/models/User";
@@ -29,13 +29,27 @@ export const options: NextAuthOptions = {
             user?.password
           ))
         ) {
-          return { id: user._id.toString(), username: user.username };
+            console.log(`Authorize: username = ${user.username}`);
+          return { id: user._id.toString(), name: user.username };
         } else {
           return null;
         }
       },
     }),
   ],
+  callbacks: {
+    jwt({token, user}){
+        if(user){
+            token.name = user.name;
+            token.id = user.id;
+        }        
+        return token;
+    },
+    session({session, token}){
+        session.user = {name: token.name};
+        return session;
+    }
+  },
   secret: process.env.NEXTAUTH_SECRET,
   jwt: {
     secret: process.env.JWT_SECRET,

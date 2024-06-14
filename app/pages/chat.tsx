@@ -7,15 +7,25 @@ import LoadingDots from '../components/loadingdots';
 import ReactMarkdown from 'react-markdown';
 import exportChatAsText from '../utils/exporttxt';
 import exportChatAsPdf from '../utils/exportpdf';
+import { Session } from 'next-auth';
 
+interface Props {
+  session: Session;
+}
 
-const Chat = () => {
-  const { messages, userTokens, botTokens, userCost, botCost, sendMessage } = useChatbot();
+const Chat = ({session}: Props) => {
+  const { messages, userTokens, botTokens, userCost, botCost, sendMessage, setUser } = useChatbot();
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if(session.user?.name){
+      setUser(session.user.name)
+    }
+  },[])
 
   useEffect(() => {
     if (scrollRef.current) {

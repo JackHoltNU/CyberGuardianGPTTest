@@ -17,17 +17,20 @@ const createOrContinueChat = async (threadID: string, user: string, newMessage: 
 
   try {
     if (chat) {
+        console.log("found chat");
         chat.messages.push(newMessage);
         await chat.save();
       } else {
+        console.log(`creating chat, ${threadID}, ${user}, ${newMessage}`);
         await Chat.create({
           threadID,
           user,
           messages: [...messageHistory],
         });
       }
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Couldn't save chat to database`)
+    throw new Error(error.message);
   }  
 }
 
@@ -35,7 +38,12 @@ export const sendMessageToChat = async (
   messageHistory: MessageHistory[], user: string, threadID: string | undefined
 ): Promise<ChatResponses> => {
   console.log("sendMessageToChat called");
-  await connectToDatabase();
+  try {
+    await connectToDatabase();
+  } catch (error: any) {
+    console.error("Couldn't connect to database");
+    throw new Error(error.message)
+  }
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   if(threadID === undefined){
