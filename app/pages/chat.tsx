@@ -14,7 +14,7 @@ interface Props {
 }
 
 const Chat = ({session}: Props) => {
-  const { messages, userTokens, botTokens, userCost, botCost, sendMessage, setUser } = useChatbot();
+  const { messages, title, userTokens, botTokens, userCost, botCost, sendMessage, setUser } = useChatbot();
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -67,7 +67,7 @@ const Chat = ({session}: Props) => {
         <div className="p-1 flex w-fit">        
           <button
             className="bg-gray-500 hover:bg-gray-700 text-white p-2 rounded-lg"
-            onClick={() => exportChatAsPdf(messages)}
+            onClick={() => exportChatAsPdf(messages, title)}
           >
             Save as PDF
           </button>
@@ -75,7 +75,7 @@ const Chat = ({session}: Props) => {
         <div className="p-1 md:p-4 flex w-fit">        
           <button
             className="bg-gray-500 hover:bg-gray-700 text-white p-2 rounded-lg"
-            onClick={() => exportChatAsText(messages)}
+            onClick={() => exportChatAsText(messages, title)}
           >
             Save as TXT
           </button>

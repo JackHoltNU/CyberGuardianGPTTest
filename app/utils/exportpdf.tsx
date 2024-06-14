@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 import { MessageHistory } from '../types/types';
 
-const exportChatAsPdf = async (chatData: Array<MessageHistory>) => {
+const exportChatAsPdf = async (chatData: Array<MessageHistory>, title: string) => {
   const doc = new jsPDF();
   let y = 20; // Starting Y position
   const maxwidth = 180;
@@ -27,7 +27,7 @@ const exportChatAsPdf = async (chatData: Array<MessageHistory>) => {
     }    
   }
 
-  doc.save('chat.pdf');
+  doc.save(`${title}.pdf`);
 };
 
 export default exportChatAsPdf;

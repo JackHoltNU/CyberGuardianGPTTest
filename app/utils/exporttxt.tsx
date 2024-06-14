@@ -1,6 +1,6 @@
 import { MessageHistory } from "../types/types";
 
-const exportChatAsText = (chatData: Array<MessageHistory>) => {
+const exportChatAsText = (chatData: Array<MessageHistory>, title: string) => {
   const formattedChat = chatData.map(({ sender, text }) => {
     const resolvedText = typeof text === 'string' ? text : 'Loading...';
     return `${sender === 'user' ? 'User' : 'CyberGuardian GPT'}: ${resolvedText}`;
@@ -10,7 +10,7 @@ const exportChatAsText = (chatData: Array<MessageHistory>) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'chat.txt';
+  a.download = `${title}.txt`;
   a.click();
   URL.revokeObjectURL(url);
 };

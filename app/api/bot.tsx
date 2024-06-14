@@ -12,18 +12,20 @@ interface ChatCompletionRequestMessage {
   content: string;
 }
 
-const createOrContinueChat = async (threadID: string, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[]) => {
+const createOrContinueChat = async (threadID: string, title: string, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[]) => {
   const chat = await Chat.findOne({ threadID });
 
   try {
     if (chat) {
         console.log("found chat");
         chat.messages.push(newMessage);
+        chat.title = title;
         await chat.save();
       } else {
         console.log(`creating chat, ${threadID}, ${user}, ${newMessage}`);
         await Chat.create({
           threadID,
+          title,
           user,
           messages: [...messageHistory],
         });
@@ -50,7 +52,7 @@ export const sendMessageToChat = async (
     threadID = crypto.randomUUID();
   }
 
-  await createOrContinueChat(threadID, user, messageHistory[messageHistory.length - 1], messageHistory);
+  await createOrContinueChat(threadID,"", user, messageHistory[messageHistory.length - 1], messageHistory);
 
   const messagesParam: ChatCompletionRequestMessage[] = [
     {
@@ -62,6 +64,10 @@ export const sendMessageToChat = async (
       role: item.sender,
       content: item.text as string,
     })),
+    {
+      role: "user",
+      content: `Please respond with the following JSON format: {"title": "Suggested chat title", "response": "Your response here"}`
+    }
   ];
 
   try {
@@ -70,12 +76,26 @@ export const sendMessageToChat = async (
       model: "ft:gpt-3.5-turbo-1106:personal:test-finetune:9WLpJhZj",
     });
 
-    const responseMessage = completion.choices[0].message.content ?? "";
+    let response = "";
+    let title = "";
 
-    await createOrContinueChat(threadID, user, {sender: "assistant", text: responseMessage},messageHistory);
+    try {
+      const responseMessage = completion.choices[0].message.content ?? "";
+      const jsonResponse = JSON.parse(responseMessage);
+      console.log(responseMessage);
+      title = jsonResponse.title;
+      console.log(`title: ${title}`)
+      response = jsonResponse.response;
+    } catch (error: any) {
+      console.error("Failed to parse JSON message");
+      throw new Error(error.message);
+    } finally {
+      await createOrContinueChat(threadID, title, user, {sender: "assistant", text: response},messageHistory);
+    }   
 
     return {
-      messages: [completion.choices[0].message.content ?? ""],
+      title: title,
+      messages: [response],
       threadID: threadID,
       userTokens: completion.usage?.prompt_tokens,
       botTokens: completion.usage?.completion_tokens,
@@ -87,120 +107,118 @@ export const sendMessageToChat = async (
 };
 
 // Assistant API not needed and at present doesn't support fine-tuned models
-export const sendMessageToAssistant = async (
-  userMessage: string,
-  threadID: string | undefined
-): Promise<ChatResponses> => {
-  const openai = new OpenAI({
-    apiKey: "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",
-  });
-  let thread: OpenAI.Beta.Threads.Thread;
+// export const sendMessageToAssistant = async (
+//   userMessage: string,
+//   threadID: string | undefined
+// ): Promise<ChatResponses> => {
+//   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+//   let thread: OpenAI.Beta.Threads.Thread;
 
-  const getResponse = async (
-    thread: OpenAI.Beta.Threads.Thread
-  ): Promise<ChatResponses> => {
-    let run: OpenAI.Beta.Threads.Runs.Run;
-    try {
-      run = await openai.beta.threads.runs.create(thread.id, {
-        assistant_id: "asst_Ep7a4MHToBAM4vc9kSQorWIo",
-      });
-    } catch (error: any) {
-      console.error("Couldn't get run", error);
-      throw new Error(`Failed to create run: ${error.message}`);
-    }
+//   const getResponse = async (
+//     thread: OpenAI.Beta.Threads.Thread
+//   ): Promise<ChatResponses> => {
+//     let run: OpenAI.Beta.Threads.Runs.Run;
+//     try {
+//       run = await openai.beta.threads.runs.create(thread.id, {
+//         assistant_id: "asst_Ep7a4MHToBAM4vc9kSQorWIo",
+//       });
+//     } catch (error: any) {
+//       console.error("Couldn't get run", error);
+//       throw new Error(`Failed to create run: ${error.message}`);
+//     }
 
-    return new Promise((resolve, reject) => {
-      async function checkStatus() {
-        console.log("Running checkstatus");
+//     return new Promise((resolve, reject) => {
+//       async function checkStatus() {
+//         console.log("Running checkstatus");
 
-        try {
-          console.log("retrieving run");
+//         try {
+//           console.log("retrieving run");
 
-          run = await openai.beta.threads.runs.retrieve(thread.id, run.id);
-          console.log(run);
-          console.log("retrieved run");
-        } catch (error) {
-          console.error("Problem receiving run");
-        }
+//           run = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+//           console.log(run);
+//           console.log("retrieved run");
+//         } catch (error) {
+//           console.error("Problem receiving run");
+//         }
 
-        if (run.status == "completed") {
-          // console.log('Status: Completed');
-          console.log("Run completed");
+//         if (run.status == "completed") {
+//           // console.log('Status: Completed');
+//           console.log("Run completed");
 
-          clearInterval(intervalId);
-          (async () => {
-            try {
-              console.log("Getting messages");
+//           clearInterval(intervalId);
+//           (async () => {
+//             try {
+//               console.log("Getting messages");
 
-              const messages = await openai.beta.threads.messages.list(
-                thread.id
-              );
+//               const messages = await openai.beta.threads.messages.list(
+//                 thread.id
+//               );
 
-              console.log("Converting messages to text only");
+//               console.log("Converting messages to text only");
 
-              const textMessages = messages.data[0].content.filter(
-                (
-                  msg
-                ): msg is OpenAI.Beta.Threads.Messages.MessageContentText => {
-                  if (msg) {
-                    return msg.type === "text";
-                  }
-                  return false;
-                }
-              );
-              const stringMessages = textMessages.map((msg) => msg.text.value);
-              console.log(stringMessages);
+//               const textMessages = messages.data[0].content.filter(
+//                 (
+//                   msg
+//                 ): msg is OpenAI.Beta.Threads.Messages.MessageContentText => {
+//                   if (msg) {
+//                     return msg.type === "text";
+//                   }
+//                   return false;
+//                 }
+//               );
+//               const stringMessages = textMessages.map((msg) => msg.text.value);
+//               console.log(stringMessages);
 
-              resolve({
-                messages: stringMessages,
-                threadID: thread.id,
-                userTokens: run.usage?.prompt_tokens,
-                botTokens: run.usage?.completion_tokens,
-              });
-            } catch (error) {
-              console.error("Failed to retrieve message");
-            }
-          })();
-        }
-      }
-      const intervalId = setInterval(checkStatus, 2000);
-    });
-  };
+//               resolve({
+//                 messages: stringMessages,
+//                 threadID: thread.id,
+//                 userTokens: run.usage?.prompt_tokens,
+//                 botTokens: run.usage?.completion_tokens,
+//               });
+//             } catch (error) {
+//               console.error("Failed to retrieve message");
+//             }
+//           })();
+//         }
+//       }
+//       const intervalId = setInterval(checkStatus, 2000);
+//     });
+//   };
 
-  let ChatResponses = {
-    messages: [],
-    threadID,
-    userTokens: undefined,
-    botTokens: undefined,
-  };
-  if (threadID) {
-    console.log("Found thread id, retrieving");
-    try {
-      thread = await openai.beta.threads.retrieve(threadID);
-      await openai.beta.threads.messages.create(thread.id, {
-        role: "user",
-        content: userMessage,
-      });
+//   let ChatResponses = {
+//     messages: [],
+//     threadID,
+//     userTokens: undefined,
+//     botTokens: undefined,
+//   };
+//   if (threadID) {
+//     console.log("Found thread id, retrieving");
+//     try {
+//       thread = await openai.beta.threads.retrieve(threadID);
+//       await openai.beta.threads.messages.create(thread.id, {
+//         role: "user",
+//         content: userMessage,
+//       });
 
-      return getResponse(thread);
-    } catch (error) {
-      console.error("Couldn't retrieve thread", error);
-    }
-  } else {
-    try {
-      console.log("Creating new thread");
+//       return getResponse(thread);
+//     } catch (error) {
+//       console.error("Couldn't retrieve thread", error);
+//     }
+//   } else {
+//     try {
+//       console.log("Creating new thread");
 
-      thread = await openai.beta.threads.create();
-      await openai.beta.threads.messages.create(thread.id, {
-        role: "user",
-        content: userMessage,
-      });
+//       thread = await openai.beta.threads.create();
+//       await openai.beta.threads.messages.create(thread.id, {
+//         role: "user",
+//         content: userMessage,
+//       });
 
-      return getResponse(thread);
-    } catch (error) {
-      console.error("Couldn't create thread", error);
-    }
-  }
+//       return getResponse(thread);
+//     } catch (error) {
+//       console.error("Couldn't create thread", error);
+//     }
+//   }
 
-  return ChatResponses;
-};
+//   return ChatResponses;
+// };

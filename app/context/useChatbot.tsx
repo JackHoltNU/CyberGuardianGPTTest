@@ -7,6 +7,7 @@ import { ChatResponses, MessageHistory } from '../types/types';
 
 interface ChatbotContextType {
   messages: Array<MessageHistory>;
+  title: string;
   sendMessage: (text: string) => Promise<void>;
   user?: string;
   setUser: (user: string) => void;
@@ -25,6 +26,7 @@ interface ChatbotProviderProps {
 export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   const [messages, setMessages] = useState<Array<MessageHistory>>([]);
   const [threadId, setThreadID] = useState<string | undefined>();
+  const [title, setTitle] = useState<string>("");
   const [user, setUser] = useState<string>();
   const [userTokens, setUserTokens] = useState(0);
   const [userCost, setUserCost] = useState(0);
@@ -46,6 +48,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
 
       setMessages(prev => [...prev, { sender: 'assistant', text: latest }]);
       setThreadID(response.threadID);
+      setTitle(response.title);
 
       if(response.userTokens !== undefined){
         setUserTokens(response.userTokens);
@@ -67,6 +70,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   return (
     <ChatbotContext.Provider value={{
         messages,
+        title,
         sendMessage,
         user,
         setUser,
