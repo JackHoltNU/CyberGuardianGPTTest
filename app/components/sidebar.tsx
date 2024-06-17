@@ -9,7 +9,7 @@ interface Props {
     session: Session;
 }
 
-const sidebar = ({session}: Props) => {
+const Sidebar = ({session}: Props) => {
     const { chatCollection, loadUserChats, openChat } = useChatbot();    
 
     // useEffect(() => {
@@ -45,4 +45,4 @@ const sidebar = ({session}: Props) => {
     )
 }
 
-export default sidebar;
+export default Sidebar;
