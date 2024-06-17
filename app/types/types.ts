@@ -11,3 +11,13 @@ export interface ChatResponses {
     userTokens: number | undefined;
     botTokens: number | undefined;
 }
+
+export type ChatInstance = {
+    threadID: string,
+    title: string,
+    messages: MessageHistory[]
+}
+
+export type ChatCollection = {
+    chats: ChatInstance[]
+}

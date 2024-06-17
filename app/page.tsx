@@ -2,8 +2,7 @@ import Chat from "./pages/chat";
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/options";
 import { redirect } from "next/navigation";
-
-
+import Sidebar from "./components/sidebar";
 
 const Home = async () => {
   const session = await getServerSession(options);
@@ -16,7 +15,12 @@ const Home = async () => {
 
   return (
       <main className="flex flex-col w-screen h-screen items-center">
-        {session && <Chat session={session}/>}
+        {session && (
+          <div className = "flex flex-row w-full">
+            <Sidebar session={session} />
+            <Chat session={session}/>
+          </div>
+        )}
       </main>
   );
 };

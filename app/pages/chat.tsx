@@ -25,7 +25,7 @@ const Chat = ({session}: Props) => {
     if(session.user?.name){
       setUser(session.user.name)
     }
-  },[])
+  },[session])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -72,14 +72,14 @@ const Chat = ({session}: Props) => {
             Save as PDF
           </button>
         </div>
-        <div className="p-1 md:p-4 flex w-fit">        
+        {/* <div className="p-1 md:p-4 flex w-fit">        
           <button
             className="bg-gray-500 hover:bg-gray-700 text-white p-2 rounded-lg"
             onClick={() => exportChatAsText(messages, title)}
           >
             Save as TXT
           </button>
-        </div>
+        </div> */}
       </div>
       
       <div className="flex-grow overflow-y-auto p-4 space-y-2 " ref={scrollRef} aria-live="polite">

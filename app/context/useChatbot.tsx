@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { sendMessageToChat } from '../api/bot';
-import { ChatResponses, MessageHistory } from '../types/types';
+import { loadChats, sendMessageToChat } from '../api/bot';
+import { ChatCollection, ChatInstance, ChatResponses, MessageHistory } from '../types/types';
+import { debounce } from '../utils/debounce';
 
 interface ChatbotContextType {
   messages: Array<MessageHistory>;
@@ -11,6 +12,9 @@ interface ChatbotContextType {
   sendMessage: (text: string) => Promise<void>;
   user?: string;
   setUser: (user: string) => void;
+  loadUserChats: () => void;
+  chatCollection: ChatCollection | undefined;
+  openChat: (chat:ChatInstance) => void;
   userTokens: number;
   botTokens: number;
   userCost: number;
@@ -26,12 +30,27 @@ interface ChatbotProviderProps {
 export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   const [messages, setMessages] = useState<Array<MessageHistory>>([]);
   const [threadId, setThreadID] = useState<string | undefined>();
+  const [chatCollection, setChatCollection] = useState<ChatCollection>();
   const [title, setTitle] = useState<string>("");
   const [user, setUser] = useState<string>();
   const [userTokens, setUserTokens] = useState(0);
   const [userCost, setUserCost] = useState(0);
   const [botTokens, setBotTokens] = useState(0);
   const [botCost, setBotCost] = useState(0);
+
+  const loadUserChats = debounce(async () => {
+    console.log(`loadUserChats run`);
+    if(user){
+      const chats:ChatCollection = await loadChats(user);
+      setChatCollection(chats);
+    }
+  },200);
+
+  const openChat = (chat:ChatInstance) => {
+    setMessages(chat.messages);
+    setThreadID(chat.threadID);
+    loadUserChats();
+  }
 
   const sendMessage = async (text: string) => {
     const updatedMessages:MessageHistory[] = [...messages, { sender: 'user', text }];
@@ -74,6 +93,9 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         sendMessage,
         user,
         setUser,
+        loadUserChats,
+        chatCollection,
+        openChat,
         userTokens,
         botTokens,
         userCost,

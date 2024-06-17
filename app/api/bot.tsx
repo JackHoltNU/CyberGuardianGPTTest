@@ -2,7 +2,7 @@
 
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import { ChatResponses, MessageHistory } from "@/app/types/types";
+import { ChatCollection, ChatInstance, ChatResponses, MessageHistory } from "@/app/types/types";
 import Chat from "@/app/models/Chat";
 import connectToDatabase from "@/app/lib/mongodb";
 dotenv.config();
@@ -34,6 +34,16 @@ const createOrContinueChat = async (threadID: string, title: string, user: strin
     console.error(`Couldn't save chat to database`)
     throw new Error(error.message);
   }  
+}
+
+const findChatsByUser = async (user: string) => {
+  try {
+    const chats = await Chat.find({user});
+    return chats;
+  } catch (error: any) {
+    console.error(error);
+    throw new Error(error.message);
+  }
 }
 
 export const sendMessageToChat = async (
@@ -105,6 +115,36 @@ export const sendMessageToChat = async (
     throw new Error(`Failed to create chat completion: ${error.message}`);
   }
 };
+
+export const loadChats = async(user:string) => {
+  console.log("Loading chats...");
+  await connectToDatabase();
+
+  const chats = await findChatsByUser(user);
+
+  const chatInstances:ChatInstance[] = chats.map((chat) => {
+    const messages = chat.messages.map((message: any) => {
+      const messageHistory: MessageHistory = {
+        sender: message.sender,
+        text: message.text
+      }
+      return messageHistory
+    })
+
+    const chatInstance:ChatInstance = {
+      threadID: chat.threadID,
+      title: chat.title,
+      messages
+    }
+    return chatInstance;
+  })
+
+  const collection:ChatCollection = {
+    chats: chatInstances,
+  }
+
+  return collection;
+}
 
 // Assistant API not needed and at present doesn't support fine-tuned models
 // export const sendMessageToAssistant = async (
