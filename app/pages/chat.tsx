@@ -66,7 +66,7 @@ const Chat = ({session}: Props) => {
         {/* <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p> */}
         <div className="p-1 flex w-fit">        
           <button
-            className="bg-gray-500 hover:bg-gray-700 text-white p-2 rounded-lg"
+            className="bg-green-700 hover:bg-green-900 text-white p-2 rounded-lg"
             onClick={() => exportChatAsPdf(messages, title)}
           >
             Save as PDF
@@ -74,7 +74,7 @@ const Chat = ({session}: Props) => {
         </div>
         <div className="p-1 flex w-fit">        
           <button
-            className="bg-gray-500 hover:bg-gray-700 text-white p-2 rounded-lg"
+            className="bg-purple-700 hover:bg-purple-900 text-white p-2 rounded-lg"
             onClick={() => resetChat()}
           >
             Start new chat
