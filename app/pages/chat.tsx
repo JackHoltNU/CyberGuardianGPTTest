@@ -18,6 +18,7 @@ const Chat = ({session}: Props) => {
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -65,12 +66,12 @@ const Chat = ({session}: Props) => {
       <div className="flex w-full items-center justify-center">
         {/* <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p> */}
         <div className="p-1 flex w-fit">        
-          <button
+          {/* <button
             className="bg-green-700 hover:bg-green-900 text-white p-2 rounded-lg"
             onClick={() => exportChatAsPdf(messages, title)}
           >
             Save as PDF
-          </button>
+          </button> */}
         </div>
         <div className="p-1 flex w-fit">        
           <button
@@ -78,6 +79,17 @@ const Chat = ({session}: Props) => {
             onClick={() => resetChat()}
           >
             Start new chat
+          </button>
+        </div>
+        <div className="p-1 flex w-fit">        
+          <button
+            className="bg-gray-700 hover:bg-gray-900 text-white p-2 rounded-lg"
+            onClick={() => {
+              setShowMoreOptions(!showMoreOptions)
+            }
+            }
+          >
+            ...
           </button>
         </div>
         {/* <div className="p-1 md:p-4 flex w-fit">        
@@ -89,6 +101,22 @@ const Chat = ({session}: Props) => {
           </button>
         </div> */}
       </div>
+
+      {showMoreOptions && (
+        <div className="w-full mx-auto rounded-lg h-fit py-4">
+          <ul className="w-2/5 mx-auto">
+            <li>
+              <button className="w-full bg-green-700 hover:bg-green-900 text-white rounded-lg p-2 m-1">Save as PDF</button>
+            </li>          
+            <li>
+              <button className="w-full bg-red-500 hover:bg-red-700 text-white rounded-lg p-2 m-1">Delete chat</button>
+            </li>
+            <li>
+              <button className="w-full bg-gray-500 hover:bg-gray-700 text-white rounded-lg p-2 m-1" onClick={() => setShowMoreOptions(false)}>Cancel</button>
+            </li>
+          </ul>
+        </div>
+      )}
       
       <div className="flex-grow overflow-y-auto p-4 space-y-2 " ref={scrollRef} aria-live="polite">
         {messages.map((msg, index) => (

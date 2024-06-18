@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { loadChats, sendMessageToChat } from '../api/bot';
 import { ChatCollection, ChatInstance, ChatResponses, MessageHistory } from '../types/types';
 import { debounce } from '../utils/debounce';
 
@@ -48,8 +47,15 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   const loadUserChats = debounce(async () => {
     console.log(`loadUserChats run`);
     if(user){
-      const chats:ChatCollection = await loadChats(user);
-      setChatCollection(chats);
+      const responseString = await fetch('/api/loadChats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({user: user}),
+      });
+      const response: ChatCollection = await responseString.json();
+      setChatCollection(response);
     }
   },200);
 
@@ -79,7 +85,16 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
       return;
     }
     try {
-      const response: ChatResponses = await sendMessageToChat(updatedMessages, user, threadId);
+      // const response: ChatResponses = await sendMessageToChat(updatedMessages, user, threadId);
+      const responseString = await fetch('/api/sendMessageToChat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({messageHistory: updatedMessages, user: user, threadID: threadId}),
+      });
+      const response: ChatResponses = await responseString.json();
+      
       setThreadID(response.threadID);
       let latest = response.messages[response.messages.length - 1];
 
