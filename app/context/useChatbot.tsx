@@ -15,6 +15,7 @@ interface ChatbotContextType {
   loadUserChats: () => void;
   chatCollection: ChatCollection | undefined;
   openChat: (chat:ChatInstance) => void;
+  resetChat: () => void;
   userTokens: number;
   botTokens: number;
   userCost: number;
@@ -49,6 +50,14 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   const openChat = (chat:ChatInstance) => {
     setMessages(chat.messages);
     setThreadID(chat.threadID);
+    setTitle(chat.title);
+    loadUserChats();
+  }
+
+  const resetChat = () => {
+    setMessages([]);
+    setThreadID(undefined);
+    setTitle("");
     loadUserChats();
   }
 
@@ -96,6 +105,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         loadUserChats,
         chatCollection,
         openChat,
+        resetChat,
         userTokens,
         botTokens,
         userCost,
