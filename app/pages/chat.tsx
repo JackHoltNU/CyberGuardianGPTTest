@@ -60,7 +60,7 @@ const Chat = ({session}: Props) => {
   };
 
   return (
-    <div className="flex flex-col h-dvh w-4/5">
+    <div className="flex flex-col h-dvh w-4/5 px-8">
       <header className="text-center p-2 mt-4 text-xl font-bold">CyberGuardian GPT</header>
       <div className="flex w-full items-center justify-center">
         {/* <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p> */}

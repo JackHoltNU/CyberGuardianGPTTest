@@ -16,6 +16,10 @@ interface ChatbotContextType {
   chatCollection: ChatCollection | undefined;
   openChat: (chat:ChatInstance) => void;
   resetChat: () => void;
+  selectedChat: string | undefined;
+  setSelectedChat: (chat: string) => void;
+  isNewChat: boolean;
+  setIsNewChat: (newState: boolean) => void;
   userTokens: number;
   botTokens: number;
   userCost: number;
@@ -38,6 +42,8 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   const [userCost, setUserCost] = useState(0);
   const [botTokens, setBotTokens] = useState(0);
   const [botCost, setBotCost] = useState(0);
+  const [selectedChat, setSelectedChat] = useState<string>();
+  const [isNewChat, setIsNewChat] = useState<boolean>(true);
 
   const loadUserChats = debounce(async () => {
     console.log(`loadUserChats run`);
@@ -51,14 +57,17 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
     setMessages(chat.messages);
     setThreadID(chat.threadID);
     setTitle(chat.title);
+    setIsNewChat(false);
     loadUserChats();
   }
 
   const resetChat = () => {
     setMessages([]);
     setThreadID(undefined);
-    setTitle("");
-    loadUserChats();
+    setTitle("New Chat");
+    setSelectedChat(undefined);
+    setIsNewChat(true);
+    loadUserChats(); 
   }
 
   const sendMessage = async (text: string) => {
@@ -77,6 +86,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
       setMessages(prev => [...prev, { sender: 'assistant', text: latest }]);
       setThreadID(response.threadID);
       setTitle(response.title);
+      setIsNewChat(false);
 
       if(response.userTokens !== undefined){
         setUserTokens(response.userTokens);
@@ -106,6 +116,10 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         chatCollection,
         openChat,
         resetChat,
+        selectedChat,
+        setSelectedChat,
+        isNewChat,
+        setIsNewChat,
         userTokens,
         botTokens,
         userCost,

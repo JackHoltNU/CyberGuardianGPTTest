@@ -15,7 +15,7 @@ export interface ChatResponses {
 export type ChatInstance = {
     threadID: string,
     title: string,
-    messages: MessageHistory[]
+    messages: MessageHistory[],
 }
 
 export type ChatCollection = {

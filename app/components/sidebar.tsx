@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect } from "react";
-import { MessageHistory } from "../types/types";
+import { ChatInstance, MessageHistory } from "../types/types";
 import { useChatbot } from "../context/useChatbot";
 import { Session } from 'next-auth';
 
@@ -10,7 +10,12 @@ interface Props {
 }
 
 const Sidebar = ({session}: Props) => {
-    const { chatCollection, loadUserChats, openChat } = useChatbot();    
+    const { chatCollection, selectedChat, isNewChat, loadUserChats, openChat, setSelectedChat } = useChatbot();   
+
+    const changeChat = (chat: ChatInstance) => {
+        setSelectedChat(chat.threadID);
+        openChat(chat);
+    }
 
     // useEffect(() => {
     //     if(session.user?.name){
@@ -23,18 +28,25 @@ const Sidebar = ({session}: Props) => {
     }},);
 
     return (
-        <section className="flex flex-col w-1/5 h-dvh bg-gray-200">
-            <h1 className="w-full text-center mt-2">Chats</h1>
-            <div className="w-4/5 ml-4 my-4 h-content">
+        <section className="flex flex-col w-1/5 h-dvh bg-blue-50 border-r-2 border-gray-400 items-center">
+            <h1 className="w-full text-center mt-4 p-2 font-bold">Your Previous Chats</h1>
+            <div className="w-11/12 my-4 h-content">
                 <ul>
+                    {isNewChat && (
+                        (<li className={`mx-2 my-1 rounded-md p-2 hover:bg-blue-300 hover:cursor-pointer bg-blue-300`} key="newchat">
+                            <button className="w-full">
+                                <h3 className="text-sm text-left">New Chat</h3>
+                            </button>
+                        </li>)
+                    )}
                     {chatCollection && chatCollection.chats.map((chat) => {
                         if(chat.title === undefined || chat.title == ""){
                             return null;
                         }
                         return (
-                            <li className="m-2 rounded-md p-2 bg-gray-100 hover:bg-gray-300 hover:cursor-pointer" key={chat.threadID}>
-                                <button onClick={() => openChat(chat)}>
-                                    <h3 className="text-sm">{chat.title}</h3>
+                            <li className={`mx-2 my-1 rounded-md p-2 hover:bg-blue-300 hover:cursor-pointer ${chat.threadID === selectedChat && "bg-blue-300"}`} key={chat.threadID}>
+                                <button className="w-full" onClick={() => changeChat(chat)}>
+                                    <h3 className="text-sm text-left">{chat.title}</h3>
                                 </button>
                             </li>
                         )
