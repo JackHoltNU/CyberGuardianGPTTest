@@ -7,8 +7,6 @@ import Sidebar from "./components/sidebar";
 const Home = async () => {
   const session = await getServerSession(options);
 
-  console.log(`Name: ${session?.user?.name}`);
-
   if (!session) {
     redirect('api/auth/signin?callbackUrl=%2F')
   }
@@ -16,7 +14,7 @@ const Home = async () => {
   return (
       <main className="flex flex-col w-screen h-screen items-center">
         {session && (
-          <div className = "flex flex-row w-full">
+          <div className = "flex flex-col-reverse md:flex-row w-full">
             <Sidebar session={session} />
             <Chat session={session}/>
           </div>

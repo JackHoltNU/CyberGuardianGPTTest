@@ -28,7 +28,7 @@ const Sidebar = ({session}: Props) => {
     }},);
 
     return (
-        <section className="flex flex-col w-1/5 h-dvh bg-blue-50 border-r-2 border-gray-400 items-center">
+        <section className="flex flex-col w-full h-2/5 md:w-1/5 md:h-dvh bg-blue-50 border-r-2 border-gray-400 items-center">
             <h1 className="w-full text-center mt-4 p-2 font-bold">Your Previous Chats</h1>
             <div className="w-11/12 my-4 h-content">
                 <ul>
