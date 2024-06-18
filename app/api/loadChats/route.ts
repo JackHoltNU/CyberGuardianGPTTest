@@ -7,7 +7,7 @@ interface Props {
     user: string;
 }
 
-export async function POST(req: NextApiRequest) {
+export async function POST(req: Request) {
     const body = await new Response(req.body).json();
     let { user } = body as Props;
 
