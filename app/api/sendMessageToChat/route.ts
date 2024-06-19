@@ -1,8 +1,11 @@
-import { NextApiRequest } from "next";
+import { NextApiRequest, NextApiResponse } from "next";
 import { MessageHistory } from "../../types/types";
 import Chat from "@/app/models/Chat";
 import connectToDatabase from "@/app/lib/mongodb";
 import OpenAI from "openai";
+import { getServerSession } from "next-auth";
+import { options } from "../auth/options";
+import { NextRequest, NextResponse } from "next/server";
 
 interface Props {
     messageHistory: MessageHistory[], 
@@ -16,11 +19,17 @@ interface ChatCompletionRequestMessage {
 }
 
 
-export async function POST(req: Request) {
+export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
     const body = await new Response(req.body).json();
+    const session = await getServerSession(options); 
     let { messageHistory, user, threadID } = body as Props;
+
+    if(!session){
+      return new Response(`User not authenticated`, {
+        status: 401,
+      })
+    }
   
-    console.log("sendMessageToChat called");
   try {
     await connectToDatabase();
   } catch (error: any) {
@@ -88,7 +97,7 @@ export async function POST(req: Request) {
     console.error("Couldn't create chat completion", error);
     // throw new Error(`Failed to create chat completion: ${error.message}`);
   }
-}
+};
 
 const createOrContinueChat = async (threadID: string, title: string, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[]) => {
     const chat = await Chat.findOne({ threadID });

@@ -2,6 +2,8 @@ import connectToDatabase from "@/app/lib/mongodb";
 import Chat from "@/app/models/Chat";
 import { ChatCollection, ChatInstance, MessageHistory } from "@/app/types/types";
 import { NextApiRequest } from "next";
+import { getServerSession } from "next-auth";
+import { options } from "../auth/options";
 
 interface Props {
     user: string;
@@ -9,10 +11,14 @@ interface Props {
 
 export async function POST(req: Request) {
     const body = await new Response(req.body).json();
+    const session = await getServerSession(options); 
     let { user } = body as Props;
-
-    console.log("Loading chats...");
-  
+    
+    if(!session){
+      return new Response(`User not authenticated`, {
+        status: 401,
+      })
+    }
 
   await connectToDatabase();
 
