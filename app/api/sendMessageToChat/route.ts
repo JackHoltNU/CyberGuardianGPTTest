@@ -19,8 +19,8 @@ interface ChatCompletionRequestMessage {
 }
 
 
-export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
-    const body = await new Response(req.body).json();
+export const POST = async (req: Request) => {
+    const body = await req.json();
     const session = await getServerSession(options); 
     let { messageHistory, user, threadID } = body as Props;
 

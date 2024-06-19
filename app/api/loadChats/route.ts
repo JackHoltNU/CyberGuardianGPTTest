@@ -10,7 +10,7 @@ interface Props {
 }
 
 export async function POST(req: Request) {
-    const body = await new Response(req.body).json();
+    const body = await req.json();
     const session = await getServerSession(options); 
     let { user } = body as Props;
     
