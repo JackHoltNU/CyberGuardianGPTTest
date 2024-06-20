@@ -14,11 +14,12 @@ interface Props {
 }
 
 const Chat = ({session}: Props) => {
-  const { messages, title, userTokens, botTokens, userCost, botCost, sendMessage, setUser, resetChat } = useChatbot();
+  const { messages, title, userTokens, botTokens, userCost, botCost, sendMessage, setUser, resetChat, deleteChat } = useChatbot();
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [showDeletedAlert, setShowDeletedAlert] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -59,6 +60,17 @@ const Chat = ({session}: Props) => {
       }
     }          
   };
+
+  const deleteChatAndShowDeleted = () => {
+    deleteChat();
+    showDeleted();
+  }
+
+  const showDeleted = () => {
+    setShowDeletedAlert(true);
+    setShowMoreOptions(false);
+    setTimeout(() => setShowDeletedAlert(false), 3000);
+  }
 
   return (
     <div className="flex flex-col h-dvh w-full md:w-4/5 px-8">
@@ -104,18 +116,22 @@ const Chat = ({session}: Props) => {
 
       {showMoreOptions && (
         <div className="w-full mx-auto rounded-lg h-fit py-4">
-          <ul className="w-2/5 mx-auto">
+          <ul className="w-4/5 md:3/5 lg:w-2/5 mx-auto">
             <li>
               <button className="w-full bg-green-700 hover:bg-green-900 text-white rounded-lg p-2 m-1">Save as PDF</button>
             </li>          
             <li>
-              <button className="w-full bg-red-500 hover:bg-red-700 text-white rounded-lg p-2 m-1">Delete chat</button>
+              <button className="w-full bg-red-500 hover:bg-red-700 text-white rounded-lg p-2 m-1" onClick={() => deleteChatAndShowDeleted()}>Delete chat</button>
             </li>
             <li>
               <button className="w-full bg-gray-500 hover:bg-gray-700 text-white rounded-lg p-2 m-1" onClick={() => setShowMoreOptions(false)}>Cancel</button>
             </li>
           </ul>
         </div>
+      )}
+
+      {showDeletedAlert && (
+        <div className='w-2/5 m-2 p-2 h-10 border-2 border-red-500 text-red-500 ml-auto mr-auto text-center'>Chat deleted</div>
       )}
       
       <div className="flex-grow overflow-y-auto p-4 space-y-2 " ref={scrollRef} aria-live="polite">

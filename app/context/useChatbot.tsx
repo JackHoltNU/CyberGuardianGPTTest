@@ -15,6 +15,7 @@ interface ChatbotContextType {
   chatCollection: ChatCollection | undefined;
   openChat: (chat:ChatInstance) => void;
   resetChat: () => void;
+  deleteChat: () => void;
   selectedChat: string | undefined;
   setSelectedChat: (chat: string) => void;
   isNewChat: boolean;
@@ -76,6 +77,26 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
     loadUserChats(); 
   }
 
+  const deleteChat = async () => {
+    // TODO are you sure modal
+    try {
+      await fetch('/api/deleteChat', {
+        method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({user: user, threadID: threadId}),
+      })
+    } catch (error: any) {
+      console.error(`Could not delete chat`);
+      throw new Error(error.message);
+    }
+    
+    // TODO message deleted alert
+
+    resetChat()
+  }
+
   const sendMessage = async (text: string) => {
     const updatedMessages:MessageHistory[] = [...messages, { sender: 'user', text }];
     setMessages(prev => [...prev, { sender: 'user', text }]);
@@ -131,6 +152,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         chatCollection,
         openChat,
         resetChat,
+        deleteChat,
         selectedChat,
         setSelectedChat,
         isNewChat,
