@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ChatInstance, MessageHistory } from "../types/types";
 import { useChatbot } from "../context/useChatbot";
 import { Session } from 'next-auth';
@@ -10,18 +10,21 @@ interface Props {
 }
 
 const Sidebar = ({session}: Props) => {
-    const { chatCollection, selectedChat, isNewChat, loadUserChats, openChat, setSelectedChat } = useChatbot();   
+    const { chatCollection, selectedChat, isNewChat, title, loadUserChats, openChat, setSelectedChat } = useChatbot();   
+    const [chats, setChats] = useState<ChatInstance[]>([]);
 
     const changeChat = (chat: ChatInstance) => {
         setSelectedChat(chat.threadID);
         openChat(chat);
     }
 
-    // useEffect(() => {
-    //     if(session.user?.name){
-    //       loadUserChats();
-    //     }
-    //   },[session])
+    useEffect(() => {
+        if(chatCollection){
+            setChats(chatCollection.chats);
+            console.log(chats);
+        }
+    },[chatCollection])
+    
 
     useEffect(() => {if(chatCollection === undefined && session.user?.name) {
         loadUserChats();
@@ -39,7 +42,7 @@ const Sidebar = ({session}: Props) => {
                             </button>
                         </li>)
                     )}
-                    {chatCollection && chatCollection.chats.map((chat) => {
+                    {chats.map((chat) => {
                         if(chat.title === undefined || chat.title == ""){
                             return null;
                         }

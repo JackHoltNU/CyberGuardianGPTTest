@@ -1,9 +1,10 @@
 'use client'
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
 import { ChatCollection, ChatInstance, ChatResponses, MessageHistory } from '../types/types';
 import { debounce } from '../utils/debounce';
+import { rename } from 'fs';
 
 interface ChatbotContextType {
   messages: Array<MessageHistory>;
@@ -57,6 +58,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
       });
       const response: ChatCollection = await responseString.json();
       setChatCollection(response);
+      // renameChat(threadId, title);
     }
   },200);
 
@@ -75,6 +77,23 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
     setSelectedChat(undefined);
     setIsNewChat(true);
     loadUserChats(); 
+  }
+
+  useEffect(() => {
+    console.log("title changed");
+    renameChat(threadId, title);
+  },[title]);
+
+  const renameChat = (threadID: string | undefined, newTitle: string) => {
+    if(chatCollection){
+      setChatCollection({chats: [...chatCollection.chats.map((chat) => {
+        if(chat.threadID == threadID){
+          chat.title = newTitle;
+        }
+        console.log(chat.title);
+        return chat
+      })]});
+    }
   }
 
   const deleteChat = async () => {
@@ -100,8 +119,6 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   const sendMessage = async (text: string) => {
     const updatedMessages:MessageHistory[] = [...messages, { sender: 'user', text }];
     setMessages(prev => [...prev, { sender: 'user', text }]);
-    console.log("sending message");
-    console.log(`User: ${user}`);
     if(user === undefined){
       return;
     }
@@ -123,6 +140,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
       setThreadID(response.threadID);
       setTitle(response.title);
       setIsNewChat(false);
+      loadUserChats();
 
       if(response.userTokens !== undefined){
         setUserTokens(response.userTokens);

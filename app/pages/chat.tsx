@@ -27,7 +27,7 @@ const Chat = ({session}: Props) => {
     if(session.user?.name){
       setUser(session.user.name)
     }
-  },[session])
+  },[session]);
 
   useEffect(() => {
     if (scrollRef.current) {

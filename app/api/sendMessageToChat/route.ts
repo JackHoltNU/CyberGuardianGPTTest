@@ -74,9 +74,7 @@ export const POST = async (req: Request) => {
     try {
       const responseMessage = completion.choices[0].message.content ?? "";
       const jsonResponse = JSON.parse(responseMessage);
-      console.log(responseMessage);
       title = jsonResponse.title;
-      console.log(`title: ${title}`)
       response = jsonResponse.response;
     } catch (error: any) {
       console.error("Failed to parse JSON message");
@@ -104,7 +102,6 @@ const createOrContinueChat = async (threadID: string, title: string, user: strin
   
     try {
       if (chat) {
-          console.log("found chat");
           chat.messages.push(newMessage);
           chat.title = title;
           await chat.save();
