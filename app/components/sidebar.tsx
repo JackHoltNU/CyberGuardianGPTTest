@@ -30,9 +30,30 @@ const Sidebar = ({session}: Props) => {
         loadUserChats();
     }},);
 
+    const formatDate = (date: Date | string): string => {
+        const dateObj = new Date(date);
+        const nowObj = new Date();
+        const yesterdayObj = new Date();
+        yesterdayObj.setDate(nowObj.getDate() - 1);
+
+        let formattedDate = "";
+        // if today, show as today, time
+        // else if yesterday, show yesterday, time
+        // else show date, time
+        if(dateObj.getDate() == nowObj.getDate() && dateObj.getMonth() == nowObj.getMonth() && dateObj.getFullYear() == nowObj.getFullYear()){
+            formattedDate = `Today, ${dateObj.toLocaleTimeString()}`;
+        } else if(dateObj.getDate() == yesterdayObj.getDate()  && dateObj.getMonth() == yesterdayObj.getMonth() && dateObj.getFullYear() == yesterdayObj.getFullYear()){
+            formattedDate = `Yesterday, ${dateObj.toLocaleTimeString()}`;
+        } else {
+            formattedDate = `${dateObj.toDateString()},${dateObj.toLocaleTimeString()}`;
+        }
+
+        return formattedDate
+    }
+
     return (
         <section className="flex-grow overflow-y-auto flex-col w-full h-2/5 md:w-1/5 md:h-dvh bg-blue-50 border-r-2 border-gray-400 items-center">
-            <h1 className="w-full text-center mt-4 p-2 font-bold">Your Previous Chats</h1>
+            <h1 className="w-full text-center mt-4 p-2 font-bold">Your Conversations</h1>
             <div className="w-11/12 my-4 h-content">
                 <ul>
                     {isNewChat && (
@@ -50,6 +71,7 @@ const Sidebar = ({session}: Props) => {
                             <li className={`mx-2 my-1 rounded-md p-2 hover:bg-blue-300 hover:cursor-pointer ${chat.threadID === selectedChat && "bg-blue-300"}`} key={chat.threadID}>
                                 <button className="w-full" onClick={() => changeChat(chat)}>
                                     <h3 className="text-sm text-left">{chat.title}</h3>
+                                    { chat.latestTimestamp && (<p className="text-xs text-left">Latest: {formatDate(chat.latestTimestamp)}</p>)}
                                 </button>
                             </li>
                         )

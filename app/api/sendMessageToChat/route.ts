@@ -73,6 +73,7 @@ export const POST = async (req: Request) => {
 
     try {
       const responseMessage = completion.choices[0].message.content ?? "";
+      console.log(`Raw response ${responseMessage}`);
       const jsonResponse = JSON.parse(responseMessage);
       title = jsonResponse.title;
       response = jsonResponse.response;
@@ -104,6 +105,7 @@ const createOrContinueChat = async (threadID: string, title: string, user: strin
       if (chat) {
           chat.messages.push(newMessage);
           chat.title = title;
+          chat.latestTimestamp = Date.now();
           await chat.save();
         } else {
           console.log(`creating chat, ${threadID}, ${user}, ${newMessage}`);

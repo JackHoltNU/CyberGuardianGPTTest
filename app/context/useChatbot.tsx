@@ -57,10 +57,31 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         body: JSON.stringify({user: user}),
       });
       const response: ChatCollection = await responseString.json();
-      setChatCollection(response);
+      const sortedResponse = sortChatCollectionByDate(response);
+      setChatCollection(sortedResponse);
       // renameChat(threadId, title);
     }
   },200);
+
+  const sortChatCollectionByDate = (collection: ChatCollection): ChatCollection => {
+    const sortedChats = collection.chats.sort((a, b) => {
+      if(a.messages && b.messages){
+        const latestA = a.messages[a.messages.length - 1];
+        const latestB = b.messages[b.messages.length - 1];
+
+        if(latestA.timestamp && latestB.timestamp){
+          if(latestA.timestamp > latestB.timestamp){
+            return -1;
+          } else {
+            return 1;
+          }
+        }
+        return 0;
+      }
+      return 0;      
+    })
+    return { chats: sortedChats }
+  }
 
   const openChat = (chat:ChatInstance) => {
     setMessages(chat.messages);
@@ -140,6 +161,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
       setThreadID(response.threadID);
       setTitle(response.title);
       setIsNewChat(false);
+      setSelectedChat(threadId);
       loadUserChats();
 
       if(response.userTokens !== undefined){

@@ -1,7 +1,6 @@
 import connectToDatabase from "@/app/lib/mongodb";
 import Chat from "@/app/models/Chat";
 import { ChatCollection, ChatInstance, MessageHistory } from "@/app/types/types";
-import { NextApiRequest } from "next";
 import { getServerSession } from "next-auth";
 import { options } from "../auth/options";
 
@@ -28,7 +27,8 @@ export async function POST(req: Request) {
     const messages = chat.messages.map((message: any) => {
       const messageHistory: MessageHistory = {
         sender: message.sender,
-        text: message.text
+        text: message.text,
+        timestamp: message.timestamp
       }
       return messageHistory
     })
@@ -36,6 +36,7 @@ export async function POST(req: Request) {
     const chatInstance:ChatInstance = {
       threadID: chat.threadID,
       title: chat.title,
+      latestTimestamp: new Date(chat.latestTimestamp),
       messages
     }
     return chatInstance;

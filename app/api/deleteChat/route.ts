@@ -44,7 +44,7 @@ export async function PUT(req: Request) {
 
 const deleteChat = async (user: string, threadID: string) => {
     try {
-        const chats = await Chat.deleteOne({user, threadID});        
+        await Chat.deleteOne({user, threadID});        
       } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
