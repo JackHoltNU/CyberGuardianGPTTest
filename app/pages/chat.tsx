@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import exportChatAsText from '../utils/exporttxt';
 import exportChatAsPdf from '../utils/exportpdf';
 import { Session } from 'next-auth';
+import { signOut } from 'next-auth/react';
 
 interface Props {
   session: Session;
@@ -74,7 +75,11 @@ const Chat = ({session}: Props) => {
 
   return (
     <div className="flex flex-col h-dvh w-full md:w-4/5 px-8">
-      <header className="text-center p-2 mt-4 text-xl font-bold">CyberGuardian GPT</header>
+      <div className='flex flex-row w-full items-center justify-between'>
+        <div className='w-20'></div>
+        <header className="text-center p-2 mt-4 text-xl font-bold">CyberGuardian GPT</header>
+        <button className='bg-gray-600 hover:bg-gray-700 text-white text-sm p-2 rounded-lg w-20' onClick={() => signOut()}>Log Out</button>
+      </div>
       <div className="flex w-full items-center justify-center">
         {/* <p className="text-center p-3">{userTokens + botTokens} total tokens used (${userCost + botCost})</p> */}
         <div className="p-1 flex w-fit">        
