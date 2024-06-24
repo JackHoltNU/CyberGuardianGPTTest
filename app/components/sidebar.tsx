@@ -10,7 +10,7 @@ interface Props {
 }
 
 const Sidebar = ({session}: Props) => {
-    const { chatCollection, selectedChat, isNewChat, title, loadUserChats, openChat, setSelectedChat } = useChatbot();   
+    const { chatCollection, selectedChat, isNewChat, title, loadUserChats, openChat, setSelectedChat, resetChat } = useChatbot();   
     const [chats, setChats] = useState<ChatInstance[]>([]);
 
     const changeChat = (chat: ChatInstance) => {
@@ -36,13 +36,18 @@ const Sidebar = ({session}: Props) => {
         const yesterdayObj = new Date();
         yesterdayObj.setDate(nowObj.getDate() - 1);
 
+        const isSameDay = (d1: Date, d2: Date): boolean => 
+        d1.getDate() === d2.getDate() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getFullYear() === d2.getFullYear();
+
         let formattedDate = "";
         // if today, show as today, time
         // else if yesterday, show yesterday, time
         // else show date, time
-        if(dateObj.getDate() == nowObj.getDate() && dateObj.getMonth() == nowObj.getMonth() && dateObj.getFullYear() == nowObj.getFullYear()){
+        if(isSameDay(dateObj, nowObj)){
             formattedDate = `Today, ${dateObj.toLocaleTimeString()}`;
-        } else if(dateObj.getDate() == yesterdayObj.getDate()  && dateObj.getMonth() == yesterdayObj.getMonth() && dateObj.getFullYear() == yesterdayObj.getFullYear()){
+        } else if(isSameDay(dateObj, yesterdayObj)){
             formattedDate = `Yesterday, ${dateObj.toLocaleTimeString()}`;
         } else {
             formattedDate = `${dateObj.toDateString()},${dateObj.toLocaleTimeString()}`;
@@ -52,26 +57,32 @@ const Sidebar = ({session}: Props) => {
     }
 
     return (
-        <section className="flex-grow overflow-y-auto flex-col w-full h-2/5 md:w-1/5 md:h-dvh bg-blue-50 border-r-2 border-gray-400 items-center">
-            <h1 className="w-full text-center mt-4 p-2 font-bold">Your Conversations</h1>
-            <div className="w-11/12 my-4 h-content">
+        <section className="sidebar">
+            <h1 className="sidebar__title">Your Conversations</h1>
+            <div className="sidebar__conversations">
                 <ul>
-                    {isNewChat && (
-                        (<li className={`mx-2 my-1 rounded-md p-2 hover:bg-blue-300 hover:cursor-pointer bg-blue-300`} key="newchat">
-                            <button className="w-full">
-                                <h3 className="text-sm text-left">New Chat</h3>
+                    {isNewChat ? (
+                        <li className={'conversation conversation--selected'} key="newchat">
+                            <button className="conversation__button">
+                                <h3 className="conversation__title">New Chat</h3>
                             </button>
-                        </li>)
+                        </li>
+                    ) : (
+                        <li className="conversation">
+                            <button className="conversation__button">
+                                <h3 className="conversation__title" onClick={() => resetChat()}>Start New Chat</h3>
+                            </button>
+                        </li>
                     )}
                     {chats.map((chat) => {
                         if(chat.title === undefined || chat.title == ""){
                             return null;
                         }
                         return (
-                            <li className={`mx-2 my-1 rounded-md p-2 hover:bg-blue-300 hover:cursor-pointer ${chat.threadID === selectedChat && "bg-blue-300"}`} key={chat.threadID}>
-                                <button className="w-full" onClick={() => changeChat(chat)}>
-                                    <h3 className="text-sm text-left">{chat.title}</h3>
-                                    { chat.latestTimestamp && (<p className="text-xs text-left">Latest: {formatDate(chat.latestTimestamp)}</p>)}
+                            <li className={`conversation ${chat.threadID === selectedChat && "conversation--selected"}`} key={chat.threadID}>
+                                <button className="conversation__button" onClick={() => changeChat(chat)}>
+                                    <h3 className="conversation__title">{chat.title}</h3>
+                                    { chat.latestTimestamp && (<p className="conversation__timestamp">Latest: {formatDate(chat.latestTimestamp)}</p>)}
                                 </button>
                             </li>
                         )
