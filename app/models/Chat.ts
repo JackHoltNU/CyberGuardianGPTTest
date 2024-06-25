@@ -25,6 +25,9 @@ const chatSchema = new mongoose.Schema({
   title: {
     type: String
   },
+  tags: {
+    type: [String]
+  },
   user: {
     type: String,
     required: true

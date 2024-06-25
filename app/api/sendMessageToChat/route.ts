@@ -57,7 +57,7 @@ export const POST = async (req: Request) => {
     })),
     {
       role: "user",
-      content: `Please respond with the following JSON format: {"title": "Suggested chat title", "response": "Your response here"}`
+      content: `Please respond in the following JSON format, supplying a title that captures the full conversation, your new response, and a comma-separated list containing as many of the given tags as apply to this conversation: {"title": "Suggested chat title", "response": "Your response here", "tags": "Choose one or more from this list, [Scams, Passwords, Protective Software, Safe Shopping, AI, Miscellaneous]"}`
     }
   ];
 
@@ -70,6 +70,7 @@ export const POST = async (req: Request) => {
 
     let response = "";
     let title = "";
+    let tags: string[] = [];
 
     try {
       const responseMessage = completion.choices[0].message.content ?? "";
@@ -77,12 +78,17 @@ export const POST = async (req: Request) => {
       const jsonResponse = JSON.parse(responseMessage);
       title = jsonResponse.title;
       response = jsonResponse.response;
+      const tagsRaw: string = jsonResponse.tags;
+      tags = tagsRaw.split(",");
+      console.log(tags);
     } catch (error: any) {
-      console.error("Failed to parse JSON message");
-      throw new Error(error.message);
-    } finally {
-      await createOrContinueChat(threadID, title, user, {sender: "assistant", text: response},messageHistory);
-    }   
+      console.error("Failed to parse JSON message, returning raw response");
+      response = completion.choices[0].message.content ?? "";;
+      title = "";
+      // throw new Error(error.message);
+    }
+
+    await createOrContinueChat(threadID, title, user, {sender: "assistant", text: response},messageHistory, tags);
 
     return Response.json({
         title: title,
@@ -98,7 +104,7 @@ export const POST = async (req: Request) => {
   }
 };
 
-const createOrContinueChat = async (threadID: string, title: string, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[]) => {
+const createOrContinueChat = async (threadID: string, title: string, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[], tags?: String[]) => {
     const chat = await Chat.findOne({ threadID });
   
     try {
@@ -106,6 +112,9 @@ const createOrContinueChat = async (threadID: string, title: string, user: strin
           chat.messages.push(newMessage);
           chat.title = title;
           chat.latestTimestamp = Date.now();
+          if(tags){
+            chat.tags = tags;
+          }
           await chat.save();
         } else {
           console.log(`creating chat, ${threadID}, ${user}, ${newMessage}`);

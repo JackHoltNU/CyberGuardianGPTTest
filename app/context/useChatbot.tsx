@@ -143,6 +143,8 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
     if(user === undefined){
       return;
     }
+
+    let response: ChatResponses;
     try {
       // const response: ChatResponses = await sendMessageToChat(updatedMessages, user, threadId);
       const responseString = await fetch('/api/sendMessageToChat', {
@@ -152,14 +154,22 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         },
         body: JSON.stringify({messageHistory: updatedMessages, user: user, threadID: threadId}),
       });
-      const response: ChatResponses = await responseString.json();
+      response = await responseString.json();
+
+    } catch (error:any) {
+        console.error("Failed to send message:", error);
+        throw new Error(`Failed to send message to chat ${error.message}`)
+      }
+    
       
       setThreadID(response.threadID);
       let latest = response.messages[response.messages.length - 1];
 
       setMessages(prev => [...prev, { sender: 'assistant', text: latest }]);
       setThreadID(response.threadID);
-      setTitle(response.title);
+      if(response.title != ""){
+        setTitle(response.title);
+      }
       setIsNewChat(false);
       setSelectedChat(threadId);
       loadUserChats();
@@ -174,11 +184,6 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         const botCost = (response.botTokens / 1000) * 0.0015;
         setBotCost(parseFloat(botCost.toFixed(4)));
       }
-         
-    } catch (error:any) {
-      console.error("Failed to send message:", error);
-      throw new Error(`Failed to send message to chat ${error.message}`)
-    }
   };
 
   return (
