@@ -92,13 +92,13 @@ const Message = ({ messageHistory }: Props) => {
             <div className="flex items-center justify-between bottom--50 bg-yellow-100 px-2 py-2 rounded-b-lg w-full lg:w-3/5">
               <button className={`px-2 py-1 mx-2 border-2 border-black rounded-md ${upvoted ? "bg-green-300" : "bg-white"}`} onClick={() => toggleUpvote()}><FontAwesomeIcon icon={faThumbsUp} /></button>
               <button className={`px-2 py-1 mx-2 border-2 border-black rounded-md ${downvoted ? "bg-red-300" : "bg-white"}`} onClick={() => {toggleDownvote(); if(upvoted){toggleUpvote()}}}><FontAwesomeIcon icon={faThumbsDown} /></button>
-              <div className="inline-flex items-center justify-end px-2 py-1 w-11/12">
+              <div className="inline-flex flex-col sm:flex-row items-center px-2 py-1 w-11/12">
                 {/* <label htmlFor="feedback-input" className="mx-2 font-bold">Comment: </label> */}
                 <input
                   type="text"
                   className="w-4/5 h-8 rounded-sm mx-2 px-2"
                   value={feedbackText}
-                  placeholder="Optional comment"
+                  placeholder="Feedback"
                   onChange={(e) => setFeedbackText(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
@@ -107,7 +107,7 @@ const Message = ({ messageHistory }: Props) => {
                   }}
                 />
                 <button
-                  className="button--submit-feedback ml-2 w-1/5"
+                  className="button--submit-feedback ml-2 w-4/5 mt-2 sm:w-1/5 sm:mt-0"
                   onClick={() => comment(feedbackText)}
                 >
                   Submit

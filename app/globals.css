@@ -23,7 +23,7 @@
 }
 
 .chat__actions {
-  @apply flex w-full items-center justify-center;
+  @apply flex w-full items-center justify-center mb-2;
 }
 
 .chat__action {
@@ -71,7 +71,7 @@
 }
 
 .chatinput {
-  @apply p-4 md:p-8 flex w-full;
+  @apply p-4 md:p-4 flex w-full;
 }
 
 .chatinput__field {
