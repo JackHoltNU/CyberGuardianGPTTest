@@ -2,11 +2,11 @@
 
 import React, { useEffect } from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { ChatCollection, ChatInstance, ChatResponses, MessageHistory } from '../types/types';
+import { ChatCollection, ChatInstance, ChatResponses, MessageHistory, MessageRating } from '../types/types';
 import { debounce } from '../utils/debounce';
-import { rename } from 'fs';
 
 interface ChatbotContextType {
+  threadId: string | undefined,
   messages: Array<MessageHistory>;
   title: string;
   sendMessage: (text: string) => Promise<void>;
@@ -17,6 +17,8 @@ interface ChatbotContextType {
   openChat: (chat:ChatInstance) => void;
   resetChat: () => void;
   deleteChat: () => void;
+  submitFeedback: (messageId: string, text: string) => void;
+  submitVote: (messageId: string, upvote: boolean, downvote: boolean) => void;
   selectedChat: string | undefined;
   setSelectedChat: (chat: string) => void;
   isNewChat: boolean;
@@ -47,7 +49,6 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   const [isNewChat, setIsNewChat] = useState<boolean>(true);
 
   const loadUserChats = debounce(async () => {
-    console.log(`loadUserChats run`);
     if(user){
       const responseString = await fetch('/api/loadChats', {
         method: 'POST',
@@ -57,7 +58,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         body: JSON.stringify({user: user}),
       });
       const response: ChatCollection = await responseString.json();
-      const sortedResponse = sortChatCollectionByDate(response);
+      const sortedResponse = await sortChatCollectionByDate(response);
       setChatCollection(sortedResponse);
       // renameChat(threadId, title);
     }
@@ -101,7 +102,6 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   }
 
   useEffect(() => {
-    console.log("title changed");
     renameChat(threadId, title);
   },[title]);
 
@@ -111,7 +111,6 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         if(chat.threadID == threadID){
           chat.title = newTitle;
         }
-        console.log(chat.title);
         return chat
       })]});
     }
@@ -138,7 +137,8 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   }
 
   const sendMessage = async (text: string) => {
-    const updatedMessages:MessageHistory[] = [...messages, { sender: 'user', text }];
+    
+    const updatedMessages:MessageHistory[] = [...messages, { sender: 'user', text, id: crypto.randomUUID()}];
     setMessages(prev => [...prev, { sender: 'user', text }]);
     if(user === undefined){
       return;
@@ -163,9 +163,9 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
     
       
       setThreadID(response.threadID);
-      let latest = response.messages[response.messages.length - 1];
+      let latest = response.message;
 
-      setMessages(prev => [...prev, { sender: 'assistant', text: latest }]);
+      setMessages(prev => [...prev, { id: response.id, sender: 'assistant', text: latest }]);
       setThreadID(response.threadID);
       if(response.title != ""){
         setTitle(response.title);
@@ -186,8 +186,39 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
       }
   };
 
+  const submitFeedback = async (messageId: string, text: string) => {
+    try {
+      console.log(`Submitting: ${text}`);
+      await fetch('/api/addFeedbackMessage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user, threadId, messageId, comment: text }),
+      });
+    } catch (error) {
+      console.error("Couldn't update feedback comments");
+    }
+  }
+
+  const submitVote = async (messageId: string, upvote: boolean, downvote: boolean) => {
+    try {
+      await fetch('/api/toggleVoteOnMessage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user, threadId, messageId, upvote, downvote }),
+      });
+    } catch (error) {
+      console.error("Couldn't update vote status for message");
+    }
+    
+  }
+
   return (
     <ChatbotContext.Provider value={{
+        threadId,
         messages,
         title,
         sendMessage,
@@ -198,6 +229,8 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         openChat,
         resetChat,
         deleteChat,
+        submitFeedback,
+        submitVote,
         selectedChat,
         setSelectedChat,
         isNewChat,

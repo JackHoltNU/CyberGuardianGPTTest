@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { MessageHistory } from "../../types/types";
+import { MessageHistory, MessageRating } from "../../types/types";
 import Chat from "@/app/models/Chat";
 import connectToDatabase from "@/app/lib/mongodb";
 import OpenAI from "openai";
@@ -29,6 +29,14 @@ export const POST = async (req: Request) => {
         status: 401,
       })
     }
+
+    if(session.user?.name != user){
+      console.log(`Session user is ${session.user?.name}, requesting user is ${user}`);
+
+      return new Response(`Correct user not authenticated`, {
+          status: 401,
+      })
+  }
   
   try {
     await connectToDatabase();
@@ -57,7 +65,7 @@ export const POST = async (req: Request) => {
     })),
     {
       role: "user",
-      content: `Please respond in the following JSON format, supplying a title that captures the full conversation, your new response, and a comma-separated list containing as many of the given tags as apply to this conversation: {"title": "Suggested chat title", "response": "Your response here", "tags": "Choose one or more from this list, [Scams, Passwords, Protective Software, Safe Shopping, AI, Miscellaneous]"}`
+      content: `Please respond in the following JSON format: {"title": "Suggested chat title that captures the full conversation", "response": "Your response here", "tags": "One or more comma-separated tags chosen from this list: [Scams, Passwords, Protective Software, Safe Shopping, AI, Miscellaneous]"}`
     }
   ];
 
@@ -71,6 +79,11 @@ export const POST = async (req: Request) => {
     let response = "";
     let title = "";
     let tags: string[] = [];
+    const emptyFeedback:MessageRating = {
+      upvoted: false,
+      downvoted: false,
+      comments: []
+    }
 
     try {
       const responseMessage = completion.choices[0].message.content ?? "";
@@ -87,12 +100,14 @@ export const POST = async (req: Request) => {
       title = "";
       // throw new Error(error.message);
     }
+    const responseId = crypto.randomUUID();
 
-    await createOrContinueChat(threadID, title, user, {sender: "assistant", text: response},messageHistory, tags);
+    await createOrContinueChat(threadID, title, user, {sender: "assistant", text: response, id: responseId, messageRating: emptyFeedback},messageHistory, tags);
 
     return Response.json({
+        id: responseId,
         title: title,
-        messages: [response],
+        message: response,
         threadID: threadID,
         userTokens: completion.usage?.prompt_tokens,
         botTokens: completion.usage?.completion_tokens,
@@ -106,6 +121,7 @@ export const POST = async (req: Request) => {
 
 const createOrContinueChat = async (threadID: string, title: string, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[], tags?: String[]) => {
     const chat = await Chat.findOne({ threadID });
+    console.log(newMessage.messageRating);
   
     try {
       if (chat) {

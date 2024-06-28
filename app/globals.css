@@ -51,7 +51,7 @@
 }
 
 .message {
-  @apply w-fit p-2 rounded-lg;
+  @apply w-fit p-2;
 }
 
 .message--user {
@@ -59,7 +59,7 @@
 }
 
 .message--bot {
-  @apply mr-auto -ml-2 bg-yellow-200;
+  @apply mr-auto -ml-2 bg-yellow-200 hover:cursor-pointer;
 }
 
 .message--loading {
@@ -100,6 +100,10 @@
 
 .button--cancel {
   @apply w-full bg-gray-500 hover:bg-gray-700 text-white rounded-lg p-2;
+}
+
+.button--submit-feedback {
+  @apply bg-green-500 hover:bg-green-700 text-white py-1 px-2 rounded-md;
 }
 
 .sidebar {

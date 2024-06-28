@@ -1,21 +1,19 @@
 'use client'
 
-
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useChatbot } from '../context/useChatbot';
 import LoadingDots from '../components/loadingdots';
-import ReactMarkdown from 'react-markdown';
-import exportChatAsText from '../utils/exporttxt';
 import exportChatAsPdf from '../utils/exportpdf';
 import { Session } from 'next-auth';
 import { signOut } from 'next-auth/react';
+import Message from '../components/message';
 
 interface Props {
   session: Session;
 }
 
 const Chat = ({session}: Props) => {
-  const { messages, title, userTokens, botTokens, userCost, botCost, sendMessage, setUser, resetChat, deleteChat } = useChatbot();
+  const { messages, title, userTokens, botTokens, userCost, botCost, threadId, sendMessage, setUser, resetChat, deleteChat } = useChatbot();
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -71,7 +69,7 @@ const Chat = ({session}: Props) => {
     setShowDeletedAlert(true);
     setShowMoreOptions(false);
     setTimeout(() => setShowDeletedAlert(false), 3000);
-  }
+  }  
 
   return (
     <div className="chat">
@@ -124,9 +122,7 @@ const Chat = ({session}: Props) => {
       
       <div className="chat__messages" ref={scrollRef} aria-live="polite">
         {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.sender === 'user' ? 'message--user' : 'message--bot'}`}>
-            { typeof msg.text == "string" ? <ReactMarkdown className="markdown">{msg.text}</ReactMarkdown> : <>{msg.text}</>}
-          </div>
+          <Message messageHistory={msg} key={msg.id !== "" ? msg.id : `Message${threadId}${index}`}/>
         ))}
         {loading && (
           <div key={"loading"} className={'message--loading'}>

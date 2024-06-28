@@ -1,6 +1,24 @@
 import mongoose from 'mongoose';
 
+const feedbackSchema = new mongoose.Schema({
+  upvoted: {
+    type: Boolean,
+    required: true
+  },
+  downvoted: {
+    type: Boolean,
+    required: true
+  },
+  comments: {
+    type: [String],
+  }
+})
+
 const messageSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: false,
+  },
   sender: {
     type: String,
     enum: ['system', 'user', 'assistant'],
@@ -14,6 +32,10 @@ const messageSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  feedback: {
+    type: feedbackSchema,
+    required: false,
+  }
 });
 
 const chatSchema = new mongoose.Schema({
