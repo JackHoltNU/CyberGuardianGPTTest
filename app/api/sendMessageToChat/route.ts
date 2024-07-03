@@ -44,7 +44,6 @@ export const POST = async (req: Request) => {
     console.error("Couldn't connect to database");
     throw new Error(error.message)
   }
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   if(threadID === undefined){
     threadID = crypto.randomUUID();
@@ -70,15 +69,12 @@ export const POST = async (req: Request) => {
   ];
 
   // get bot response
-  try {
-    const completion = await openai.chat.completions.create({
-      messages: messagesParam,
-      model: "ft:gpt-3.5-turbo-1106:personal:test-finetune:9WLpJhZj",
-    });
+  try {    
+    let completion = await getCompletion(messagesParam);
 
-    let response = "";
-    let title = "";
-    let tags: string[] = [];
+    let response: string = "";
+    let title: string | undefined = "";
+    let tags: string[] | undefined = [];
     const emptyFeedback:MessageRating = {
       upvoted: false,
       downvoted: false,
@@ -86,19 +82,50 @@ export const POST = async (req: Request) => {
     }
 
     try {
-      const responseMessage = completion.choices[0].message.content ?? "";
+      let responseMessage = completion.choices[0].message.content ?? "";
       console.log(`Raw response ${responseMessage}`);
-      const jsonResponse = JSON.parse(responseMessage);
+      let successfulResponse = false;
+      let iterations = 0;
+      let jsonResponse: any;
+
+      try {
+        jsonResponse = JSON.parse(responseMessage);
+        if(jsonResponse.response){
+          successfulResponse = true;
+        }
+      } catch (error) {
+        console.error(`Failed to parse JSON message`);
+        successfulResponse = false;
+      }
+
+      while(!successfulResponse && iterations < 3){
+        try {
+          completion = await getCompletion(messagesParam);
+          responseMessage = completion.choices[0].message.content ?? "";
+          jsonResponse = JSON.parse(responseMessage);
+          if(jsonResponse.response){
+            successfulResponse = true;
+          } else {
+            iterations ++;
+          }
+        } catch (error) {
+          console.error(`Failed to parse JSON message`);
+          iterations ++;
+        }                
+      }
+      
       title = jsonResponse.title;
       response = jsonResponse.response;
       const tagsRaw: string = jsonResponse.tags;
-      tags = tagsRaw.split(",");
-      console.log(tags);
+      if(tagsRaw){
+        tags = tagsRaw.split(",");
+        console.log(tags);
+      }      
     } catch (error: any) {
       console.error("Failed to parse JSON message, returning raw response");
-      response = completion.choices[0].message.content ?? "";;
-      title = "";
-      // throw new Error(error.message);
+      return new Response("Could not create chat completion", {
+        status: 500,
+      })
     }
     const responseId = crypto.randomUUID();
 
@@ -115,18 +142,31 @@ export const POST = async (req: Request) => {
     
   } catch (error: any) {
     console.error("Couldn't create chat completion", error);
-    // throw new Error(`Failed to create chat completion: ${error.message}`);
+    return new Response("Could not create chat completion", {
+      status: 500,
+    })
   }
 };
 
-const createOrContinueChat = async (threadID: string, title: string, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[], tags?: String[]) => {
+const getCompletion = async (messagesParam: ChatCompletionRequestMessage[]) => {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+  return await openai.chat.completions.create({
+    messages: messagesParam,
+    model: "ft:gpt-3.5-turbo-1106:personal:test-finetune:9WLpJhZj",
+  });
+}
+
+const createOrContinueChat = async (threadID: string, title: string | undefined, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[], tags?: String[]) => {
     const chat = await Chat.findOne({ threadID });
     console.log(newMessage.messageRating);
   
     try {
       if (chat) {
           chat.messages.push(newMessage);
-          chat.title = title;
+          if(title){
+            chat.title = title;
+          }
           chat.latestTimestamp = Date.now();
           if(tags){
             chat.tags = tags;

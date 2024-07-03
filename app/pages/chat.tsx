@@ -13,10 +13,9 @@ interface Props {
 }
 
 const Chat = ({session}: Props) => {
-  const { messages, title, userTokens, botTokens, userCost, botCost, threadId, sendMessage, setUser, resetChat, deleteChat } = useChatbot();
+  const { messages, title, userTokens, botTokens, userCost, botCost, threadId, showError, sendMessage, setUser, resetChat, deleteChat, setShowError } = useChatbot();
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showError, setShowError] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showDeletedAlert, setShowDeletedAlert] = useState(false);
 
@@ -52,12 +51,13 @@ const Chat = ({session}: Props) => {
     } catch (error: any) {
       console.error("Failed to send message:", error);
       setShowError(true);
+      return;
     } finally {
       setLoading(false);
-      if(showError){
-        setShowError(false);
-      }
-    }          
+    }   
+    if(showError){
+      setShowError(false);
+    }        
   };
 
   const deleteChatAndShowDeleted = () => {

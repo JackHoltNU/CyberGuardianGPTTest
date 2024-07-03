@@ -14,6 +14,8 @@ interface ChatbotContextType {
   setUser: (user: string) => void;
   loadUserChats: () => void;
   chatCollection: ChatCollection | undefined;
+  showError: boolean;
+  setShowError: (bool: boolean) => void;
   openChat: (chat:ChatInstance) => void;
   resetChat: () => void;
   deleteChat: () => void;
@@ -47,6 +49,8 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   const [botCost, setBotCost] = useState(0);
   const [selectedChat, setSelectedChat] = useState<string>();
   const [isNewChat, setIsNewChat] = useState<boolean>(true);
+  const [showError, setShowError] = useState(false);
+
 
   const loadUserChats = debounce(async () => {
     if(user){
@@ -89,6 +93,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
     setThreadID(chat.threadID);
     setTitle(chat.title);
     setIsNewChat(false);
+    setShowError(false);
     loadUserChats();
   }
 
@@ -98,6 +103,7 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
     setTitle("New Chat");
     setSelectedChat(undefined);
     setIsNewChat(true);
+    setShowError(false);
     loadUserChats(); 
   }
 
@@ -137,9 +143,9 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   }
 
   const sendMessage = async (text: string) => {
-    
-    const updatedMessages:MessageHistory[] = [...messages, { sender: 'user', text, id: crypto.randomUUID()}];
-    setMessages(prev => [...prev, { sender: 'user', text }]);
+    const newID = crypto.randomUUID();
+    const updatedMessages:MessageHistory[] = [...messages, { sender: 'user', text, id: newID}];
+    setMessages(prev => [...prev, { sender: 'user', text, id: newID }]);
     if(user === undefined){
       return;
     }
@@ -226,6 +232,8 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         setUser,
         loadUserChats,
         chatCollection,
+        showError,
+        setShowError,
         openChat,
         resetChat,
         deleteChat,
