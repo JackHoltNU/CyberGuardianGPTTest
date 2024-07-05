@@ -150,8 +150,8 @@ export const POST = async (req: Request) => {
 
 const getCompletion = async (messagesParam: ChatCompletionRequestMessage[]) => {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  // const model = "ft:gpt-3.5-turbo-1106:personal:test-finetune:9WLpJhZj";
-  const model = "gpt-4o";
+  const model = "ft:gpt-3.5-turbo-1106:personal:test-finetune:9WLpJhZj";
+  // const model = "gpt-4o";
 
   return await openai.chat.completions.create({
     messages: messagesParam,
