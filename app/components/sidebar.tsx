@@ -10,7 +10,7 @@ interface Props {
 }
 
 const Sidebar = ({session}: Props) => {
-    const { chatCollection, selectedChat, isNewChat, title, loadUserChats, openChat, setSelectedChat, resetChat } = useChatbot();   
+    const { chatCollection, selectedChat, isNewChat, loadUserChats, openChat, setSelectedChat, resetChat } = useChatbot();   
     const [chats, setChats] = useState<ChatInstance[]>([]);
 
     const changeChat = (chat: ChatInstance) => {

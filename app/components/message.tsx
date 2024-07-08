@@ -84,16 +84,15 @@ const Message = ({ messageHistory }: Props) => {
             <>
             {comments.length > 0 && (
                 <ul className="flex flex-col items-start justify-between bottom--50 bg-yellow-100 px-4 py-3 w-full lg:w-3/5">
-                    {comments.map((comment, index) => {
-                        return (<li key={`Comment${messageHistory.id}${index}`}>{comment}</li>)
-                    })}
+                    {comments.map((comment, index) => 
+                        (<li key={`Comment${messageHistory.id}${index}`}>{comment}</li>)
+                    )}
                 </ul>
             )}
             <div className="flex items-center justify-between bottom--50 bg-yellow-100 px-2 py-2 rounded-b-lg w-full lg:w-3/5">
               <button className={`px-2 py-1 mx-2 border-2 border-black rounded-md ${upvoted ? "bg-green-300" : "bg-white"}`} onClick={() => toggleUpvote()}><FontAwesomeIcon icon={faThumbsUp} /></button>
               <button className={`px-2 py-1 mx-2 border-2 border-black rounded-md ${downvoted ? "bg-red-300" : "bg-white"}`} onClick={() => {toggleDownvote(); if(upvoted){toggleUpvote()}}}><FontAwesomeIcon icon={faThumbsDown} /></button>
               <div className="inline-flex flex-col sm:flex-row items-center px-2 py-1 w-11/12">
-                {/* <label htmlFor="feedback-input" className="mx-2 font-bold">Comment: </label> */}
                 <input
                   type="text"
                   className="w-4/5 h-8 rounded-sm mx-2 px-2"

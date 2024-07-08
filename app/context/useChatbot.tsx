@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
 import { ChatCollection, ChatInstance, ChatResponses, MessageHistory, MessageRating } from '../types/types';
 import { debounce } from '../utils/debounce';
+import { signOut } from 'next-auth/react';
 
 interface ChatbotContextType {
   threadId: string | undefined,
@@ -125,13 +126,17 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   const deleteChat = async () => {
     // TODO are you sure modal
     try {
-      await fetch('/api/deleteChat', {
+      const response = await fetch('/api/deleteChat', {
         method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({user: user, threadID: threadId}),
-      })
+      });
+
+      if(!response.ok){
+        await handleResponseError(response);
+      }
     } catch (error: any) {
       console.error(`Could not delete chat`);
       throw new Error(error.message);
@@ -160,6 +165,9 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
         },
         body: JSON.stringify({messageHistory: updatedMessages, user: user, threadID: threadId}),
       });
+      if(!responseString.ok){
+        await handleResponseError(responseString);
+      }
       response = await responseString.json();
 
     } catch (error:any) {
@@ -192,16 +200,26 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
       }
   };
 
+  const handleResponseError = async (response: Response) => {
+    console.log(response.status);
+    if (response.status === 401){
+      await signOut();
+    }
+  }
+
   const submitFeedback = async (messageId: string, text: string) => {
     try {
       console.log(`Submitting: ${text}`);
-      await fetch('/api/addFeedbackMessage', {
+      const response = await fetch('/api/addFeedbackMessage', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ user, threadId, messageId, comment: text }),
       });
+      if(!response.ok){
+        await handleResponseError(response);
+      }
     } catch (error) {
       console.error("Couldn't update feedback comments");
     }
@@ -209,13 +227,16 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
 
   const submitVote = async (messageId: string, upvote: boolean, downvote: boolean) => {
     try {
-      await fetch('/api/toggleVoteOnMessage', {
+      const response = await fetch('/api/toggleVoteOnMessage', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ user, threadId, messageId, upvote, downvote }),
       });
+      if(!response.ok){
+        await handleResponseError(response);
+      }
     } catch (error) {
       console.error("Couldn't update vote status for message");
     }
