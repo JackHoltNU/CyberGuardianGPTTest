@@ -1,4 +1,3 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { MessageHistory, MessageRating } from "../../types/types";
 import Chat from "@/app/models/Chat";
 import connectToDatabase from "@/app/lib/mongodb";
@@ -20,23 +19,25 @@ interface ChatCompletionRequestMessage {
 
 
 export const POST = async (req: Request) => {
-    const body = await req.json();
-    const session = await getServerSession(options); 
-    let { messageHistory, user, threadID } = body as Props;
+  const body = await req.json();
+  const session = await getServerSession(options); 
+  let { messageHistory, user, threadID } = body as Props;
 
-    if(!session){
-      return new Response(`User not authenticated`, {
-        status: 401,
-      })
-    }
-
-    if(session.user?.name != user){
-      console.log(`Session user is ${session.user?.name}, requesting user is ${user}`);
-
-      return new Response(`Correct user not authenticated`, {
-          status: 401,
-      })
+  if(!session){
+    return new Response(`User not authenticated`, {
+      status: 401,
+    })
   }
+
+  if(session.user?.name != user){
+    console.log(`Session user is ${session.user?.name}, requesting user is ${user}`);
+
+    return new Response(`Correct user not authenticated`, {
+        status: 401,
+    })
+  }
+
+  console.log(`User role: ${session.user.role}`);
   
   try {
     await connectToDatabase();

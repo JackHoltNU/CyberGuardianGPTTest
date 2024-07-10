@@ -18,10 +18,6 @@
   @apply text-center p-2 mt-4 text-xl font-bold;
 }
 
-.button--logout {
-  @apply bg-gray-600 hover:bg-gray-700 text-white text-sm p-2 rounded-lg w-20;
-}
-
 .chat__actions {
   @apply flex w-full items-center justify-center mb-2;
 }
@@ -78,6 +74,14 @@
   @apply flex-grow w-2/5 sm:w-3/5 mr-4 p-2 border border-gray-300 rounded-lg;
 }
 
+.button--logout {
+  @apply bg-gray-600 hover:bg-gray-700 text-white text-sm p-2 rounded-lg w-20;
+}
+
+.button--dashboard {
+  @apply w-full bg-blue-500 hover:bg-blue-700 text-white rounded-lg p-2;
+}
+
 .button--send {
   @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg;
 }
@@ -111,23 +115,23 @@
 }
 
 .sidebar__title {
-  @apply w-full text-center mt-4 p-2 font-bold;
+  @apply p-4 text-xl font-bold border-b border-gray-700;
 }
 
-.sidebar__conversations {
+.sidebar__items {
   @apply w-11/12 my-4;
 }
 
-.conversation {
+.item {
   @apply mx-2 my-1 rounded-md p-2 hover:bg-blue-300 hover:cursor-pointer;
 }
 
-.conversation--selected {
+.item--selected {
   @apply bg-blue-300;
 }
 
-.conversation__button {
-  @apply w-full;
+.item__button {
+  @apply w-full inline-block;
 }
 
 .conversation__title {
@@ -136,4 +140,8 @@
 
 .conversation__timestamp {
   @apply text-xs text-left;
+}
+
+.dashboard {
+  @apply flex flex-col h-dvh w-full md:w-4/5 p-8;
 }

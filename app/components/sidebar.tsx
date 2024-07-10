@@ -59,17 +59,17 @@ const Sidebar = ({session}: Props) => {
     return (
         <section className="sidebar">
             <h1 className="sidebar__title">Your Conversations</h1>
-            <div className="sidebar__conversations">
+            <div className="sidebar__items">
                 <ul>
                     {isNewChat ? (
-                        <li className={'conversation conversation--selected'} key="newchat">
-                            <button className="conversation__button">
+                        <li className={'item item--selected'} key="newchat">
+                            <button className="item__button">
                                 <h3 className="conversation__title">New Chat</h3>
                             </button>
                         </li>
                     ) : (
-                        <li className="conversation">
-                            <button className="conversation__button">
+                        <li className="item">
+                            <button className="item__button">
                                 <h3 className="conversation__title" onClick={() => resetChat()}>Start New Chat</h3>
                             </button>
                         </li>
@@ -79,8 +79,8 @@ const Sidebar = ({session}: Props) => {
                             return null;
                         }
                         return (
-                            <li className={`conversation ${chat.threadID === selectedChat && "conversation--selected"}`} key={chat.threadID}>
-                                <button className="conversation__button" onClick={() => changeChat(chat)}>
+                            <li className={`item ${chat.threadID === selectedChat && "item--selected"}`} key={chat.threadID}>
+                                <button className="item__button" onClick={() => changeChat(chat)}>
                                     <h3 className="conversation__title">{chat.title}</h3>
                                     { chat.latestTimestamp && (<p className="conversation__timestamp">Latest: {formatDate(chat.latestTimestamp)}</p>)}
                                 </button>

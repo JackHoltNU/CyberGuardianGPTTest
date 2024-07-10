@@ -7,6 +7,7 @@ import exportChatAsPdf from '../utils/exportpdf';
 import { Session } from 'next-auth';
 import { signOut } from 'next-auth/react';
 import Message from '../components/message';
+import { redirect, useRouter } from 'next/navigation';
 
 interface Props {
   session: Session;
@@ -18,7 +19,7 @@ const Chat = ({session}: Props) => {
   const [loading, setLoading] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showDeletedAlert, setShowDeletedAlert] = useState(false);
-
+  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -111,6 +112,9 @@ const Chat = ({session}: Props) => {
             </li>
             <li>
               <button className="more-options__item button--cancel" onClick={() => setShowMoreOptions(false)}>Cancel</button>
+            </li>
+            <li>
+            {session.user.role === "admin" && <button className='more-options__item button--dashboard' onClick={() => router.push("/dashboard")}>Dashboard</button>}
             </li>
           </ul>
         </div>

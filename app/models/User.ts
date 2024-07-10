@@ -6,6 +6,10 @@ const credentialsSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  role: {
+    type: String,
+    required: false,
+  },
   password: {
     type: String,
     required: true,

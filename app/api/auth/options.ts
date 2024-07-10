@@ -29,12 +29,11 @@ export const options: NextAuthOptions = {
             user?.password
           ))
         ) {
-            console.log(`Authorize: username = ${user.username}`);
-          return { id: user._id.toString(), name: user.username };
+          return { id: user._id.toString(), name: user.username, role: user.role};
         } else {
           return null;
         }
-      },
+      }, 
     }),
   ],
   callbacks: {
@@ -42,12 +41,13 @@ export const options: NextAuthOptions = {
         if(user){
             token.name = user.name;
             token.id = user.id;
+            token.role = user.role;
         }        
         return token;
     },
     session({session, token}){
-        session.user = {name: token.name};
-        return session;
+      session.user = {name: token.name, role: token.role};
+      return session;
     }
   },
   secret: process.env.NEXTAUTH_SECRET,
