@@ -1,9 +1,10 @@
+import React from "react";
 import { getServerSession } from "next-auth";
 import { options } from "../api/auth/options";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { useState } from "react";
 import AdminSidebar from "../components/adminSidebar";
+import { useAdmin } from "../context/useAdmin";
+import Users from "./users";
 
 const ManageUsers = async () => {
   const session = await getServerSession(options);
@@ -23,9 +24,7 @@ const ManageUsers = async () => {
         <AdminSidebar selected={1} />
 
         {/* Main content */}
-        <main className="dashboard">
-          Manage users content to go here
-        </main>
+        <Users />
       </div>
     </div>
   );

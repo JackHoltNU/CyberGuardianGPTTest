@@ -32,3 +32,12 @@ export type ChatInstance = {
 export type ChatCollection = {
     chats: ChatInstance[]
 }
+
+export type User = {
+    username: string,
+    role: string
+}
+
+export type UserCollection = {
+    users: User[]
+}

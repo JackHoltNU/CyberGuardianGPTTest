@@ -145,3 +145,7 @@
 .dashboard {
   @apply flex flex-col h-dvh w-full md:w-4/5 p-8;
 }
+
+.users {
+  @apply flex flex-col h-dvh w-full md:w-4/5 p-8;
+}

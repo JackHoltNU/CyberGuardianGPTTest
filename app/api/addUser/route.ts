@@ -1,17 +1,21 @@
 import { getServerSession } from "next-auth";
+import bcrypt from "bcrypt";
+import User from "@/app/models/User";
 import { options } from "../auth/options";
-import Chat from "@/app/models/Chat";
 
 interface Props {
-    user: string;
-    threadID: string;
+    username: string;
+    password: string;
+    role: string;
 }
 
 export async function POST(req: Request) {
+    console.log(`submitting new user, api`);
+
     const body = await req.json();
     const session = await getServerSession(options); 
 
-    const { user, threadID } = body as Props;
+    const { username, password, role } = body as Props;
     
     if(!session){
         return new Response(`User not authenticated`, {
@@ -27,5 +31,27 @@ export async function POST(req: Request) {
         })
     }
 
-    // add user functionality to go here
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    await addUser(username, hashedPassword, role);
+
+    return new Response(`User added successfully`, {
+        status: 201,
+    });
+}
+
+const addUser = async (username: string, password: string, role: string) => {  
+    console.log(`submitting new user, api function: ${username}`);
+
+    try {        
+        await User.create({
+            username,
+            password,
+            role
+          });
+    } catch (error: any) {
+      console.error(`Couldn't add user to database`);
+      throw new Error(error.message);
+    }  
 }

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import AdminSidebar from "../components/adminSidebar";
+import { AdminProvider } from "../context/useAdmin";
 
 const Dashboard = async () => {
   const session = await getServerSession(options);
@@ -17,6 +18,7 @@ const Dashboard = async () => {
   }
 
   return (
+    
     <div className="flex flex-col w-screen h-screen items-center">
       <div className="flex flex-col-reverse md:flex-row w-full">
         {/* Sidebar */}
