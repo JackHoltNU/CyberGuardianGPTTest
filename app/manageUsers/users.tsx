@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAdmin } from "../context/useAdmin";
 
 export default () => {
@@ -8,6 +8,10 @@ export default () => {
     const [ newUsername, setNewUsername ] = useState("");
     const [ newPassword, setNewPassword ] = useState("");
     const [ newRole, setNewRole ] = useState("user");
+
+    useEffect(() => {
+        loadUsers();
+    },[])
 
     const submitNewUser = () => {
         if(newUsername.length <= 3){
@@ -35,6 +39,15 @@ export default () => {
             <div className="w-2/5">Role</div>
             <div className="w-1/5"></div>
           </li>
+          {users.users.map((user) => {
+            return (
+                <li className="flex w-full">
+                    <div className="w-2/5">{user.username}</div>
+                    <div className="w-2/5">{user.role}</div>
+                    <div className="w-1/5"></div>
+                </li>
+            )
+          })}
         </ul>
         <h2 className="mt-10 text-md font-bold">Add New User</h2>
         <div className="w-80 mt-2">

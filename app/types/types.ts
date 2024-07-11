@@ -33,11 +33,11 @@ export type ChatCollection = {
     chats: ChatInstance[]
 }
 
-export type User = {
+export type UserInstance = {
     username: string,
     role: string
 }
 
 export type UserCollection = {
-    users: User[]
+    users: UserInstance[]
 }
