@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useAdmin } from "../context/useAdmin";
 import User from "./user";
 
-export default () => {
+const Users = () => {
     const { users, addUser, loadUsers, deleteUser } = useAdmin();
     const [ newUsername, setNewUsername ] = useState("");
     const [ newPassword, setNewPassword ] = useState("");
@@ -85,3 +85,5 @@ export default () => {
       </main>
     );
 }
+
+export default Users;
