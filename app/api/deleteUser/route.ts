@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { options } from "../auth/options";
 import User from "@/app/models/User";
+import connectToDatabase from "@/app/lib/mongodb";
 
 interface Props {
     user: string;
@@ -25,6 +26,13 @@ export async function PUT(req: Request) {
             status: 403,
         })
     }
+
+    try {
+        await connectToDatabase();
+      } catch (error: any) {
+        console.error("Couldn't connect to database");
+        throw new Error(error.message)
+      }
 
     try {
         await deleteUser(user);

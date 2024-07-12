@@ -10,6 +10,8 @@ interface AdminContextType {
   addUser: (username: string, password: string, role: string) => void;
   loadUsers: () => void;
   deleteUser: (user: string) => void;
+  updatePassword: (username: string, password: string) => void;
+  updateRole: (username: string, role: string) => void;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -75,6 +77,37 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
       }
       loadUsers();
   }
+
+  const updatePassword = async (username: string, password: string) => {
+    try {
+        await fetch('/api/updateUser', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({username, password}),
+        });
+      } catch (error: any) {
+          console.error(`Could not update user`);
+          throw new Error(error.message);
+      }
+  }
+
+  const updateRole = async (username: string, role: string) => {
+    try {
+        await fetch('/api/updateUser', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({username, role}),
+        });
+      } catch (error: any) {
+          console.error(`Could not update user`);
+          throw new Error(error.message);
+    }
+    loadUsers();
+  }
   
   const handleResponseError = async (response: Response) => {
       console.log(response.status);
@@ -90,6 +123,8 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
         addUser,
         loadUsers,
         deleteUser,
+        updatePassword,
+        updateRole
       }}>
       {children}
     </AdminContext.Provider>

@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import User from "@/app/models/User";
 import { options } from "../auth/options";
 import { UserCollection, UserInstance } from "@/app/types/types";
+import connectToDatabase from "@/app/lib/mongodb";
 
 
 export async function GET() {
@@ -23,11 +24,16 @@ export async function GET() {
         })
     }
 
+    try {
+        await connectToDatabase();
+      } catch (error: any) {
+        console.error("Couldn't connect to database");
+        throw new Error(error.message)
+      }
+
     const users = await findAllUsers();
-    console.log(users[0]);
 
     const userInstances = users.map((item) => {
-        console.log(item);
         const user: UserInstance = {
             username: item.username,
             role: item.role

@@ -2,19 +2,22 @@
 
 import React, { useEffect, useState } from "react";
 import { useAdmin } from "../context/useAdmin";
+import User from "./user";
 
 export default () => {
     const { users, addUser, loadUsers, deleteUser } = useAdmin();
     const [ newUsername, setNewUsername ] = useState("");
     const [ newPassword, setNewPassword ] = useState("");
     const [ newRole, setNewRole ] = useState("user");
+    
+
 
     useEffect(() => {
         loadUsers();
     },[])
 
     const submitNewUser = () => {
-        if(newUsername.length <= 3){
+        if(newUsername.length < 3){
             // todo feedback
             return
         }
@@ -44,15 +47,7 @@ export default () => {
           </li>
           {users.users.map((user) => {
             return (
-                <li className="flex items-center w-full" key={user.username}>
-                    <div className="w-1/5">{user.username}</div>
-                    <div className="w-1/5">{user.role}</div>
-                    <div className="w-3/5 flex">
-                        <button className="w-1/5 m-2 bg-gray-300">Change role</button>
-                        <button className="w-1/5 m-2 bg-gray-300">Change password</button>
-                        <button className="w-1/5 m-2 bg-red-300" onClick={() => deleteUser(user.username)}>Delete user</button>
-                    </div>
-                </li>
+                <User username={user.username} role={user.role} key={`${user.username}_user`}/>
             )
           })}
         </ul>
@@ -67,7 +62,7 @@ export default () => {
                     onChange={(e) => setNewUsername(e.target.value)}
                 />
             </div>
-            <div className="flex w-full lg:w-1/4 justify-end lg:my-2">
+            <div className="flex w-full lg:w-1/4 justify-end lg:ml-2 lg:my-2">
                 <label htmlFor="password">Password</label>
                 <input
                     type="password"
