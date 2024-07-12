@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useAdmin } from "../context/useAdmin";
 
 export default () => {
-    const { users, addUser, loadUsers } = useAdmin();
+    const { users, addUser, loadUsers, deleteUser } = useAdmin();
     const [ newUsername, setNewUsername ] = useState("");
     const [ newPassword, setNewPassword ] = useState("");
     const [ newRole, setNewRole ] = useState("user");
@@ -28,6 +28,9 @@ export default () => {
         }
         console.log(`submitting new user, component`);
         addUser(newUsername, newPassword, newRole);
+        setNewUsername("");
+        setNewPassword("");
+        setNewRole("user");
     }
 
     return (
@@ -35,23 +38,27 @@ export default () => {
         <h1 className="text-lg font-bold mb-4">Users</h1>
         <ul>
           <li className="flex w-full border-b-4">
-            <div className="w-2/5">Username</div>
-            <div className="w-2/5">Role</div>
-            <div className="w-1/5"></div>
+            <div className="w-1/5">Username</div>
+            <div className="w-1/5">Role</div>
+            <div className="w-3/5"></div>
           </li>
           {users.users.map((user) => {
             return (
-                <li className="flex w-full">
-                    <div className="w-2/5">{user.username}</div>
-                    <div className="w-2/5">{user.role}</div>
-                    <div className="w-1/5"></div>
+                <li className="flex items-center w-full" key={user.username}>
+                    <div className="w-1/5">{user.username}</div>
+                    <div className="w-1/5">{user.role}</div>
+                    <div className="w-3/5 flex">
+                        <button className="w-1/5 m-2 bg-gray-300">Change role</button>
+                        <button className="w-1/5 m-2 bg-gray-300">Change password</button>
+                        <button className="w-1/5 m-2 bg-red-300" onClick={() => deleteUser(user.username)}>Delete user</button>
+                    </div>
                 </li>
             )
           })}
         </ul>
         <h2 className="mt-10 text-md font-bold">Add New User</h2>
-        <div className="w-80 mt-2">
-            <div className="flex w-full justify-end my-2">
+        <div className="w-80 lg:w-full lg:flex md:items-center mt-2">
+            <div className="flex w-full lg:w-1/4 justify-end my-2">
                 <label htmlFor="username">Username</label>
                 <input
                     type="text"
@@ -60,7 +67,7 @@ export default () => {
                     onChange={(e) => setNewUsername(e.target.value)}
                 />
             </div>
-            <div className="flex w-full justify-end">
+            <div className="flex w-full lg:w-1/4 justify-end lg:my-2">
                 <label htmlFor="password">Password</label>
                 <input
                     type="password"
@@ -69,14 +76,14 @@ export default () => {
                     onChange={(e) => setNewPassword(e.target.value)}
                 />
             </div>
-            <div className="flex w-full justify-end mt-2">
+            <div className="flex w-full lg:w-1/4  justify-end mt-2 md:my-2">
                 <label htmlFor="role">Role</label>
                 <select name="role" className="w-2/3 ml-2 pl-2" onChange={(e) => setNewRole(e.target.value)}>
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                 </select>
             </div>
-            <button className="w-full h-8 bg-blue-200 mt-6" onClick={() => submitNewUser()}>Add</button>
+            <button className="w-full lg:w-1/6 h-8 lg:h-6 bg-blue-200 mt-6 md:my-2 lg:ml-4 rounded-md" onClick={() => submitNewUser()}>Add</button>
         </div>
         
         
