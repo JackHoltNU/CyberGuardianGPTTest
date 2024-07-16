@@ -4,6 +4,7 @@ import React from "react"
 import { MessageInstance } from "../types/types";
 import { faThumbsUp, faThumbsDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
 
 
 interface Props {
@@ -12,6 +13,8 @@ interface Props {
 }
 
 const Chatlist = ({title, list}: Props) => {
+    const router = useRouter();
+
     return (
       <div className="flex-grow overflow-y-auto">
         <h1 className="py-2 text-left text-lg font-bold">{title}</h1>
@@ -37,8 +40,8 @@ const Chatlist = ({title, list}: Props) => {
                     <FontAwesomeIcon icon={faThumbsDown} />
                   )}
                 </div>
-                <div className={`p-2 flex items-center col-span-2 ${index % 2 == 0 && "bg-blue-100"}`}>{message.title}</div>
-                <div className={`p-2 flex items-center col-span-4 ${index % 2 == 0 && "bg-blue-100"}`}>"{message.message}"</div>
+                <div className={`p-2 flex items-center col-span-2 hover:underline cursor-pointer ${index % 2 == 0 && "bg-blue-100"}`} onClick={() => router.push(`/chat/${message.threadID}`)}>{message.title}</div>
+                <div className={`p-2 flex items-center col-span-4 hover:underline cursor-pointer ${index % 2 == 0 && "bg-blue-100"}`} onClick={() => router.push(`/chat/${message.threadID}`)}>"{message.message}"</div>
                 <div className={`p-2 flex items-center col-span-4 ${index % 2 == 0 && "bg-blue-100"}`}>
                   {message.feedback?.comments?.length > 0 && (
                     <div>

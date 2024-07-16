@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { ChatCollection, MessageInstance, UserCollection } from '../types/types';
+import { ChatCollection, MessageHistory, MessageInstance, UserCollection } from '../types/types';
 import { signOut } from 'next-auth/react';
 
 interface AdminContextType {
@@ -16,6 +16,7 @@ interface AdminContextType {
   updatePassword: (username: string, password: string) => void;
   updateRole: (username: string, role: string) => void;
   getVotedOn: () => {};
+  getThread: (threadID: string) => Promise<MessageHistory[]>;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -135,6 +136,23 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
         throw new Error(error.message);
     }
   }
+
+  const getThread = async(threadID: string): Promise<MessageHistory[]> => {
+    try {
+      const responseString = await fetch('/api/loadThread', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({threadID})
+      });
+      const response: MessageHistory[] = await responseString.json();
+      return response;
+    } catch (error: any) {
+        console.error(`Could not get users`);
+        throw new Error(error.message);
+    }
+  }
   
   const handleResponseError = async (response: Response) => {
       console.log(response.status);
@@ -155,7 +173,8 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
         deleteUser,
         updatePassword,
         updateRole,
-        getVotedOn
+        getVotedOn,
+        getThread,
       }}>
       {children}
     </AdminContext.Provider>
