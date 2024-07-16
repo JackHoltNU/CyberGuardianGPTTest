@@ -41,7 +41,7 @@ const Chatlist = ({title, list}: Props) => {
                   )}
                 </div>
                 <div className={`p-2 flex items-center col-span-2 hover:underline cursor-pointer ${index % 2 == 0 && "bg-blue-100"}`} onClick={() => router.push(`/chat/${message.threadID}`)}>{message.title}</div>
-                <div className={`p-2 flex items-center col-span-4 hover:underline cursor-pointer ${index % 2 == 0 && "bg-blue-100"}`} onClick={() => router.push(`/chat/${message.threadID}`)}>"{message.message}"</div>
+                <div className={`p-2 flex items-center col-span-4 hover:underline cursor-pointer ${index % 2 == 0 && "bg-blue-100"}`} onClick={() => router.push(`/chat/${message.threadID}`)}>{`"${message.message}"`}</div>
                 <div className={`p-2 flex items-center col-span-4 ${index % 2 == 0 && "bg-blue-100"}`}>
                   {message.feedback?.comments?.length > 0 && (
                     <div>
