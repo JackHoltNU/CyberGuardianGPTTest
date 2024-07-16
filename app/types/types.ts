@@ -22,6 +22,17 @@ export interface ChatResponses {
     botTokens: number | undefined;
 }
 
+export type MessageInstance = {
+    id: string,
+    threadID: string,
+    title: string,
+    message: string,
+    timestamp: Date,
+    user: string,
+    feedback: MessageRating,
+    tags: string[]
+}
+
 export type ChatInstance = {
     threadID: string,
     title: string,

@@ -2,16 +2,20 @@
 
 import React, { useEffect } from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { UserCollection } from '../types/types';
+import { ChatCollection, MessageInstance, UserCollection } from '../types/types';
 import { signOut } from 'next-auth/react';
 
 interface AdminContextType {
   users: UserCollection,
+  upvotedList: MessageInstance[],
+  downvotedList: MessageInstance[],
+  unvotedList: MessageInstance[],
   addUser: (username: string, password: string, role: string) => void;
   loadUsers: () => void;
   deleteUser: (user: string) => void;
   updatePassword: (username: string, password: string) => void;
   updateRole: (username: string, role: string) => void;
+  getVotedOn: () => {};
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -22,6 +26,11 @@ interface AdminProviderProps {
 
 export const AdminProvider = ({ children }:AdminProviderProps) => { 
   const [ users, setUsers ] = useState<UserCollection>({ users: [] });
+  const [ upvotedList, setUpvotedList ] = useState<Array<MessageInstance>>([]);
+  const [ downvotedList, setDownvotedList ] = useState<Array<MessageInstance>>([]);
+  const [ unvotedList, setUnvotedList ] = useState<Array<MessageInstance>>([]);
+
+
 
   const addUser = async (username: string, password: string, role: string) => {
     console.log(`submitting new user, context`);
@@ -108,6 +117,24 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
     }
     loadUsers();
   }
+
+  const getVotedOn = async () => {
+    try {
+      const responseString = await fetch('/api/getVotedOn', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const response = await responseString.json();
+      setUpvotedList(response.upvoted);
+      setDownvotedList(response.downvoted);
+      setUnvotedList(response.unvoted);
+    } catch (error: any) {
+        console.error(`Could not get users`);
+        throw new Error(error.message);
+    }
+  }
   
   const handleResponseError = async (response: Response) => {
       console.log(response.status);
@@ -120,11 +147,15 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
   return (
     <AdminContext.Provider value={{
         users,
+        upvotedList,
+        downvotedList,
+        unvotedList,
         addUser,
         loadUsers,
         deleteUser,
         updatePassword,
-        updateRole
+        updateRole,
+        getVotedOn
       }}>
       {children}
     </AdminContext.Provider>
