@@ -95,11 +95,15 @@
 }
 
 .button--save-pdf-full {
-  @apply w-full bg-green-700 hover:bg-green-900 text-white rounded-lg p-2;
+  @apply w-full bg-pink-700 hover:bg-pink-900 text-white rounded-lg p-2;
 }
 
 .button--delete-chat {
   @apply w-full bg-red-500 hover:bg-red-700 text-white rounded-lg p-2;
+}
+
+.button--rate-chat {
+  @apply w-full bg-green-700 hover:bg-green-900 text-white rounded-lg p-2;
 }
 
 .button--cancel {
@@ -148,4 +152,17 @@
 
 .users {
   @apply flex flex-col h-dvh w-full md:w-4/5 p-8;
+}
+
+
+.modal {
+  @apply fixed inset-0 flex justify-center items-center bg-black bg-opacity-50;
+}
+
+.modal__content {
+  @apply bg-white p-4 rounded shadow-md max-w-lg w-full;
+}
+
+.modal__close {
+  @apply text-gray-500 float-right text-2xl cursor-pointer;
 }

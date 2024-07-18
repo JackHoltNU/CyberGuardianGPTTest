@@ -1,13 +1,16 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useChatbot } from '../context/useChatbot';
 import LoadingDots from '../components/loadingdots';
 import exportChatAsPdf from '../utils/exportpdf';
 import { Session } from 'next-auth';
 import { signOut } from 'next-auth/react';
 import Message from '../components/message';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import Modal from '../components/modal';
+import LikertScale from '../components/likertScale';
+import ChatFeedbackModal from '../components/chatFeedbackModal';
 
 interface Props {
   session: Session;
@@ -19,6 +22,7 @@ const Chat = ({session}: Props) => {
   const [loading, setLoading] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showDeletedAlert, setShowDeletedAlert] = useState(false);
+  const [ showFeedbackModal, setShowFeedbackModal ] = useState(false);
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -104,11 +108,17 @@ const Chat = ({session}: Props) => {
       {showMoreOptions && (
         <div className="chat__more-options">
           <ul className="more-options__list">
+          <li>
+              <button className="more-options__item button--rate-chat" onClick={() => {
+                setShowMoreOptions(false);
+                setShowFeedbackModal(true);
+                }}>Rate this chat</button>
+            </li>  
             <li>
               <button className="more-options__item button--save-pdf-full" onClick={() => exportChatAsPdf(messages, title)}>Save as PDF</button>
             </li>          
             <li>
-              <button className="more-options__item button--delete-chat" onClick={() => deleteChatAndShowDeleted()}>Delete chat</button>
+              <button className="more-options__item button--delete-chat" onClick={() => deleteChatAndShowDeleted()}>Delete this chat</button>
             </li>
             <li>
               <button className="more-options__item button--cancel" onClick={() => setShowMoreOptions(false)}>Cancel</button>
@@ -156,7 +166,11 @@ const Chat = ({session}: Props) => {
         >
           Send
         </button>
-      </div>      
+      </div>   
+
+      {showFeedbackModal && (
+        <ChatFeedbackModal closeModal={() => setShowFeedbackModal(false)} />
+      )}   
     </div>
   );
 };

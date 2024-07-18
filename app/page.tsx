@@ -7,14 +7,14 @@ const Home = async () => {
   const session = await getServerSession(options);
 
   return (
-      <main className="flex flex-col w-screen h-screen items-center">
+      <div className="flex flex-col w-screen h-screen items-center">
         {session && (
           <div className = "flex flex-col-reverse md:flex-row w-full">
             <Sidebar session={session} />
             <Chat session={session}/>
           </div>
         )}
-      </main>
+      </div>
   );
 };
 

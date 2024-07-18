@@ -14,11 +14,17 @@ const Dash = () => {
 
     return (
         <div>
-            <div className="flex">
+            <div>
+                <div>Upvoted responses: {upvotedList.length}</div>
+                <div>Downvoted responses: {downvotedList.length}</div>
+                <div>Responses not voted on: {unvotedList.length}</div>
+            </div>
+            <div className="flex mt-2">
                 <button className={`p-2 border-2 ${selectedList == "upvoted" && "bg-blue-100"}`} onClick={() => setSelectedList("upvoted")}>Upvoted</button>
                 <button className={`p-2 border-y-2 border-r-2 ${selectedList == "downvoted" && "bg-blue-100"}`} onClick={() => setSelectedList("downvoted")}>Downvoted</button>
                 <button className={`p-2 border-y-2 border-r-2 ${selectedList == "unvoted" && "bg-blue-100"}`} onClick={() => setSelectedList("unvoted")}>Unvoted</button>
             </div>
+            
             {selectedList == "upvoted" && <Chatlist title="Upvoted Responses" list={upvotedList}/>}
             {selectedList == "downvoted" && <Chatlist title="Downvoted Responses" list={downvotedList}/>}
             {selectedList == "unvoted" && <Chatlist title="Unvoted Responses" list={unvotedList}/>}
