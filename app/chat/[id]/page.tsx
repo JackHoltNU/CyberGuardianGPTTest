@@ -9,11 +9,11 @@ export default async function Page({ params }: { params: { id: string } }) {
   const session = await getServerSession(options);
 
   if (!session) {
-    redirect('api/auth/signin?callbackUrl=%2F');
+    redirect('../api/auth/signin?callbackUrl=%2F');
   }
 
   if(session.user.role !== "admin"){
-    redirect('api/auth/signin?callbackUrl=%2F');
+    redirect('../api/auth/signin?callbackUrl=%2F');
   }
 
   return (
