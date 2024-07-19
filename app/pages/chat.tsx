@@ -22,7 +22,8 @@ const Chat = ({session}: Props) => {
   const [loading, setLoading] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showDeletedAlert, setShowDeletedAlert] = useState(false);
-  const [ showFeedbackModal, setShowFeedbackModal ] = useState(false);
+  // const [ showFeedbackModal, setShowFeedbackModal ] = useState(false);
+  const [ showDeleteModal, setShowDeleteModal ] = useState(false);
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -68,6 +69,7 @@ const Chat = ({session}: Props) => {
   const deleteChatAndShowDeleted = () => {
     deleteChat();
     showDeleted();
+    setShowDeleteModal(false);
   }
 
   const showDeleted = () => {
@@ -78,27 +80,25 @@ const Chat = ({session}: Props) => {
 
   return (
     <div className="chat">
-      <div className='chat__header'>
-        <div className='chat__header-empty-space'></div>
+      <div className="chat__header">
+        <div className="chat__header-empty-space"></div>
         <header className="chat__title">CyberGuardian GPT</header>
-        <button className='button--logout' onClick={() => signOut()}>Log Out</button>
+        <button className="button--logout" onClick={() => signOut()}>
+          Log Out
+        </button>
       </div>
-      <div className="chat__actions">                
-        <div className="chat__action">        
-          <button
-            className="button--new-chat"
-            onClick={() => resetChat()}
-          >
+      <div className="chat__actions">
+        <div className="chat__action">
+          <button className="button--new-chat" onClick={() => resetChat()}>
             Start new chat
           </button>
         </div>
-        <div className="chat__action">        
+        <div className="chat__action">
           <button
             className="button--more-options"
             onClick={() => {
-              setShowMoreOptions(!showMoreOptions)
-            }
-            }
+              setShowMoreOptions(!showMoreOptions);
+            }}
           >
             ...
           </button>
@@ -108,69 +108,100 @@ const Chat = ({session}: Props) => {
       {showMoreOptions && (
         <div className="chat__more-options">
           <ul className="more-options__list">
-          <li>
+            {/* <li>
               <button className="more-options__item button--rate-chat" onClick={() => {
                 setShowMoreOptions(false);
                 setShowFeedbackModal(true);
                 }}>Rate this chat</button>
-            </li>  
+            </li>   */}
             <li>
-              <button className="more-options__item button--save-pdf-full" onClick={() => exportChatAsPdf(messages, title)}>Save as PDF</button>
-            </li>          
-            <li>
-              <button className="more-options__item button--delete-chat" onClick={() => deleteChatAndShowDeleted()}>Delete this chat</button>
+              <button
+                className="more-options__item button--save-pdf-full"
+                onClick={() => exportChatAsPdf(messages, title)}
+              >
+                Save as PDF
+              </button>
             </li>
             <li>
-              <button className="more-options__item button--cancel" onClick={() => setShowMoreOptions(false)}>Cancel</button>
+              <button
+                className="more-options__item button--delete-chat"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete this chat
+              </button>
             </li>
             <li>
-            {session.user.role === "admin" && <button className='more-options__item button--dashboard' onClick={() => router.push("/dashboard")}>Dashboard</button>}
+              <button
+                className="more-options__item button--cancel"
+                onClick={() => setShowMoreOptions(false)}
+              >
+                Cancel
+              </button>
+            </li>
+            <li>
+              {session.user.role === "admin" && (
+                <button
+                  className="more-options__item button--dashboard"
+                  onClick={() => router.push("/dashboard")}
+                >
+                  Dashboard
+                </button>
+              )}
             </li>
           </ul>
         </div>
       )}
 
-      {showDeletedAlert && (
-        <div className='chat__alert'>Chat deleted</div>
-      )}
-      
+      {showDeletedAlert && <div className="chat__alert">Chat deleted</div>}
+
       <div className="chat__messages" ref={scrollRef} aria-live="polite">
         {messages.map((msg, index) => (
-          <Message messageHistory={msg} key={msg.id !== "" ? msg.id : `Message${threadId}${index}`}/>
+          <Message
+            messageHistory={msg}
+            key={msg.id !== "" ? msg.id : `Message${threadId}${index}`}
+          />
         ))}
         {loading && (
-          <div key={"loading"} className={'message--loading'}>
+          <div key={"loading"} className={"message--loading"}>
             <LoadingDots />
-        </div>
+          </div>
         )}
         {showError && (
-          <p className="message--error">There has been an error, please try again</p>
+          <p className="message--error">
+            There has been an error, please try again
+          </p>
         )}
       </div>
       <div className="chatinput">
-        <label htmlFor="chat-input" className="sr-only">Type your message</label>
+        <label htmlFor="chat-input" className="sr-only">
+          Type your message
+        </label>
         <input
           type="text"
           className="chatinput__field"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => {
-            if(e.key === 'Enter'){
+            if (e.key === "Enter") {
               sendMessages();
             }
           }}
         />
-        <button
-          className="button--send"
-          onClick={sendMessages}
-        >
+        <button className="button--send" onClick={sendMessages}>
           Send
         </button>
-      </div>   
+      </div>
+      { showDeleteModal && (
+        <Modal submit={deleteChatAndShowDeleted} closeModal={() => setShowDeleteModal(false)} submitWording='Confirm'>
+          <h1 className='text-center'>Are you sure you wish to delete?</h1>
+          <p className="text-center mt-4">This conversation will be removed from our database and cannot be retrieved</p>
+        </Modal>
+      ) }
 
-      {showFeedbackModal && (
+      {/* {showFeedbackModal && (
         <ChatFeedbackModal closeModal={() => setShowFeedbackModal(false)} />
-      )}   
+      )}    */}
+
     </div>
   );
 };
