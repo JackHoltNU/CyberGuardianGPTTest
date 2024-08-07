@@ -116,7 +116,7 @@ export const POST = async (req: Request) => {
       }
       
       title = jsonResponse.title;
-      response = jsonResponse.response;
+      response = jsonResponse.response;      
       const tagsRaw: string = jsonResponse.tags;
       if(tagsRaw){
         tags = tagsRaw.split(",");
@@ -151,8 +151,8 @@ export const POST = async (req: Request) => {
 
 const getCompletion = async (messagesParam: ChatCompletionRequestMessage[]) => {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const model = "ft:gpt-3.5-turbo-1106:personal:test-finetune:9WLpJhZj";
-  // const model = "gpt-4o";
+  // const model = "ft:gpt-3.5-turbo-1106:personal:test-finetune:9WLpJhZj";
+  const model = "gpt-4o-mini";
 
   return await openai.chat.completions.create({
     messages: messagesParam,
