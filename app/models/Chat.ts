@@ -35,6 +35,18 @@ const messageSchema = new mongoose.Schema({
   feedback: {
     type: feedbackSchema,
     required: false,
+  },
+  model: {
+    type: String,
+    required: false,
+  },
+  mainPrompt: {
+    type: String,
+    required: false
+  },
+  formatPrompt: {
+    type: String,
+    require: false
   }
 });
 

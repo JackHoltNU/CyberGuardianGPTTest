@@ -15,7 +15,6 @@ export async function PUT(req: Request) {
     const session = await getServerSession(options); 
 
     const { username, password, role } = body as Props;
-    console.log(`username: ${username}, password: ${password}, role: ${role}`);
     
     if(!session){
         return new Response(`User not authenticated`, {

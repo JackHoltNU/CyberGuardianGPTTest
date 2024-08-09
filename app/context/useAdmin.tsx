@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { ChatCollection, MessageHistory, MessageInstance, UserCollection } from '../types/types';
+import { AIConfigType, ChatCollection, MessageHistory, MessageInstance, UserCollection } from '../types/types';
 import { signOut } from 'next-auth/react';
 
 interface AdminContextType {
@@ -10,11 +10,14 @@ interface AdminContextType {
   upvotedList: MessageInstance[],
   downvotedList: MessageInstance[],
   unvotedList: MessageInstance[],
+  config?: AIConfigType,
   addUser: (username: string, password: string, role: string) => void;
   loadUsers: () => void;
   deleteUser: (user: string) => void;
   updatePassword: (username: string, password: string) => void;
   updateRole: (username: string, role: string) => void;
+  getAIConfig: () => void;
+  updateAIConfig: (newConfig: AIConfigType) => void;
   getVotedOn: () => {};
   getThread: (threadID: string) => Promise<MessageHistory[]>;
 }
@@ -30,6 +33,7 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
   const [ upvotedList, setUpvotedList ] = useState<Array<MessageInstance>>([]);
   const [ downvotedList, setDownvotedList ] = useState<Array<MessageInstance>>([]);
   const [ unvotedList, setUnvotedList ] = useState<Array<MessageInstance>>([]);
+  const [ config, setConfig ] = useState<AIConfigType>();
 
 
 
@@ -64,7 +68,6 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
         },
       });
       const response: UserCollection = await responseString.json();
-      //const sortedResponse = await sortChatCollectionByDate(response);
       setUsers(response);
     } catch (error: any) {
         console.error(`Could not get users`);
@@ -119,6 +122,38 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
     loadUsers();
   }
 
+  const getAIConfig =async () => {
+    try {
+      const responseString = await fetch('/api/getAIConfig', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      const response = await responseString.json();
+      const config: AIConfigType = response.config;
+      setConfig(config);
+    } catch (error: any) {
+        console.error(`Could not get config`);
+        throw new Error(error.message);
+  }
+  }
+
+  const updateAIConfig = async (newConfig: AIConfigType) => {
+    try {
+      await fetch('/api/setAIConfig', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({newConfig}),
+      });
+    } catch (error: any) {
+        console.error(`Could not update config`);
+        throw new Error(error.message);
+    }
+  }
+
   const getVotedOn = async () => {
     try {
       const responseString = await fetch('/api/getVotedOn', {
@@ -168,11 +203,14 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
         upvotedList,
         downvotedList,
         unvotedList,
+        config,
         addUser,
         loadUsers,
         deleteUser,
         updatePassword,
         updateRole,
+        getAIConfig,
+        updateAIConfig,
         getVotedOn,
         getThread,
       }}>

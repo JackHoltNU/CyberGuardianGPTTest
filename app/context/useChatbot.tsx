@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { ChatCollection, ChatInstance, ChatResponses, MessageHistory, MessageRating } from '../types/types';
+import { AIConfigType, ChatCollection, ChatInstance, ChatResponses, MessageHistory, MessageRating } from '../types/types';
 import { debounce } from '../utils/debounce';
 import { signOut } from 'next-auth/react';
 
@@ -51,7 +51,6 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   const [selectedChat, setSelectedChat] = useState<string>();
   const [isNewChat, setIsNewChat] = useState<boolean>(true);
   const [showError, setShowError] = useState(false);
-
 
   const loadUserChats = debounce(async () => {
     if(user){
@@ -124,7 +123,6 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   }
 
   const deleteChat = async () => {
-    // TODO are you sure modal
     try {
       const response = await fetch('/api/deleteChat', {
         method: 'PUT',
@@ -142,8 +140,6 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
       throw new Error(error.message);
     }
     
-    // TODO message deleted alert
-
     resetChat()
   }
 
@@ -157,13 +153,12 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
 
     let response: ChatResponses;
     try {
-      // const response: ChatResponses = await sendMessageToChat(updatedMessages, user, threadId);
       const responseString = await fetch('/api/sendMessageToChat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({messageHistory: updatedMessages, user: user, threadID: threadId}),
+        body: JSON.stringify({messageHistory: updatedMessages, user: user, threadID: threadId, model: "primary"}),
       });
       if(!responseString.ok){
         await handleResponseError(responseString);

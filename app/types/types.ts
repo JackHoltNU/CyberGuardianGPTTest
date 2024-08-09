@@ -1,3 +1,10 @@
+export type AIConfigType = {
+    primary: string,
+    secondary: string,
+    mainPrompt: string,
+    formatPrompt: string
+}
+
 export type MessageRating = {
     upvoted: boolean;
     downvoted: boolean;

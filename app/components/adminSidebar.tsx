@@ -31,6 +31,11 @@ const AdminSidebar = ({selected}: Props) => {
               </Link>
             </li>
             <li className={`item ${selected == 2 && "item--selected"}`}>
+              <Link href="/configAI" className="item__button">
+                Configure AI
+              </Link>
+            </li>
+            <li className={`item ${selected == 3 && "item--selected"}`}>
               <Link href="/" className="item__button">
                 Go To Chat
               </Link>
