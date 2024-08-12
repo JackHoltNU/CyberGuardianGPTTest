@@ -31,14 +31,12 @@ export const POST = async (req: Request) => {
   }
 
   if(session.user?.name != user){
-    console.log(`Session user is ${session.user?.name}, requesting user is ${user}`);
 
     return new Response(`Correct user not authenticated`, {
         status: 401,
     })
   }
 
-  console.log(`User role: ${session.user.role}`);
   
   try {
     await connectToDatabase();
@@ -79,7 +77,6 @@ export const POST = async (req: Request) => {
       //   content: formatPrompt
       // }
     ]
-    console.log(messagesParam);
   } else {    
     return new Response("Could not create chat completion", {
       status: 500,
@@ -108,7 +105,6 @@ export const POST = async (req: Request) => {
 
     try {
       let responseMessage = completion.choices[0].message.content ?? "";
-      console.log(`Raw response ${responseMessage}`);
       let successfulResponse = false;
       let iterations = 0;
       let jsonResponse: any;
@@ -144,7 +140,6 @@ export const POST = async (req: Request) => {
       const tagsRaw: string = jsonResponse.tags;
       if(tagsRaw){
         tags = tagsRaw.split(",");
-        console.log(tags);
       }      
     } catch (error: any) {
       console.error("Failed to parse JSON message, returning raw response");
@@ -154,7 +149,7 @@ export const POST = async (req: Request) => {
     }
     const responseId = crypto.randomUUID();
 
-    await createOrContinueChat(threadID, title, user, {sender: "assistant", text: response, id: responseId, messageRating: emptyFeedback},messageHistory, tags, model, mainPrompt, formatPrompt);
+    await createOrContinueChat(threadID, title, user, {sender: "assistant", text: response, id: responseId, messageRating: emptyFeedback, model, mainPrompt, formatPrompt},messageHistory, tags);
 
     return Response.json({
         id: responseId,
@@ -190,9 +185,8 @@ const getAIConfig = async () => {
   return aiConfig;
 }
 
-const createOrContinueChat = async (threadID: string, title: string | undefined, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[], tags?: String[], model? : string, mainPrompt?: string, formatPrompt?: string) => {
+const createOrContinueChat = async (threadID: string, title: string | undefined, user: string, newMessage: MessageHistory, messageHistory: MessageHistory[], tags?: String[]) => {
     const chat = await Chat.findOne({ threadID });
-    console.log(newMessage.messageRating);
   
     try {
       if (chat) {
@@ -203,19 +197,9 @@ const createOrContinueChat = async (threadID: string, title: string | undefined,
           chat.latestTimestamp = Date.now();
           if(tags){
             chat.tags = tags;
-          }
-          if(model){
-            chat.model = model;
-          }
-          if(mainPrompt){
-            chat.mainPrompt = mainPrompt;
-          }
-          if(formatPrompt){
-            chat.formatPrompt = formatPrompt;
-          }
+          }          
           await chat.save();
         } else {
-          console.log(`creating chat, ${threadID}, ${user}, ${newMessage}`);
           await Chat.create({
             threadID,
             title,
