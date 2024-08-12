@@ -36,7 +36,6 @@ const ChatFeedbackModal = ({closeModal} : Props) => {
             accept = false;
         }
         if(accept){
-            console.log("submit response");
             closeModal();
         }        
     }

@@ -7,8 +7,6 @@ import AIConfig from "@/app/models/AIConfig";
 
 export async function GET() {
     const session = await getServerSession(options); 
-
-    console.log("test")
     
     if(!session){
         return new Response(`User not authenticated`, {
@@ -17,7 +15,7 @@ export async function GET() {
     }
 
     if(session.user?.role !== "admin"){
-        console.log(`Session user is not authorised`);
+        console.error(`Session user is not authorised`);
 
         return new Response(`User not authorised`, {
             status: 403,
@@ -36,7 +34,6 @@ export async function GET() {
     let config: AIConfigType | null;
     try {
         config = await getAIConfig();
-        console.log(config);
     } catch (error) {
         return new Response(`Couldn't update config`, {
             status: 500,
@@ -44,7 +41,6 @@ export async function GET() {
     }   
 
     if(config){
-        console.log(config);
         return Response.json({ config });
     } else {
         return new Response(`Couldn't get config`, {
@@ -55,6 +51,5 @@ export async function GET() {
 
 const getAIConfig = async () => {
     const aiConfig: AIConfigType | null = await AIConfig.findOne();
-    console.log("test");
     return aiConfig;
   }

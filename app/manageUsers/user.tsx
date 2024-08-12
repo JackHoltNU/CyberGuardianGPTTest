@@ -29,7 +29,6 @@ const User = ({ username, role }:Props) => {
         if(newRole !== "admin" && newRole !== "user"){
             return;
         }
-        console.log("submitting role change");
         updateRole(username, newRole);
         setShowEditRole(false);
     }

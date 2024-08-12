@@ -23,8 +23,6 @@ export const POST = async (req: Request) => {
   }
 
   if(session.user?.name != user){
-    console.log(`Session user is ${session.user?.name}, requesting user is ${user}`);
-
     return new Response(`Correct user not authenticated`, {
         status: 401,
     })

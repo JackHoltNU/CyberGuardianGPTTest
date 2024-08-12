@@ -20,7 +20,7 @@ export async function PUT(req: Request) {
     }
 
     if(session.user?.role !== "admin"){
-        console.log(`Session user is not authorised`);
+        console.error(`Session user is not authorised`);
 
         return new Response(`User not authorised`, {
             status: 403,
@@ -51,7 +51,6 @@ export async function PUT(req: Request) {
 
 const updateAIConfig = async (newConfig: AIConfigType) => {  
     try {     
-        console.log(newConfig); 
         const config = await AIConfig.findOne();
         if(!config){
             await AIConfig.create({

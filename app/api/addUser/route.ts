@@ -10,8 +10,6 @@ interface Props {
 }
 
 export async function POST(req: Request) {
-    console.log(`submitting new user, api`);
-
     const body = await req.json();
     const session = await getServerSession(options); 
 
@@ -24,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     if(session.user?.role !== "admin"){
-        console.log(`Session user is not authorised`);
+        console.error(`Session user is not authorised`);
 
         return new Response(`User not authorised`, {
             status: 403,
@@ -42,8 +40,6 @@ export async function POST(req: Request) {
 }
 
 const addUser = async (username: string, password: string, role: string) => {  
-    console.log(`submitting new user, api function: ${username}`);
-
     try {        
         await User.create({
             username,

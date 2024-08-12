@@ -11,7 +11,6 @@ const LogIn = () => {
     const {setUser} = useChatbot();
 
     const logIn = () => {
-        console.log(`Settings username to: ${username}`);
         setUser(username);
         // toggleDisplayChatCallback(true);
     };

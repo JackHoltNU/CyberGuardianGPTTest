@@ -21,7 +21,6 @@ const Sidebar = ({session}: Props) => {
     useEffect(() => {
         if(chatCollection){
             setChats(chatCollection.chats);
-            console.log(chats);
         }
     },[chatCollection])
     

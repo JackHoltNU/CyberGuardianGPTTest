@@ -13,7 +13,7 @@ export async function GET() {
   }
 
   if (session.user?.role !== "admin") {
-      console.log(`Session user is not authorised`);
+      console.error(`Session user is not authorised`);
       return new Response(`User not authorised`, { status: 403 });
   }
 

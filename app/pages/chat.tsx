@@ -38,11 +38,6 @@ const Chat = ({session}: Props) => {
       // scroll to the bottom with each new message
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-    console.log(`User tokens: ${userTokens}`);
-    console.log(`User cost: ${userCost}`);
-    console.log(`Bot tokens: ${botTokens}`);
-    console.log(`Bot cost: ${botCost}`);
-
   }, [messages, userTokens, botTokens, userCost, botCost]);
 
   const sendMessages = async () => {
@@ -191,6 +186,8 @@ const Chat = ({session}: Props) => {
           Send
         </button>
       </div>
+      <div className="mx-auto mb-2 text-center">Output is AI generated and can include inaccuracies</div>
+
       { showDeleteModal && (
         <Modal submit={deleteChatAndShowDeleted} closeModal={() => setShowDeleteModal(false)} submitWording='Confirm'>
           <h1 className='text-center'>Are you sure you wish to delete?</h1>

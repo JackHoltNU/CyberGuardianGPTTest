@@ -29,7 +29,6 @@ const Users = () => {
             // todo feedback
             return
         }
-        console.log(`submitting new user, component`);
         addUser(newUsername, newPassword, newRole);
         setNewUsername("");
         setNewPassword("");

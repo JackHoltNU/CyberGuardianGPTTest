@@ -196,7 +196,6 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
   };
 
   const handleResponseError = async (response: Response) => {
-    console.log(response.status);
     if (response.status === 401){
       await signOut();
     }
@@ -204,7 +203,6 @@ export const ChatbotProvider = ({ children }:ChatbotProviderProps) => {
 
   const submitFeedback = async (messageId: string, text: string) => {
     try {
-      console.log(`Submitting: ${text}`);
       const response = await fetch('/api/addFeedbackMessage', {
         method: 'POST',
         headers: {

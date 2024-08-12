@@ -38,8 +38,6 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
 
 
   const addUser = async (username: string, password: string, role: string) => {
-    console.log(`submitting new user, context`);
-
     try {
         const response = await fetch('/api/addUser', {
           method: 'POST',
@@ -190,7 +188,6 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
   }
   
   const handleResponseError = async (response: Response) => {
-      console.log(response.status);
       if (response.status === 401){
         await signOut();
       }

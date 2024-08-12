@@ -20,15 +20,12 @@ export async function PUT(req: Request) {
     }
 
     if(session.user?.name != user){
-        console.log(`Session user is ${session.user?.name}, requesting user is ${user}`);
-
         return new Response(`Correct user not authenticated`, {
             status: 401,
         })
     }
 
     try {
-        console.log("calling deleteChat");
         await deleteChat(user, threadID);
     } catch (error) {
         console.error("Couldn't delete chat");
