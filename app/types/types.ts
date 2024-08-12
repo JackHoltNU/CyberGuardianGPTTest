@@ -19,8 +19,8 @@ export type MessageHistory = {
     timestamp?: Date
     messageRating?: MessageRating;
     model?: string,
-    mainPrompt: string,
-    formatPrompt: string
+    mainPrompt?: string,
+    formatPrompt?: string
 }
 
 export interface ChatResponses {
