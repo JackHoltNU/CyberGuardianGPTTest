@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { AIConfigType, ChatCollection, MessageHistory, MessageInstance, UserCollection } from '../types/types';
+import { AIConfigType, MessageHistory, MessageInstance, UserCollection } from '../types/types';
 import { signOut } from 'next-auth/react';
 
 interface AdminContextType {
