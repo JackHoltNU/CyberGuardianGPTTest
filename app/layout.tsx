@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { options } from "./api/auth/options";
 import { redirect } from "next/navigation";
 import { AdminProvider } from "./context/useAdmin";
+import { ComparisonChatbotProvider } from "./context/useComparisonChatbot";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -29,12 +30,14 @@ export default async function RootLayout({
   
   return (
     <ChatbotProvider>
-      <AdminProvider>
-        <html lang="en">
-          <link rel="icon" href="/favicon.ico" sizes="any" />
-          <body className={inter.className}>{children}</body>
-        </html>
-      </AdminProvider>
+      <ComparisonChatbotProvider>
+        <AdminProvider>
+          <html lang="en">
+            <link rel="icon" href="/favicon.ico" sizes="any" />
+            <body className={inter.className}>{children}</body>
+          </html>
+        </AdminProvider>
+      </ComparisonChatbotProvider>     
     </ChatbotProvider>
   );
 }

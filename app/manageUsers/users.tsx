@@ -25,7 +25,7 @@ const Users = () => {
             // todo feedback
             return
         }
-        if(newRole !== "admin" && newRole !== "user"){
+        if(newRole !== "admin" && newRole !== "user" && newRole !== "comparison"){
             // todo feedback
             return
         }
@@ -75,6 +75,7 @@ const Users = () => {
                 <select name="role" className="w-2/3 ml-2 pl-2" onChange={(e) => setNewRole(e.target.value)}>
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
+                    <option value="comparison">Comparison</option>
                 </select>
             </div>
             <button className="w-full lg:w-1/6 h-8 lg:h-6 bg-blue-200 mt-6 md:my-2 lg:ml-4 rounded-md" onClick={() => submitNewUser()}>Add</button>

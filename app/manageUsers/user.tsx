@@ -70,6 +70,7 @@ const User = ({ username, role }:Props) => {
                         <label className="w-1/5 m-2 text-right">New Role:</label>
                         <select name="role" className="w-1/5 m-2 pl-2" value={newRole} onChange={(e) => setNewRole(e.target.value)}>
                             <option value="user">User</option>
+                            <option value="comparison">Comparison</option>
                             <option value="admin">Admin</option>
                         </select>
                         <button className="w-1/12 m-2 bg-green-300" onClick={() => submitRoleChange()}>Submit</button>

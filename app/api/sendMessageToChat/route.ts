@@ -11,6 +11,11 @@ interface Props {
   messageHistory: MessageHistory[];
   user: string;
   threadID: string | undefined;
+  model?: string;
+  mainPrompt?: string;
+  formatPrompt?: string;
+  saveUserMsgToDB?: Boolean;
+  saveResponseToDB?: Boolean;
 }
 
 interface ChatCompletionRequestMessage {
@@ -21,7 +26,12 @@ interface ChatCompletionRequestMessage {
 export const POST = async (req: Request) => {
   const body = await req.json();
   const session = await getServerSession(options);
-  let { messageHistory, user, threadID } = body as Props;
+  let { messageHistory, user, threadID, model, mainPrompt, formatPrompt, saveResponseToDB, saveUserMsgToDB } = body as Props;
+
+  console.log(`Model: ${model}`);
+  console.log(`Main: ${mainPrompt}`);
+  console.log(`Format: ${formatPrompt}`);
+
 
   if (!session) {
     return new Response(`User not authenticated`, {
@@ -47,26 +57,35 @@ export const POST = async (req: Request) => {
   }
 
   // record user's message to database
-  await createOrContinueChat(
-    threadID,
-    "",
-    user,
-    messageHistory[messageHistory.length - 1],
-    messageHistory
-  );
+  if(saveUserMsgToDB){
+    await createOrContinueChat(
+      threadID,
+      "",
+      user,
+      messageHistory[messageHistory.length - 1],
+      messageHistory
+    );
+  }  
 
-  const config = await getAIConfig();
-  let model: string;
-  let mainPrompt: string;
-  let formatPrompt: string;
-
+  let config: AIConfigType | null;
   let messagesParam: ChatCompletionRequestMessage[] = [];
 
-  if (config) {
-    model = config.primary;
-    mainPrompt = config.mainPrompt;
-    formatPrompt = config.formatPrompt;
-    messagesParam = [
+  if(!model || !mainPrompt == undefined || formatPrompt == undefined){
+    console.log("resorting to defaults")
+    config = await getAIConfig();
+    if(config){
+      model = config.primary;
+      mainPrompt = config.mainPrompt;
+      formatPrompt = config.formatPrompt;
+    } else {
+      return new Response("Could not create chat completion, missing AI config", {
+        status: 500,
+      });
+    }
+    
+  }  
+   
+  messagesParam = [
       {
         role: "system",
         content: `${mainPrompt} ${formatPrompt}`,
@@ -79,24 +98,11 @@ export const POST = async (req: Request) => {
       //   role: "user",
       //   content: formatPrompt
       // }
-    ];
-  } else {
-    return new Response("Could not create chat completion", {
-      status: 500,
-    });
-  }
+  ];  
 
   // get bot response
-  try {
-    if (!config?.primary) {
-      return new Response(
-        "Could not create chat completion due to missing model information",
-        {
-          status: 500,
-        }
-      );
-    }
-    let completion = await getCompletion(messagesParam, config.primary);
+  try {    
+    let completion = await getCompletion(messagesParam, model);
 
     let response: string = "";
     let title: string | undefined = "";
@@ -153,22 +159,25 @@ export const POST = async (req: Request) => {
     }
     const responseId = crypto.randomUUID();
 
-    await createOrContinueChat(
-      threadID,
-      title,
-      user,
-      {
-        sender: "assistant",
-        text: response,
-        id: responseId,
-        messageRating: emptyFeedback,
-        model,
-        mainPrompt,
-        formatPrompt,
-      },
-      messageHistory,
-      tags
-    );
+    if(saveResponseToDB){
+      await createOrContinueChat(
+        threadID,
+        title,
+        user,
+        {
+          sender: "assistant",
+          text: response,
+          id: responseId,
+          messageRating: emptyFeedback,
+          model,
+          mainPrompt,
+          formatPrompt,
+        },
+        messageHistory,
+        tags
+      );
+    }
+    
 
     return Response.json({
       id: responseId,

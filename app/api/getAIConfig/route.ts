@@ -14,13 +14,13 @@ export async function GET() {
         })
     }
 
-    if(session.user?.role !== "admin"){
-        console.error(`Session user is not authorised`);
+    // if(session.user?.role !== "admin"){
+    //     console.error(`Session user is not authorised`);
 
-        return new Response(`User not authorised`, {
-            status: 403,
-        })
-    }
+    //     return new Response(`User not authorised`, {
+    //         status: 403,
+    //     })
+    // }
 
     try {
         await connectToDatabase();

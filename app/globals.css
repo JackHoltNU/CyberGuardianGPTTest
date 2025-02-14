@@ -6,6 +6,10 @@
   @apply flex flex-col h-dvh w-full md:w-4/5 px-8;
 }
 
+.chatcomparison {
+  @apply flex flex-col h-dvh w-full px-8;
+}
+
 .chat__header {
   @apply flex flex-row w-full items-center justify-between;
 }

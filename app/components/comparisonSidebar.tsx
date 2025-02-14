@@ -11,24 +11,24 @@ interface Props {
 }
 
 const Sidebar = ({session}: Props) => {
-    const { chatCollection, selectedChat, isNewChat, loadUserChats, openChat, setSelectedChat, resetChat } = useChatbot();   
+    const { comparisonCollection, selectedChat, isNewChat, loadUserChats, openChat, setSelectedChat, resetChat } = useComparisonChatbot();   
   
     
-    const [chats, setChats] = useState<ChatInstance[]>([]);
+    const [chats, setChats] = useState<ComparisonThread[]>([]);
 
-    const changeChat = (chat: ChatInstance) => {        
-        setSelectedChat(chat.threadID);
+    const changeChat = (chat: ComparisonThread) => {        
+        setSelectedChat(chat.comparisons[0].version1.threadID);
         openChat(chat);
     }
 
     useEffect(() => {
-        if(chatCollection){
-            setChats(chatCollection.chats);
+        if(comparisonCollection){
+            setChats(comparisonCollection.threads);
         }
-    },[chatCollection])
+    },[comparisonCollection])
     
 
-    useEffect(() => {if(chatCollection === undefined && session.user?.name) {
+    useEffect(() => {if(comparisonCollection === undefined && session.user?.name) {
         loadUserChats();
     }},);
 
@@ -76,18 +76,27 @@ const Sidebar = ({session}: Props) => {
                             </button>
                         </li>
                     )}
-                    {chats.map((chat) => {
-                        if(chat.title === undefined || chat.title == ""){
+                    {chats.map((chat) => {                        
+                        if(chat){
+                            const lastItem = chat.comparisons[chat.comparisons.length - 1];
+                            // console.log(lastItem.version1);
+                        let lastSelected = lastItem.version1;
+                        if(lastItem.version2 && lastItem.version2.selected){
+                            lastSelected = lastItem.version2;
+                        }
+                        if(lastItem.version1.title === undefined || lastItem.version1.title == ""){
                             return null;
                         }
                         return (
-                            <li className={`item ${chat.threadID === selectedChat && "item--selected"}`} key={chat.threadID}>
+                            <li className={`item ${lastSelected.threadID === selectedChat && "item--selected"}`} key={lastSelected.threadID}>
                                 <button className="item__button" onClick={() => changeChat(chat)}>
-                                    <h3 className="conversation__title">{chat.title}</h3>
-                                    { chat.latestTimestamp && (<p className="conversation__timestamp">Latest: {formatDate(chat.latestTimestamp)}</p>)}
+                                    <h3 className="conversation__title">{lastSelected.title}</h3>
+                                    { lastSelected.timestamp && (<p className="conversation__timestamp">Latest: {formatDate(lastSelected.timestamp)}</p>)}
                                 </button>
                             </li>
                         )
+                        }
+                        
                     })}                    
                 </ul>
             </div>
