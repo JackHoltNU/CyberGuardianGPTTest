@@ -7,7 +7,7 @@ import { AIConfigType } from "../types/types";
 const ConfigAI = () => {
     const { config, getAIConfig, updateAIConfig } = useAdmin();
     const [ primary, setPrimary ] = useState("")
-    const [ secondary, setSecondary ] = useState("")
+    const [ secondary, setSecondary ] = useState<string | undefined>()
     const [ mainPrompt, setMainPrompt ] = useState("");
     const [ formatPrompt, setFormatPrompt ] = useState("");
 
