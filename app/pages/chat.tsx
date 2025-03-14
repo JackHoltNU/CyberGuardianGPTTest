@@ -1,37 +1,59 @@
-'use client'
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import { useChatbot } from '../context/useChatbot';
-import LoadingDots from '../components/loadingdots';
-import exportChatAsPdf from '../utils/exportpdf';
-import { Session } from 'next-auth';
-import { signOut } from 'next-auth/react';
-import Message from '../components/message';
-import { useRouter } from 'next/navigation';
-import Modal from '../components/modal';
-import LikertScale from '../components/likertScale';
-import ChatFeedbackModal from '../components/chatFeedbackModal';
+import React, { useEffect, useRef, useState } from "react";
+import { useChatbot } from "../context/useChatbot";
+import LoadingDots from "../components/loadingdots";
+import exportChatAsPdf from "../utils/exportpdf";
+import { Session } from "next-auth";
+import { signOut } from "next-auth/react";
+import Message from "../components/message";
+import { useRouter } from "next/navigation";
+import Modal from "../components/modal";
+import LikertScale from "../components/likertScale";
+import ChatFeedbackModal from "../components/chatFeedbackModal";
+import ExportButtons from "../components/exportButtons";
+import { ChatInstance } from "../types/types";
 
 interface Props {
   session: Session;
 }
 
-const Chat = ({session}: Props) => {
-  const { messages, title, userTokens, botTokens, userCost, botCost, threadId, showError, sendMessage, setUser, resetChat, deleteChat, setShowError } = useChatbot();
-  const [inputText, setInputText] = useState('');
+const Chat = ({ session }: Props) => {
+  const {
+    messages,
+    title,
+    userTokens,
+    botTokens,
+    userCost,
+    botCost,
+    threadId,
+    showError,
+    chatCollection,
+    sendMessage,
+    setUser,
+    resetChat,
+    deleteChat,
+    setShowError,
+  } = useChatbot();
+  const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showDeletedAlert, setShowDeletedAlert] = useState(false);
   // const [ showFeedbackModal, setShowFeedbackModal ] = useState(false);
-  const [ showDeleteModal, setShowDeleteModal ] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Get the current chat instance from the collection
+  const currentChat: ChatInstance | undefined = chatCollection?.chats.find(
+    (chat) => chat.threadID === threadId
+  );
+
   useEffect(() => {
-    if(session.user?.name){
-      setUser(session.user.name)
+    if (session.user?.name) {
+      setUser(session.user.name);
     }
-  },[session]);
+  }, [session]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -42,36 +64,36 @@ const Chat = ({session}: Props) => {
 
   const sendMessages = async () => {
     let sendText = inputText.trim();
-    setInputText("");    
-    if(sendText == ""){
+    setInputText("");
+    if (sendText == "") {
       return;
     }
     setLoading(true);
     try {
-      await sendMessage(sendText);  
+      await sendMessage(sendText);
     } catch (error: any) {
       console.error("Failed to send message:", error);
       setShowError(true);
       return;
     } finally {
       setLoading(false);
-    }   
-    if(showError){
+    }
+    if (showError) {
       setShowError(false);
-    }        
+    }
   };
 
   const deleteChatAndShowDeleted = () => {
     deleteChat();
     showDeleted();
     setShowDeleteModal(false);
-  }
+  };
 
   const showDeleted = () => {
     setShowDeletedAlert(true);
     setShowMoreOptions(false);
     setTimeout(() => setShowDeletedAlert(false), 3000);
-  }  
+  };
 
   return (
     <div className="chat">
@@ -117,6 +139,14 @@ const Chat = ({session}: Props) => {
                 Save as PDF
               </button>
             </li>
+
+            {/* Export buttons */}
+            <ExportButtons
+              user={session.user?.name || "user"}
+              currentChat={currentChat}
+              closeMenu={() => setShowMoreOptions(false)}
+            />
+
             <li>
               <button
                 className="more-options__item button--delete-chat"
@@ -186,19 +216,27 @@ const Chat = ({session}: Props) => {
           Send
         </button>
       </div>
-      <div className="mx-auto mb-2 text-center">Output is AI generated and can include inaccuracies</div>
+      <div className="mx-auto mb-2 text-center">
+        Output is AI generated and can include inaccuracies
+      </div>
 
-      { showDeleteModal && (
-        <Modal submit={deleteChatAndShowDeleted} closeModal={() => setShowDeleteModal(false)} submitWording='Confirm'>
-          <h1 className='text-center'>Are you sure you wish to delete?</h1>
-          <p className="text-center mt-4">This conversation will be removed from our database and cannot be retrieved</p>
+      {showDeleteModal && (
+        <Modal
+          submit={deleteChatAndShowDeleted}
+          closeModal={() => setShowDeleteModal(false)}
+          submitWording="Confirm"
+        >
+          <h1 className="text-center">Are you sure you wish to delete?</h1>
+          <p className="text-center mt-4">
+            This conversation will be removed from our database and cannot be
+            retrieved
+          </p>
         </Modal>
-      ) }
+      )}
 
       {/* {showFeedbackModal && (
         <ChatFeedbackModal closeModal={() => setShowFeedbackModal(false)} />
       )}    */}
-
     </div>
   );
 };

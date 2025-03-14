@@ -170,3 +170,16 @@
 .modal__close {
   @apply text-gray-500 float-right text-2xl cursor-pointer;
 }
+
+
+.button--export-current {
+  @apply w-full bg-green-600 hover:bg-green-800 text-white rounded-lg p-2;
+}
+
+.button--export-csv {
+  @apply w-full bg-indigo-600 hover:bg-indigo-800 text-white rounded-lg p-2;
+}
+
+.button--export-excel {
+  @apply w-full bg-teal-600 hover:bg-teal-800 text-white rounded-lg p-2;
+}

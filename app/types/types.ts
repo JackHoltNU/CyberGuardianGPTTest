@@ -61,17 +61,18 @@ export type Comparison = {
 
 export type ComparisonThread = {
   comparisons: Comparison[];
-}
+};
 
 export type ComparisonChatCollection = {
   threads: ComparisonThread[];
-}
+};
 
 export type ChatInstance = {
   threadID: string;
   title: string;
   messages: MessageHistory[];
   latestTimestamp?: Date;
+  user?: string;
 };
 
 export type ChatCollection = {
