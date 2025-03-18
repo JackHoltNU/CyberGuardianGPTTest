@@ -51,11 +51,11 @@ export async function GET() {
 
 const getAIConfig = async () => {
     // First try to get the default config
-    let aiConfig: AIConfigType | null = await AIConfig.findOne({ isDefault: true }).lean();
+    let aiConfig: AIConfigType | null = await AIConfig.findOne({ isDefault: true });
     
     // If no default config is found, get the first one available
     if (!aiConfig) {
-        aiConfig = await AIConfig.findOne().lean();
+        aiConfig = await AIConfig.findOne();
         
         // If we found a config but it's not marked as default, mark it
         if (aiConfig) {
