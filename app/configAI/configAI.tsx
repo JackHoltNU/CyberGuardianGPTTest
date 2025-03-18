@@ -308,7 +308,7 @@ const ConfigAI = () => {
                 submitWording="Delete"
             >
                 <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
-                <p>Are you sure you want to delete the configuration "{configToDelete}"?</p>
+                <p>Are you sure you want to delete the configuration &quot;{configToDelete}&quot;?</p>
                 <p className="text-red-500 mt-2">This action cannot be undone.</p>
             </Modal>
         )}
