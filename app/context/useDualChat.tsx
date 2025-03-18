@@ -239,7 +239,7 @@ export const DualChatProvider = ({ children }: DualChatProviderProps) => {
       return;
     }
 
-    let response;
+    let response: any;
     try {
       const responseString = await fetch("/api/sendMessageWithConfig", {
         method: "POST",
