@@ -190,7 +190,7 @@ const getCompletion = async (
 };
 
 const getSpecificAIConfig = async (configName: string) => {
-  const aiConfig: AIConfigType | null = await AIConfig.findOne({ name: configName }).lean();
+  const aiConfig: AIConfigType | null = await AIConfig.findOne({ name: configName });
   return aiConfig;
 };
 
