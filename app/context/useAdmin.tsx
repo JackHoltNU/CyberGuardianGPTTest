@@ -11,13 +11,17 @@ interface AdminContextType {
   downvotedList: MessageInstance[],
   unvotedList: MessageInstance[],
   config?: AIConfigType,
+  allConfigs: AIConfigType[],
   addUser: (username: string, password: string, role: string) => void;
   loadUsers: () => void;
   deleteUser: (user: string) => void;
   updatePassword: (username: string, password: string) => void;
   updateRole: (username: string, role: string) => void;
   getAIConfig: () => void;
-  updateAIConfig: (newConfig: AIConfigType) => void;
+  getAllConfigs: () => Promise<AIConfigType[]>;
+  updateAIConfig: (configName: string, newConfig: AIConfigType) => Promise<void>;
+  addAIConfig: (newConfig: AIConfigType) => Promise<void>;
+  deleteAIConfig: (configName: string) => Promise<void>;
   getVotedOn: () => {};
   getThread: (threadID: string) => Promise<MessageHistory[]>;
 }
@@ -34,8 +38,7 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
   const [ downvotedList, setDownvotedList ] = useState<Array<MessageInstance>>([]);
   const [ unvotedList, setUnvotedList ] = useState<Array<MessageInstance>>([]);
   const [ config, setConfig ] = useState<AIConfigType>();
-
-
+  const [ allConfigs, setAllConfigs ] = useState<AIConfigType[]>([]);
 
   const addUser = async (username: string, password: string, role: string) => {
     try {
@@ -120,7 +123,7 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
     loadUsers();
   }
 
-  const getAIConfig =async () => {
+  const getAIConfig = async () => {
     try {
       const responseString = await fetch('/api/getAIConfig', {
         method: 'GET',
@@ -134,20 +137,111 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
     } catch (error: any) {
         console.error(`Could not get config`);
         throw new Error(error.message);
-  }
+    }
   }
 
-  const updateAIConfig = async (newConfig: AIConfigType) => {
+  const getAllConfigs = async (): Promise<AIConfigType[]> => {
     try {
-      await fetch('/api/setAIConfig', {
+      const responseString = await fetch('/api/getAIConfigs', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!responseString.ok) {
+        throw new Error(`Error getting configs: ${responseString.status}`);
+      }
+      
+      const response = await responseString.json();
+      const configs: AIConfigType[] = response.configs;
+      setAllConfigs(configs);
+      return configs;
+    } catch (error: any) {
+        console.error(`Could not get configs`);
+        throw new Error(error.message);
+    }
+  }
+  
+  const updateAIConfig = async (configName: string, newConfig: AIConfigType) => {
+    try {
+      const response = await fetch('/api/updateAIConfig', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({newConfig}),
+        body: JSON.stringify({ configName, newConfig }),
       });
+      
+      if (!response.ok) {
+        throw new Error(`Error updating config: ${response.status}`);
+      }
+      
+      // Refresh the configs list
+      await getAllConfigs();
+      
+      // If the updated config is the default, also update the main config
+      if (newConfig.isDefault) {
+        setConfig(newConfig);
+      }
     } catch (error: any) {
         console.error(`Could not update config`);
+        throw new Error(error.message);
+    }
+  }
+  
+  const addAIConfig = async (newConfig: AIConfigType) => {
+    try {
+      const response = await fetch('/api/addAIConfig', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ config: newConfig }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error adding config: ${response.status}`);
+      }
+      
+      // Refresh the configs list
+      await getAllConfigs();
+      
+      // If the added config is the default, also update the main config
+      if (newConfig.isDefault) {
+        setConfig(newConfig);
+      }
+    } catch (error: any) {
+        console.error(`Could not add config`);
+        throw new Error(error.message);
+    }
+  }
+  
+  const deleteAIConfig = async (configName: string) => {
+    try {
+      const response = await fetch('/api/deleteAIConfig', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ configName }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error deleting config: ${errorText}`);
+      }
+      
+      // Refresh the configs list
+      const updatedConfigs = await getAllConfigs();
+      
+      // Also refresh the default config
+      const defaultConfig = updatedConfigs.find(c => c.isDefault);
+      if (defaultConfig) {
+        setConfig(defaultConfig);
+      }
+    } catch (error: any) {
+        console.error(`Could not delete config`);
         throw new Error(error.message);
     }
   }
@@ -196,20 +290,24 @@ export const AdminProvider = ({ children }:AdminProviderProps) => {
 
   return (
     <AdminContext.Provider value={{
-        users,
-        upvotedList,
-        downvotedList,
-        unvotedList,
-        config,
-        addUser,
-        loadUsers,
-        deleteUser,
-        updatePassword,
-        updateRole,
-        getAIConfig,
-        updateAIConfig,
-        getVotedOn,
-        getThread,
+      users,
+      upvotedList,
+      downvotedList,
+      unvotedList,
+      config,
+      allConfigs,
+      addUser,
+      loadUsers,
+      deleteUser,
+      updatePassword,
+      updateRole,
+      getAIConfig,
+      getAllConfigs,
+      updateAIConfig,
+      addAIConfig,
+      deleteAIConfig,
+      getVotedOn,
+      getThread,
       }}>
       {children}
     </AdminContext.Provider>

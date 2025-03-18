@@ -56,6 +56,15 @@ const chatSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  dualChatID: {
+    type: String,
+    required: false,
+    index: true,
+  },
+  configName: {
+    type: String,
+    required: false,
+  },
   title: {
     type: String
   },

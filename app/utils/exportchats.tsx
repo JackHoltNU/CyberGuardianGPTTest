@@ -14,7 +14,7 @@ export const exportChatsToCSV = (
 
   // Create CSV header
   let csvContent =
-    "Chat Title,Thread ID,Message ID,User,Sender,Timestamp,Message,Upvoted,Downvoted,Comments\n";
+    "Chat Title,Thread ID,Dual Chat ID, Configuration Name, Model, Prompt, FormatPrompt, Message ID,User,Sender,Timestamp,Message,Upvoted,Downvoted,Comments\n";
 
   // Process each chat
   chatCollection.chats.forEach((chat) => {
@@ -23,10 +23,20 @@ export const exportChatsToCSV = (
     // Process each message in the chat
     chat.messages.forEach((message) => {
       // Format the message text - replace newlines and commas to prevent CSV breakage
-      const formattedText =
+      const formattedMessage =
         typeof message.text === "string"
           ? `"${message.text.replace(/"/g, '""').replace(/\n/g, " ")}"`
           : '""';
+
+      const formattedPrompt =
+      typeof message.mainPrompt === "string"
+        ? `"${message.mainPrompt.replace(/"/g, '""').replace(/\n/g, " ")}"`
+        : '""';
+        
+      const formattedFormatPrompt =
+      typeof message.formatPrompt === "string"
+        ? `"${message.formatPrompt.replace(/"/g, '""').replace(/\n/g, " ")}"`
+        : '""';
 
       // Format comments
       const comments = message.messageRating?.comments
@@ -37,11 +47,16 @@ export const exportChatsToCSV = (
       const line = [
         `"${chat.title.replace(/"/g, '""')}"`,
         chat.threadID,
+        chat.dualChatID || "",
+        chat.configName || "",
+        message.model || "",
+        formattedPrompt,
+        formattedFormatPrompt,
         message.id || "",
         chat.user || "",
         message.sender,
         message.timestamp ? new Date(message.timestamp).toISOString() : "",
-        formattedText,
+        formattedMessage,
         message.messageRating?.upvoted ? "Yes" : "No",
         message.messageRating?.downvoted ? "Yes" : "No",
         comments,
@@ -86,6 +101,11 @@ export const exportChatsToExcel = (
   data.push([
     "Chat Title",
     "Thread ID",
+    "Dual Chat ID",
+    "Configuration Name", 
+    "Model", 
+    "Prompt", 
+    "FormatPrompt", 
     "Message ID",
     "User",
     "Sender",
@@ -115,6 +135,11 @@ export const exportChatsToExcel = (
       data.push([
         chat.title,
         chat.threadID,
+        chat.dualChatID || "",
+        chat.configName || "",
+        message.model || "",
+        message.mainPrompt || "",
+        message.formatPrompt || "",
         message.id || "",
         chat.user || "",
         message.sender,

@@ -38,6 +38,11 @@ const AdminSidebar = ({ selected }: Props) => {
               Go To Comparison
             </Link>
           </li>
+          <li className={`item ${selected == 5 && "item--selected"}`}>
+            <Link href="/dualChat" className="item__button">
+              Dual Chat
+            </Link>
+          </li>
           <li className={`item ${selected == 4 && "item--selected"}`}>
             <Link href="/" className="item__button">
               Go To Chat

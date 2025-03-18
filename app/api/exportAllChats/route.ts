@@ -51,13 +51,15 @@ export async function POST(req: Request) {
 
     const chatInstance: ChatInstance = {
       threadID: chat.threadID,
+      dualChatID: chat.dualChatID,
+      configName: chat.configName,
       title: chat.title || "Untitled Chat",
+      user: chat.user,
       latestTimestamp: new Date(
         chat.latestTimestamp ||
           chat.messages[chat.messages.length - 1]?.timestamp
       ),
       messages,
-      user: chat.user,
     };
     return chatInstance;
   });

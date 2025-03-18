@@ -43,7 +43,9 @@ export async function POST(req: Request) {
 
     const chatInstance:ChatInstance = {
       threadID: chat.threadID,
+      dualChatID: chat.dualChatID,
       title: chat.title,
+      user: chat.user,
       latestTimestamp: new Date(chat.latestTimestamp),
       messages
     }
