@@ -2,7 +2,7 @@
 
 export type AIConfigType = {
   _id?: string;
-  name: string;
+  name?: string;
   isDefault?: boolean;
   primary: string;
   secondary?: string;

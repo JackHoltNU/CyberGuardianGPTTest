@@ -13,7 +13,7 @@ const ConfigAI = () => {
     const [ isDefault, setIsDefault ] = useState(false);
     const [ showAddModal, setShowAddModal ] = useState(false);
     const [ showDeleteConfirmation, setShowDeleteConfirmation ] = useState(false);
-    const [ configToDelete, setConfigToDelete ] = useState<string | null>(null);
+    const [ configToDelete, setConfigToDelete ] = useState<string | null | undefined>(null);
 
     useEffect(() => {
         loadConfigs();        
