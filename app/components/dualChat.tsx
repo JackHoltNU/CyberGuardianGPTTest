@@ -1,4 +1,5 @@
 // app/components/dualChat.tsx
+// Note that this component is out of date and kept only temporarily
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -265,13 +266,14 @@ const DualChat = ({ session }: Props) => {
         Output is AI generated and can include inaccuracies
       </div>
 
-      {showConfigModal && (
+      {/* Removed the following as it is now out of date. This whole component is out of date, but kept for easy switch back to prior version if needed */}
+      {/* {showConfigModal && (
         <DualChatConfigModal
           closeModal={() => setShowConfigModal(false)}
           availableConfigs={availableConfigs}
           onConfigSelect={handleConfigSelect}
         />
-      )}
+      )} */}
     </div>
   );
 };
