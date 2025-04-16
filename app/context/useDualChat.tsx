@@ -97,13 +97,13 @@ export const DualChatProvider = ({ children }: DualChatProviderProps) => {
     const newDualChatID = crypto.randomUUID();
     setDualChatID(newDualChatID);
     
-    // Reset the messages
-    setLeftMessages([]);
-    setRightMessages([]);
+    // Reset the messages removed for now
+    // setLeftMessages([]);
+    // setRightMessages([]);
     
-    // Reset thread IDs
-    setLeftThreadId(undefined);
-    setRightThreadId(undefined);
+    // Reset thread IDs removed for now
+    // setLeftThreadId(undefined);
+    // setRightThreadId(undefined);
     
     // Assign configurations based on randomization
     if (randomize) {

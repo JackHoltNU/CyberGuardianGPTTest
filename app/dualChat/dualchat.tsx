@@ -399,7 +399,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                 !sidebarOpen && "md:hidden"
               }`}
             >
-              Menu
+              History
             </h2>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -408,26 +408,7 @@ const DualChatbotInterface = ({ session }: Props) => {
             >
               {sidebarOpen ? <ChevronRight size={28} /> : <Menu size={28} />}
             </button>
-          </div>
-          <div className="flex-1 flex flex-col p-3 gap-4">
-            <button className="p-5 flex items-center gap-4 hover:bg-gray-700 rounded-lg text-left min-h-16 text-lg border border-gray-700">
-              <Settings size={28} />
-              <span className={!sidebarOpen ? "md:hidden" : ""}>Settings</span>
-            </button>
-            <button
-              className="p-5 flex items-center gap-4 hover:bg-gray-700 rounded-lg text-left min-h-16 text-lg border border-gray-700"
-              onClick={handleNewDualChat}
-            >
-              <RotateCcw size={28} />
-              <span className={!sidebarOpen ? "md:hidden" : ""}>
-                Reset Chat
-              </span>
-            </button>
-            <button className="p-5 flex items-center gap-4 hover:bg-gray-700 rounded-lg text-left text-red-300 min-h-16 text-lg border border-gray-700">
-              <X size={28} />
-              <span className={!sidebarOpen ? "md:hidden" : ""}>Exit</span>
-            </button>
-          </div>
+          </div>          
         </div>
       </div>
 
@@ -449,13 +430,13 @@ const DualChatbotInterface = ({ session }: Props) => {
                 <Menu size={28} />
               </button>
             )}
-            <h1 className={`font-medium ${fontSizes[fontSize].header}`}>
-              Dual Chatbot Interface
+            <h1 className={`font-medium text-3xl`}>
+              Dual Chat
             </h1>
           </div>
 
           {/* Text size adjustment controls */}
-          <div className="flex items-center bg-gray-200 rounded-lg p-2 mr-3 border border-gray-300 shadow">
+          <div className="flex items-center justify-between bg-gray-200 rounded-lg p-2 mr-3 border border-gray-300 shadow w-1/3">
             <button
               onClick={decreaseFontSize}
               className={`p-3 rounded-lg hover:bg-gray-300 ${
@@ -496,8 +477,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
               onClick={() => setShowConfigModal(true)}
             >
-              <Settings size={24} />
-              <span>Configure</span>
+              <Settings size={24} />              
             </button>
             <button
               className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
