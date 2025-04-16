@@ -502,7 +502,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                   onChange={(e) => setLeftInput(e.target.value)}
                   onFocus={() => setActiveBot("left")}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
+                    if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       handleLeftSendMessage();
                     }
@@ -566,7 +566,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                     >                        
                       <ReactMarkdown
                         className="markdown-content"
-                        remarkPlugins={[remarkGfm]}
+                        remarkPlugins={[remarkGfm]}                        
                       >
                         {typeof message.text == "string" ? message.text : "Loading..."}
                       </ReactMarkdown>
@@ -598,7 +598,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                   onChange={(e) => setRightInput(e.target.value)}
                   onFocus={() => setActiveBot("right")}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
+                    if (e.key === "Enter"  && !e.shiftKey) {
                       e.preventDefault();
                       handleRightSendMessage();                      
                     }
