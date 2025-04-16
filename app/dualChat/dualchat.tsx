@@ -1,18 +1,32 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Menu, Settings, RotateCcw, X, Bot, ChevronRight, ArrowDown, Type, MinusCircle, PlusCircle } from 'lucide-react';
-import { useDualChat } from '../context/useDualChat';
-import { AIConfigType } from '../types/types';
-import { useRouter } from 'next/navigation';
-import DualChatConfigModal from '../components/dualChatConfigModal';
-import { Session } from 'next-auth';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import LoadingDots from '../components/loadingdots';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Send,
+  Menu,
+  Settings,
+  RotateCcw,
+  X,
+  Bot,
+  ChevronRight,
+  ArrowDown,
+  Type,
+  MinusCircle,
+  PlusCircle,
+  Minimize,
+  Maximize,
+} from "lucide-react";
+import { useDualChat } from "../context/useDualChat";
+import { AIConfigType } from "../types/types";
+import { useRouter } from "next/navigation";
+import DualChatConfigModal from "../components/dualChatConfigModal";
+import { Session } from "next-auth";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import LoadingDots from "../components/loadingdots";
 
 // Define font size options
-type FontSizeOption = 'small' | 'medium' | 'large' | 'largest';
+type FontSizeOption = "small" | "medium" | "large" | "largest";
 
 interface FontSizes {
   chat: string;
@@ -25,30 +39,30 @@ interface FontSizeMapping {
 }
 
 interface Props {
-    session: Session;
-  }
+  session: Session;
+}
 
 const DualChatbotInterface = ({ session }: Props) => {
-    const {
-        leftThreadId,
-        rightThreadId,
-        dualChatID,
-        leftMessages,
-        rightMessages,
-        leftTitle,
-        rightTitle,
-        leftConfig,
-        rightConfig,
-        sendLeftMessage,
-        sendRightMessage,
-        setUser,
-        showError,
-        setShowError,
-        resetDualChat,
-        availableConfigs,
-        loadAllConfigs,
-        createNewDualChat,
-      } = useDualChat();
+  const {
+    leftThreadId,
+    rightThreadId,
+    dualChatID,
+    leftMessages,
+    rightMessages,
+    leftTitle,
+    rightTitle,
+    leftConfig,
+    rightConfig,
+    sendLeftMessage,
+    sendRightMessage,
+    setUser,
+    showError,
+    setShowError,
+    resetDualChat,
+    availableConfigs,
+    loadAllConfigs,
+    createNewDualChat,
+  } = useDualChat();
 
   // Input state for both chat windows
   const [leftInput, setLeftInput] = useState<string>("");
@@ -58,97 +72,131 @@ const DualChatbotInterface = ({ session }: Props) => {
   const [leftLoading, setLeftLoading] = useState(false);
   const [rightLoading, setRightLoading] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
-  const router = useRouter();
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
+  const router = useRouter();
 
   // Font size state (default: medium)
   const [fontSize, setFontSize] = useState<FontSizeOption>("medium");
-  
+
   // Confirmation message
   const [confirmMessage, setConfirmMessage] = useState<string>("");
-  
+
   // Show confirmation message and automatically hide it
   const showConfirmation = (message: string): void => {
     //setConfirmMessage(message);
     //setTimeout(() => setConfirmMessage(""), 3000);
   };
-  
+
   // Text size options with increased sizes
   const fontSizes: FontSizeMapping = {
     small: {
       chat: "text-base",
       input: "text-base",
-      header: "text-xl"
+      header: "text-xl",
     },
     medium: {
-      chat: "text-lg", 
+      chat: "text-lg",
       input: "text-lg",
-      header: "text-2xl"
+      header: "text-2xl",
     },
     large: {
       chat: "text-xl",
       input: "text-xl",
-      header: "text-3xl"
+      header: "text-3xl",
     },
     largest: {
       chat: "text-2xl",
       input: "text-2xl",
-      header: "text-4xl"
-    }
+      header: "text-4xl",
+    },
   };
 
   useEffect(() => {
-      if (session.user?.name) {
-        setUser(session.user.name);
-      }
-      
-      // Load available configs
-      loadAllConfigs();
-    }, [session]);
+    if (session.user?.name) {
+      setUser(session.user.name);
+    }
+
+    // Load available configs
+    loadAllConfigs();
+  }, [session]);
+
+  useEffect(() => {
+    const handleFullScreenChange = (): void => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullScreenChange);
+    };
+  }, []);
 
   const handleLeftSendMessage = async () => {
-      const text = leftInput.trim();
-      if (text === "") return;
-      
-      setLeftInput("");
-      setLeftLoading(true);
-      
-      try {
-        await sendLeftMessage(text);
-      } catch (error) {
-        console.error("Failed to send message:", error);
-        setShowError(true);
-      } finally {
-        setLeftLoading(false);
-      }
-    };
-  
-    const handleRightSendMessage = async () => {
-      const text = rightInput.trim();
+    const text = leftInput.trim();
+    if (text === "") return;
 
-      if (text === "") return;
-      
-      setRightInput("");
-      setRightLoading(true);
-      
-      try {
-        await sendRightMessage(text);
-      } catch (error) {
-        console.error("Failed to send message:", error);
-        setShowError(true);
-      } finally {
-        setRightLoading(false);
+    setLeftInput("");
+    setLeftLoading(true);
+
+    try {
+      await sendLeftMessage(text);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      setShowError(true);
+    } finally {
+      setLeftLoading(false);
+    }
+  };
+
+  const handleRightSendMessage = async () => {
+    const text = rightInput.trim();
+
+    if (text === "") return;
+
+    setRightInput("");
+    setRightLoading(true);
+
+    try {
+      await sendRightMessage(text);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      setShowError(true);
+    } finally {
+      setRightLoading(false);
+    }
+  };
+
+  const handleNewDualChat = () => {
+    resetDualChat();
+    setShowConfigModal(true);
+  };
+
+  const handleConfigSelect = (
+    configA: AIConfigType,
+    configB: AIConfigType,
+    randomize: boolean
+  ) => {
+    createNewDualChat(configA, configB, randomize);
+  };
+
+  const toggleFullScreen = (): void => {
+    if (!document.fullscreenElement) {
+      // Enter full screen
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(
+          `Error attempting to enable full-screen mode: ${err.message}`
+        );
+      });
+      setIsFullScreen(true);
+    } else {
+      // Exit full screen
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullScreen(false);
       }
-    };
-  
-    const handleNewDualChat = () => {
-      resetDualChat();
-      setShowConfigModal(true);
-    };
-  
-    const handleConfigSelect = (configA: AIConfigType, configB: AIConfigType, randomize: boolean) => {
-      createNewDualChat(configA, configB, randomize);
-    };
+    }
+  };
 
   // Refs for auto-resize textareas
   const leftTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -157,15 +205,15 @@ const DualChatbotInterface = ({ session }: Props) => {
   const rightChatRef = useRef<HTMLDivElement>(null);
 
   // Active bot state
-  const [activeBot, setActiveBot] = useState<'left' | 'right'>('left');
-  
+  const [activeBot, setActiveBot] = useState<"left" | "right">("left");
+
   // Side panel state
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  
+
   // Keyboard state
   const [keyboardVisible, setKeyboardVisible] = useState<boolean>(false);
   const [headerCollapsed, setHeaderCollapsed] = useState<boolean>(false);
-  
+
   // Font size controls
   const increaseFontSize = (): void => {
     if (fontSize === "small") {
@@ -181,11 +229,11 @@ const DualChatbotInterface = ({ session }: Props) => {
       showConfirmation("Text size increased to Largest");
     }
   };
-  
+
   const decreaseFontSize = (): void => {
-    if (fontSize === "largest"){
-        setFontSize("large");
-        showConfirmation("Text size decreased to Large");
+    if (fontSize === "largest") {
+      setFontSize("large");
+      showConfirmation("Text size decreased to Large");
     }
     if (fontSize === "large") {
       setFontSize("medium");
@@ -195,8 +243,7 @@ const DualChatbotInterface = ({ session }: Props) => {
       setFontSize("small");
       showConfirmation("Text size decreased to Small");
     }
-  }; 
-  
+  };
 
   // Auto-resize textarea function
   const autoResizeTextarea = (textarea: HTMLTextAreaElement | null): void => {
@@ -208,11 +255,11 @@ const DualChatbotInterface = ({ session }: Props) => {
   };
 
   // If no configs are set, show the config modal on load
-    useEffect(() => {
-      if (availableConfigs.length >= 2 && !leftConfig && !rightConfig) {
-        setShowConfigModal(true);
-      }
-    }, [availableConfigs, leftConfig, rightConfig]);
+  useEffect(() => {
+    if (availableConfigs.length >= 2 && !leftConfig && !rightConfig) {
+      setShowConfigModal(true);
+    }
+  }, [availableConfigs, leftConfig, rightConfig]);
 
   // Apply auto-resize on input change
   useEffect(() => {
@@ -222,7 +269,6 @@ const DualChatbotInterface = ({ session }: Props) => {
   useEffect(() => {
     autoResizeTextarea(rightTextareaRef.current);
   }, [rightInput]);
-  
 
   // Scroll to the bottom of chat when keyboard appears or new message arrives
   const scrollToBottom = (chatRef: React.RefObject<HTMLDivElement>): void => {
@@ -230,12 +276,12 @@ const DualChatbotInterface = ({ session }: Props) => {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
   };
-  
+
   // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom(leftChatRef);
   }, [leftMessages]);
-  
+
   useEffect(() => {
     scrollToBottom(rightChatRef);
   }, [rightMessages]);
@@ -244,18 +290,19 @@ const DualChatbotInterface = ({ session }: Props) => {
   useEffect(() => {
     // Initial viewport height
     const initialViewportHeight = window.innerHeight;
-    
+
     // Use visualViewport API for more accurate keyboard detection
     if (window.visualViewport) {
       const handleVisualViewportResize = (): void => {
         // Calculate height reduction as a percentage
-        const heightReduction = 1 - (window.visualViewport!.height / initialViewportHeight);
-        
+        const heightReduction =
+          1 - window.visualViewport!.height / initialViewportHeight;
+
         // Only treat significant height reductions as keyboard appearance
         if (heightReduction > 0.25) {
           setKeyboardVisible(true);
           setHeaderCollapsed(true);
-          
+
           // Scroll to bottom of active chat
           setTimeout(() => {
             if (activeBot === "left") {
@@ -269,17 +316,27 @@ const DualChatbotInterface = ({ session }: Props) => {
           setHeaderCollapsed(false);
         }
       };
-      
-      window.visualViewport.addEventListener('resize', handleVisualViewportResize);
-      
+
+      window.visualViewport.addEventListener(
+        "resize",
+        handleVisualViewportResize
+      );
+
       return () => {
-        window.visualViewport?.removeEventListener('resize', handleVisualViewportResize);
+        window.visualViewport?.removeEventListener(
+          "resize",
+          handleVisualViewportResize
+        );
       };
     } else {
       // Fallback for browsers that don't support visualViewport API
       const handleFocus = (): void => {
         // Only for mobile/tablet devices
-        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        if (
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+          )
+        ) {
           setKeyboardVisible(true);
           setHeaderCollapsed(true);
           setTimeout(() => {
@@ -291,30 +348,30 @@ const DualChatbotInterface = ({ session }: Props) => {
           }, 300);
         }
       };
-      
+
       const handleBlur = (): void => {
         setKeyboardVisible(false);
         setHeaderCollapsed(false);
       };
-      
+
       if (leftTextareaRef.current) {
-        leftTextareaRef.current.addEventListener('focus', handleFocus);
-        leftTextareaRef.current.addEventListener('blur', handleBlur);
+        leftTextareaRef.current.addEventListener("focus", handleFocus);
+        leftTextareaRef.current.addEventListener("blur", handleBlur);
       }
-      
+
       if (rightTextareaRef.current) {
-        rightTextareaRef.current.addEventListener('focus', handleFocus);
-        rightTextareaRef.current.addEventListener('blur', handleBlur);
+        rightTextareaRef.current.addEventListener("focus", handleFocus);
+        rightTextareaRef.current.addEventListener("blur", handleBlur);
       }
-      
+
       return () => {
         if (leftTextareaRef.current) {
-          leftTextareaRef.current.removeEventListener('focus', handleFocus);
-          leftTextareaRef.current.removeEventListener('blur', handleBlur);
+          leftTextareaRef.current.removeEventListener("focus", handleFocus);
+          leftTextareaRef.current.removeEventListener("blur", handleBlur);
         }
         if (rightTextareaRef.current) {
-          rightTextareaRef.current.removeEventListener('focus', handleFocus);
-          rightTextareaRef.current.removeEventListener('blur', handleBlur);
+          rightTextareaRef.current.removeEventListener("focus", handleFocus);
+          rightTextareaRef.current.removeEventListener("blur", handleBlur);
         }
       };
     }
@@ -330,12 +387,22 @@ const DualChatbotInterface = ({ session }: Props) => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className={`fixed md:relative h-full z-10 bg-gray-800 text-white transition-all duration-300 ${sidebarOpen ? "w-72" : "w-0"} overflow-hidden shadow-lg`}>
+      <div
+        className={`fixed md:relative h-full z-10 bg-gray-800 text-white transition-all duration-300 ${
+          sidebarOpen ? "w-72" : "w-0"
+        } overflow-hidden shadow-lg`}
+      >
         <div className="flex flex-col h-full">
           <div className="p-6 flex items-center justify-between">
-            <h2 className={`font-semibold whitespace-nowrap text-xl ${!sidebarOpen && "md:hidden"}`}>Menu</h2>
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)} 
+            <h2
+              className={`font-semibold whitespace-nowrap text-xl ${
+                !sidebarOpen && "md:hidden"
+              }`}
+            >
+              Menu
+            </h2>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-3 rounded hover:bg-gray-700 text-gray-300 min-w-14 min-h-14 flex items-center justify-center"
               aria-label={sidebarOpen ? "Close menu" : "Open menu"}
             >
@@ -347,12 +414,14 @@ const DualChatbotInterface = ({ session }: Props) => {
               <Settings size={28} />
               <span className={!sidebarOpen ? "md:hidden" : ""}>Settings</span>
             </button>
-            <button 
+            <button
               className="p-5 flex items-center gap-4 hover:bg-gray-700 rounded-lg text-left min-h-16 text-lg border border-gray-700"
               onClick={handleNewDualChat}
             >
               <RotateCcw size={28} />
-              <span className={!sidebarOpen ? "md:hidden" : ""}>Reset Chat</span>
+              <span className={!sidebarOpen ? "md:hidden" : ""}>
+                Reset Chat
+              </span>
             </button>
             <button className="p-5 flex items-center gap-4 hover:bg-gray-700 rounded-lg text-left text-red-300 min-h-16 text-lg border border-gray-700">
               <X size={28} />
@@ -361,30 +430,40 @@ const DualChatbotInterface = ({ session }: Props) => {
           </div>
         </div>
       </div>
-      
+
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Header with title, text size controls, and other controls */}
-        <header className={`bg-gray-100 text-gray-800 border-b border-gray-200 flex items-center justify-between transition-all duration-300 ${headerCollapsed ? "h-0 p-0 overflow-hidden opacity-0" : "p-4"}`}>
+        <header
+          className={`bg-gray-100 text-gray-800 border-b border-gray-200 flex items-center justify-between transition-all duration-300 ${
+            headerCollapsed ? "h-0 p-0 overflow-hidden opacity-0" : "p-4"
+          }`}
+        >
           <div className="flex items-center">
             {!sidebarOpen && (
-              <button 
-                onClick={() => setSidebarOpen(true)} 
+              <button
+                onClick={() => setSidebarOpen(true)}
                 className="mr-4 p-3 rounded hover:bg-gray-200 min-w-14 min-h-14 flex items-center justify-center shadow border border-gray-300"
                 aria-label="Open menu"
               >
                 <Menu size={28} />
               </button>
             )}
-            <h1 className={`font-medium ${fontSizes[fontSize].header}`}>Dual Chatbot Interface</h1>
+            <h1 className={`font-medium ${fontSizes[fontSize].header}`}>
+              Dual Chatbot Interface
+            </h1>
           </div>
-          
+
           {/* Text size adjustment controls */}
           <div className="flex items-center bg-gray-200 rounded-lg p-2 mr-3 border border-gray-300 shadow">
-            <button 
-              onClick={decreaseFontSize} 
-              className={`p-3 rounded-lg hover:bg-gray-300 ${fontSize === 'small' ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700'} border border-gray-300 shadow`}
-              disabled={fontSize === 'small'}
+            <button
+              onClick={decreaseFontSize}
+              className={`p-3 rounded-lg hover:bg-gray-300 ${
+                fontSize === "small"
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700"
+              } border border-gray-300 shadow`}
+              disabled={fontSize === "small"}
               aria-label="Decrease text size"
             >
               <MinusCircle size={24} />
@@ -392,58 +471,98 @@ const DualChatbotInterface = ({ session }: Props) => {
             </button>
             <div className="px-3 flex items-center gap-2 text-lg">
               <Type size={24} />
-              <span className="font-medium">Text Size: {fontSize.charAt(0).toUpperCase() + fontSize.slice(1)}</span>
+              <span className="font-medium">
+                Text Size:{" "}
+                {fontSize.charAt(0).toUpperCase() + fontSize.slice(1)}
+              </span>
             </div>
-            <button 
-              onClick={increaseFontSize} 
-              className={`p-3 rounded-lg hover:bg-gray-300 ${fontSize === 'largest' ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700'} border border-gray-300 shadow`}
-              disabled={fontSize === 'largest'}
+            <button
+              onClick={increaseFontSize}
+              className={`p-3 rounded-lg hover:bg-gray-300 ${
+                fontSize === "largest"
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700"
+              } border border-gray-300 shadow`}
+              disabled={fontSize === "largest"}
               aria-label="Increase text size"
             >
               <PlusCircle size={24} />
               <span className="sr-only">Larger Text</span>
             </button>
           </div>
-          
+
           <div className="flex items-center gap-3">
-            <button className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
-              onClick={() => setShowConfigModal(true)}>
+            <button
+              className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
+              onClick={() => setShowConfigModal(true)}
+            >
               <Settings size={24} />
               <span>Configure</span>
             </button>
-            <button 
+            <button
               className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
               onClick={resetDualChat}
             >
               <RotateCcw size={24} />
               <span>Reset Chat</span>
             </button>
-            <button 
+            {/* <button
               className="p-3 rounded-lg hover:bg-gray-200 text-red-500 min-w-14 min-h-14 flex items-center justify-center border border-gray-300 shadow"
               aria-label="Exit application"
             >
               <X size={28} />
               <span className="sr-only">Exit</span>
+            </button> */}
+            <button
+              className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
+              onClick={toggleFullScreen}
+              aria-label={
+                isFullScreen ? "Exit full screen" : "Enter full screen"
+              }
+            >
+              {isFullScreen ? (
+                <>
+                  <Minimize size={24} />
+                  <span>Exit Full Screen</span>
+                </>
+              ) : (
+                <>
+                  <Maximize size={24} />
+                  <span>Full Screen</span>
+                </>
+              )}
             </button>
           </div>
         </header>
-        
+
         {/* Confirmation message toast */}
         {confirmMessage && (
           <div className="fixed z-50 top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-800 px-6 py-4 rounded-lg shadow-lg border border-green-200 text-lg">
             {confirmMessage}
           </div>
         )}
-        
+
         {/* Chatbot content area */}
         <div className="flex flex-1 p-6 gap-6 overflow-hidden">
           {/* Left Chatbot */}
-          <div className={`flex-1 flex flex-col bg-white rounded-lg shadow-lg overflow-hidden ${activeBot === "left" ? "ring-4 ring-indigo-500" : "border-2 border-gray-300"}`}>
+          <div
+            className={`flex-1 flex flex-col bg-white rounded-lg shadow-lg overflow-hidden ${
+              activeBot === "left"
+                ? "ring-4 ring-indigo-500"
+                : "border-2 border-gray-300"
+            }`}
+          >
             {/* Chatbot header */}
-            <div className={`bg-indigo-600 text-white p-4 flex items-center justify-between ${headerCollapsed ? "h-16 py-2" : ""}`}>
+            <div
+              className={`bg-indigo-600 text-white p-4 flex items-center justify-between ${
+                headerCollapsed ? "h-16 py-2" : ""
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <Bot size={28} />
-                <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>{chatNameA}</h2>
+                <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
+                  {chatNameA}
+                </h2>
               </div>
               {/* Active indicator for more clarity */}
               {activeBot === "left" && (
@@ -452,17 +571,23 @@ const DualChatbotInterface = ({ session }: Props) => {
                 </div>
               )}
             </div>
-            
+
             {/* Chat messages area with ref for keyboard scroll */}
             <div ref={leftChatRef} className="flex-1 p-5 overflow-y-auto">
               <div className="flex flex-col gap-4">
-                {leftMessages.map(message => (
+                {leftMessages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                    className={`flex ${
+                      message.sender === "user"
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
                   >
                     <div
-                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${fontSizes[fontSize].chat} ${
+                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${
+                        fontSizes[fontSize].chat
+                      } ${
                         message.sender === "user"
                           ? "bg-indigo-100 text-gray-800 border border-indigo-200"
                           : "bg-gray-100 text-gray-800 border border-gray-300"
@@ -471,25 +596,26 @@ const DualChatbotInterface = ({ session }: Props) => {
                       <ReactMarkdown
                         className="markdown-content"
                         remarkPlugins={[remarkGfm]}
-                    >
-                        {typeof message.text == "string" ? message.text : "Loading..."}
-                    </ReactMarkdown>
+                      >
+                        {typeof message.text == "string"
+                          ? message.text
+                          : "Loading..."}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 ))}
                 {leftLoading && (
+                  <div key={"leftloading"} className={`flex justify-start`}>
                     <div
-                    key={"leftloading"}
-                    className={`flex justify-start`}
+                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${fontSizes[fontSize].chat} bg-gray-100 text-gray-800 border border-gray-300`}
                     >
-                        <div className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${fontSizes[fontSize].chat} bg-gray-100 text-gray-800 border border-gray-300`}>
-                        <LoadingDots />
-                        </div>
+                      <LoadingDots />
                     </div>
+                  </div>
                 )}
               </div>
             </div>
-            
+
             {/* Input area with enhanced send button */}
             <div className="border-t-2 border-gray-200 p-4 relative">
               <div className="flex items-center bg-gray-100 rounded-lg p-3 border border-gray-300">
@@ -509,19 +635,19 @@ const DualChatbotInterface = ({ session }: Props) => {
                   }}
                   style={{ height: "42px" }}
                 />
-                <button 
+                <button
                   className="p-4 ml-3 flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-indigo-400 gap-2"
-                  onClick={() => handleLeftSendMessage()}                  
+                  onClick={() => handleLeftSendMessage()}
                   aria-label="Send message"
                 >
                   <Send size={28} />
                   <span className="font-medium">Send</span>
                 </button>
               </div>
-              
+
               {/* Keyboard dismiss button - only visible when keyboard is showing */}
               {keyboardVisible && activeBot === "left" && (
-                <button 
+                <button
                   onClick={dismissKeyboard}
                   className="absolute bottom-20 right-6 bg-indigo-600 text-white rounded-full p-4 shadow-lg border-2 border-indigo-400"
                   aria-label="Dismiss keyboard"
@@ -532,14 +658,26 @@ const DualChatbotInterface = ({ session }: Props) => {
               )}
             </div>
           </div>
-          
+
           {/* Right Chatbot */}
-          <div className={`flex-1 flex flex-col bg-white rounded-lg shadow-lg overflow-hidden ${activeBot === "right" ? "ring-4 ring-teal-500" : "border-2 border-gray-300"}`}>
+          <div
+            className={`flex-1 flex flex-col bg-white rounded-lg shadow-lg overflow-hidden ${
+              activeBot === "right"
+                ? "ring-4 ring-teal-500"
+                : "border-2 border-gray-300"
+            }`}
+          >
             {/* Chatbot header */}
-            <div className={`bg-teal-600 text-white p-4 flex items-center justify-between ${headerCollapsed ? "h-16 py-2" : ""}`}>
+            <div
+              className={`bg-teal-600 text-white p-4 flex items-center justify-between ${
+                headerCollapsed ? "h-16 py-2" : ""
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <Bot size={28} />
-                <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>{chatNameB}</h2>
+                <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
+                  {chatNameB}
+                </h2>
               </div>
               {/* Active indicator for more clarity */}
               {activeBot === "right" && (
@@ -548,44 +686,51 @@ const DualChatbotInterface = ({ session }: Props) => {
                 </div>
               )}
             </div>
-            
+
             {/* Chat messages area with ref for keyboard scroll */}
             <div ref={rightChatRef} className="flex-1 p-5 overflow-y-auto">
               <div className="flex flex-col gap-4">
-                {rightMessages.map(message => (
+                {rightMessages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                    className={`flex ${
+                      message.sender === "user"
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
                   >
                     <div
-                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${fontSizes[fontSize].chat} ${
+                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${
+                        fontSizes[fontSize].chat
+                      } ${
                         message.sender === "user"
                           ? "bg-teal-100 text-gray-800 border border-teal-200"
                           : "bg-gray-100 text-gray-800 border border-gray-300"
                       }`}
-                    >                        
+                    >
                       <ReactMarkdown
                         className="markdown-content"
-                        remarkPlugins={[remarkGfm]}                        
+                        remarkPlugins={[remarkGfm]}
                       >
-                        {typeof message.text == "string" ? message.text : "Loading..."}
+                        {typeof message.text == "string"
+                          ? message.text
+                          : "Loading..."}
                       </ReactMarkdown>
                     </div>
                   </div>
                 ))}
                 {rightLoading && (
+                  <div key={"rightloading"} className={`flex justify-start`}>
                     <div
-                    key={"rightloading"}
-                    className={`flex justify-start`}
+                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${fontSizes[fontSize].chat} bg-gray-100 text-gray-800 border border-gray-300`}
                     >
-                        <div className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${fontSizes[fontSize].chat} bg-gray-100 text-gray-800 border border-gray-300`}>
-                        <LoadingDots />
-                        </div>
+                      <LoadingDots />
                     </div>
+                  </div>
                 )}
               </div>
             </div>
-            
+
             {/* Input area with enhanced send button */}
             <div className="border-t-2 border-gray-200 p-4 relative">
               <div className="flex items-center bg-gray-100 rounded-lg p-3 border border-gray-300">
@@ -598,26 +743,26 @@ const DualChatbotInterface = ({ session }: Props) => {
                   onChange={(e) => setRightInput(e.target.value)}
                   onFocus={() => setActiveBot("right")}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter"  && !e.shiftKey) {
+                    if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
-                      handleRightSendMessage();                      
+                      handleRightSendMessage();
                     }
                   }}
                   style={{ height: "42px" }}
                 />
-                <button 
+                <button
                   className="p-4 ml-3 flex-shrink-0 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
-                  onClick={() => handleRightSendMessage()}                  
+                  onClick={() => handleRightSendMessage()}
                   aria-label="Send message"
                 >
                   <Send size={28} />
                   <span className="font-medium">Send</span>
                 </button>
               </div>
-              
+
               {/* Keyboard dismiss button - only visible when keyboard is showing */}
               {keyboardVisible && activeBot === "right" && (
-                <button 
+                <button
                   onClick={dismissKeyboard}
                   className="absolute bottom-20 right-6 bg-teal-600 text-white rounded-full p-4 shadow-lg border-2 border-teal-400"
                   aria-label="Dismiss keyboard"
@@ -628,14 +773,17 @@ const DualChatbotInterface = ({ session }: Props) => {
               )}
             </div>
             {showConfigModal && (
-            <DualChatConfigModal
+              <DualChatConfigModal
                 closeModal={() => setShowConfigModal(false)}
                 availableConfigs={availableConfigs}
                 onConfigSelect={handleConfigSelect}
                 chatNameA={chatNameA}
                 chatNameB={chatNameB}
-                setDisplayNames={(chatNameA: string, chatNameB: string) => {setChatNameA(chatNameA); setChatNameB(chatNameB)}}
-                />
+                setDisplayNames={(chatNameA: string, chatNameB: string) => {
+                  setChatNameA(chatNameA);
+                  setChatNameB(chatNameB);
+                }}
+              />
             )}
           </div>
         </div>
