@@ -21,7 +21,7 @@ const DualChatConfigModal = ({ closeModal, availableConfigs, onConfigSelect, cha
   const [displayNameA, setChatNameA] = useState(chatNameA);
   const [displayNameB, setChatNameB] = useState(chatNameB);
 
-  const [randomize, setRandomize] = useState(true);
+  const [randomize, setRandomize] = useState(false);
   const [showValidationError, setShowValidationError] = useState(false);
 
   useEffect(() => {
