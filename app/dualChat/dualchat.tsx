@@ -9,6 +9,7 @@ import DualChatConfigModal from '../components/dualChatConfigModal';
 import { Session } from 'next-auth';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import LoadingDots from '../components/loadingdots';
 
 // Define font size options
 type FontSizeOption = 'small' | 'medium' | 'large' | 'largest';
@@ -476,6 +477,16 @@ const DualChatbotInterface = ({ session }: Props) => {
                     </div>
                   </div>
                 ))}
+                {leftLoading && (
+                    <div
+                    key={"leftloading"}
+                    className={`flex justify-start`}
+                    >
+                        <div className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${fontSizes[fontSize].chat} bg-gray-100 text-gray-800 border border-gray-300`}>
+                        <LoadingDots />
+                        </div>
+                    </div>
+                )}
               </div>
             </div>
             
@@ -490,11 +501,17 @@ const DualChatbotInterface = ({ session }: Props) => {
                   value={leftInput}
                   onChange={(e) => setLeftInput(e.target.value)}
                   onFocus={() => setActiveBot("left")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleLeftSendMessage();
+                    }
+                  }}
                   style={{ height: "42px" }}
                 />
                 <button 
                   className="p-4 ml-3 flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-indigo-400 gap-2"
-                  onClick={() => handleLeftSendMessage()}
+                  onClick={() => handleLeftSendMessage()}                  
                   aria-label="Send message"
                 >
                   <Send size={28} />
@@ -546,16 +563,26 @@ const DualChatbotInterface = ({ session }: Props) => {
                           ? "bg-teal-100 text-gray-800 border border-teal-200"
                           : "bg-gray-100 text-gray-800 border border-gray-300"
                       }`}
-                    >
+                    >                        
                       <ReactMarkdown
                         className="markdown-content"
                         remarkPlugins={[remarkGfm]}
-                    >
+                      >
                         {typeof message.text == "string" ? message.text : "Loading..."}
-                    </ReactMarkdown>
+                      </ReactMarkdown>
                     </div>
                   </div>
                 ))}
+                {rightLoading && (
+                    <div
+                    key={"rightloading"}
+                    className={`flex justify-start`}
+                    >
+                        <div className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${fontSizes[fontSize].chat} bg-gray-100 text-gray-800 border border-gray-300`}>
+                        <LoadingDots />
+                        </div>
+                    </div>
+                )}
               </div>
             </div>
             
@@ -570,11 +597,17 @@ const DualChatbotInterface = ({ session }: Props) => {
                   value={rightInput}
                   onChange={(e) => setRightInput(e.target.value)}
                   onFocus={() => setActiveBot("right")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleRightSendMessage();                      
+                    }
+                  }}
                   style={{ height: "42px" }}
                 />
                 <button 
                   className="p-4 ml-3 flex-shrink-0 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
-                  onClick={() => handleRightSendMessage()}
+                  onClick={() => handleRightSendMessage()}                  
                   aria-label="Send message"
                 >
                   <Send size={28} />
