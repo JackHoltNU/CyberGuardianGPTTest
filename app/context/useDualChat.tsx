@@ -192,12 +192,7 @@ export const DualChatProvider = ({ children }: DualChatProviderProps) => {
     setRightThreadId(undefined);
     setDualChatID(undefined);
     setLeftTitle("Chat A");
-    setRightTitle("Chat B");
-    setLeftConfig(undefined);
-    setRightConfig(undefined);
-    setIsRandomized(false);
-    setConfigA(undefined);
-    setConfigB(undefined);
+    setRightTitle("Chat B");        
   };
 
   const sendLeftMessage = async (text: string) => {

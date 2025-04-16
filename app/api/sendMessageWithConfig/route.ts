@@ -25,7 +25,15 @@ interface ChatCompletionRequestMessage {
 export const POST = async (req: Request) => {
   const body = await req.json();
   const session = await getServerSession(options);
-  let { messageHistory, user, threadID, dualChatID, configName, saveResponseToDB, saveUserMsgToDB } = body as Props;
+  let {
+    messageHistory,
+    user,
+    threadID,
+    dualChatID,
+    configName,
+    saveResponseToDB,
+    saveUserMsgToDB,
+  } = body as Props;
 
   if (!session) {
     return new Response(`User not authenticated`, {
@@ -51,7 +59,7 @@ export const POST = async (req: Request) => {
   }
 
   // record user's message to database
-  if(saveUserMsgToDB){
+  if (saveUserMsgToDB) {
     await createOrContinueChat(
       threadID,
       dualChatID,
@@ -61,7 +69,7 @@ export const POST = async (req: Request) => {
       messageHistory[messageHistory.length - 1],
       messageHistory
     );
-  }  
+  }
 
   // Get the specific AI configuration
   let config: AIConfigType | null;
@@ -90,10 +98,10 @@ export const POST = async (req: Request) => {
       role: item.sender,
       content: item.text as string,
     })),
-  ];  
+  ];
 
   // get bot response
-  try {    
+  try {
     let completion = await getCompletion(messagesParam, config.primary);
 
     let response: string = "";
@@ -107,6 +115,7 @@ export const POST = async (req: Request) => {
 
     try {
       let responseMessage = completion.choices[0].message.content ?? "";
+      console.log(responseMessage);
       let successfulResponse = false;
       let jsonResponse: any;
 
@@ -134,7 +143,7 @@ export const POST = async (req: Request) => {
     }
     const responseId = crypto.randomUUID();
 
-    if(saveResponseToDB){
+    if (saveResponseToDB) {
       await createOrContinueChat(
         threadID,
         dualChatID,
@@ -190,7 +199,9 @@ const getCompletion = async (
 };
 
 const getSpecificAIConfig = async (configName: string) => {
-  const aiConfig: AIConfigType | null = await AIConfig.findOne({ name: configName });
+  const aiConfig: AIConfigType | null = await AIConfig.findOne({
+    name: configName,
+  });
   return aiConfig;
 };
 

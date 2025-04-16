@@ -15,6 +15,7 @@ import { AIConfigType } from "../types/types";
 
 interface ChatSideProps {
   title: string;
+  color: string;
   messages: any[];
   threadId: string | undefined;
   loading: boolean;
@@ -26,6 +27,7 @@ interface ChatSideProps {
 
 const ChatSide: React.FC<ChatSideProps> = ({
   title,
+  color,
   messages,
   threadId,
   loading,
@@ -43,8 +45,8 @@ const ChatSide: React.FC<ChatSideProps> = ({
   }, [messages, loading]);
 
   return (
-    <div className="flex flex-col h-full w-full border-r">
-      <div className="text-center p-2 font-bold border-b">{title}</div>
+    <div className={`flex flex-col h-full w-full border-t-2 border-black`}>
+      <div className="text-center p-2 font-bold">{title}</div>
       <div className="flex-grow overflow-y-auto p-4 space-y-2" ref={scrollRef}>
         {messages.map((msg, index) => (
           <Message
@@ -63,7 +65,7 @@ const ChatSide: React.FC<ChatSideProps> = ({
           </p>
         )}
       </div>
-      <div className="p-2 border-t">
+      <div className="p-2 ">
         <div className="flex">
           <input
             type="text"
@@ -182,8 +184,8 @@ const DualChat = ({ session }: Props) => {
   };
 
   return (
-    <div className="flex flex-col h-dvh w-full px-4">
-      <div className="flex justify-between items-center py-4 border-b">
+    <div className="flex flex-col h-dvh w-full">
+      <div className="flex justify-between items-center border-b pb-4">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded"
           onClick={handleNewDualChat}
@@ -230,10 +232,11 @@ const DualChat = ({ session }: Props) => {
         </div>
       )}
 
-      <div className="flex-grow flex">
-        <div className="w-1/2">
+      <div className="flex-grow flex border-double border-black divide-3 divide-indigo-500">
+        <div className="w-1/2 border-r-4 border-double border-black">
           <ChatSide
             title={leftTitle}
+            color="teal"
             messages={leftMessages}
             threadId={leftThreadId}
             loading={leftLoading}
@@ -246,6 +249,7 @@ const DualChat = ({ session }: Props) => {
         <div className="w-1/2">
           <ChatSide
             title={rightTitle}
+            color="red"
             messages={rightMessages}
             threadId={rightThreadId}
             loading={rightLoading}
@@ -257,7 +261,7 @@ const DualChat = ({ session }: Props) => {
         </div>
       </div>
 
-      <div className="py-2 text-center text-gray-500 text-sm">
+      <div className="text-center text-gray-500 text-sm">
         Output is AI generated and can include inaccuracies
       </div>
 

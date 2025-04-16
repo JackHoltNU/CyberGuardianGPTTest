@@ -4,21 +4,36 @@ import Modal from "./modal";
 import { AIConfigType } from "../types/types";
 import { useDualChat } from "../context/useDualChat";
 
+
 interface Props {
   closeModal: () => void;
   availableConfigs: AIConfigType[];
   onConfigSelect: (configA: AIConfigType, configB: AIConfigType, randomize: boolean) => void;
+  chatNameA: string;
+  chatNameB: string;
+  setDisplayNames: (chatNameA: string, chatNameB: string) => void;
 }
 
-const DualChatConfigModal = ({ closeModal, availableConfigs, onConfigSelect }: Props) => {
+const DualChatConfigModal = ({ closeModal, availableConfigs, onConfigSelect, chatNameA, chatNameB, setDisplayNames }: Props) => {
+  const { leftConfig, rightConfig } = useDualChat();
   const [selectedConfigA, setSelectedConfigA] = useState<AIConfigType | null>(null);
   const [selectedConfigB, setSelectedConfigB] = useState<AIConfigType | null>(null);
+  const [displayNameA, setChatNameA] = useState(chatNameA);
+  const [displayNameB, setChatNameB] = useState(chatNameB);
+
   const [randomize, setRandomize] = useState(true);
   const [showValidationError, setShowValidationError] = useState(false);
 
   useEffect(() => {
+    if(leftConfig && leftConfig.primary){
+      setSelectedConfigA(leftConfig);
+    }
+    if(rightConfig && rightConfig.primary){
+      setSelectedConfigB(rightConfig);
+    }
     // Set default selections if configs are available
-    if (availableConfigs.length >= 2) {
+    if (!leftConfig && !rightConfig && availableConfigs.length >= 2) {
+      console.log("test")
       setSelectedConfigA(availableConfigs[0]);
       setSelectedConfigB(availableConfigs[1]);
     }
@@ -28,15 +43,10 @@ const DualChatConfigModal = ({ closeModal, availableConfigs, onConfigSelect }: P
     if (!selectedConfigA || !selectedConfigB) {
       setShowValidationError(true);
       return;
-    }
-
-    // Check if the same config is selected for both sides
-    if (selectedConfigA.name === selectedConfigB.name) {
-      setShowValidationError(true);
-      return;
-    }
+    }    
 
     onConfigSelect(selectedConfigA, selectedConfigB, randomize);
+    setDisplayNames(displayNameA, displayNameB);
     closeModal();
   };
 
@@ -53,28 +63,39 @@ const DualChatConfigModal = ({ closeModal, availableConfigs, onConfigSelect }: P
           <>
             <div className="mb-6">
               <h3 className="font-semibold mb-2">Configuration A</h3>
-              <select
-                className="w-full p-2 border rounded"
-                value={selectedConfigA?.name || ""}
-                onChange={(e) => {
-                  const config = availableConfigs.find(c => c.name === e.target.value);
-                  if (config) setSelectedConfigA(config);
-                  setShowValidationError(false);
-                }}
-              >
-                <option value="" disabled>Select Configuration A</option>
-                {availableConfigs.map(config => (
-                  <option key={`A-${config.name}`} value={config.name}>
-                    {config.name}
-                  </option>
-                ))}
-              </select>
+              <div className="py-2 pl-3 flex items-center justify-between w-auto">
+                <label className="mr-2">Model</label>
+                <select
+                  className="p-2 border rounded"
+                  value={selectedConfigA?.name || ""}
+                  onChange={(e) => {
+                    const config = availableConfigs.find(c => c.name === e.target.value);
+                    if (config) setSelectedConfigA(config);
+                    setShowValidationError(false);
+                  }}
+                >
+                  <option value="" disabled>Select Configuration A</option>
+                  {availableConfigs.map(config => (
+                    <option key={`A-${config.name}`} value={config.name}>
+                      {config.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="py-2 pl-3 flex items-center justify-between w-auto">
+                <label className="mr-2">Display Name</label>
+                <input type="text" value={displayNameA} className="border rounded p-2" onChange={(e) => setChatNameA(e.target.value)}/>
+              </div>
             </div>
+
+            
 
             <div className="mb-6">
               <h3 className="font-semibold mb-2">Configuration B</h3>
-              <select
-                className="w-full p-2 border rounded"
+              <div className="py-2 pl-3 flex items-center justify-between w-auto">
+                <label className="mr-2">Model</label>
+                <select
+                className="p-2 border rounded"
                 value={selectedConfigB?.name || ""}
                 onChange={(e) => {
                   const config = availableConfigs.find(c => c.name === e.target.value);
@@ -89,13 +110,20 @@ const DualChatConfigModal = ({ closeModal, availableConfigs, onConfigSelect }: P
                   </option>
                 ))}
               </select>
+              </div>
+              
+              <div className="py-2 pl-3 flex items-center justify-between w-auto">
+                <label className="mr-2">Display Name</label>
+                <input type="text" value={displayNameB} className="border rounded p-2" onChange={(e) => setChatNameB(e.target.value)}/>
+              </div>
+              
             </div>
 
             <div className="mb-6">
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={randomize}
+                  checked={false}
                   onChange={(e) => setRandomize(e.target.checked)}
                   className="mr-2"
                 />
