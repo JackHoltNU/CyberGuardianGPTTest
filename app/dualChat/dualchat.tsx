@@ -74,6 +74,7 @@ const DualChatbotInterface = ({ session }: Props) => {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   const router = useRouter();
 
@@ -278,6 +279,26 @@ const DualChatbotInterface = ({ session }: Props) => {
     }
   };
 
+  const checkIsTouchDevice = () => {
+    const toMatch = [
+        /Android/i,
+        /webOS/i,
+        /iPhone/i,
+        /iPad/i,
+        /iPod/i,
+        /BlackBerry/i,
+        /Windows Phone/i
+    ];
+    
+    return toMatch.some((toMatchItem) => {
+        return navigator.userAgent.match(toMatchItem);
+    });
+  }
+
+  useEffect(() => {
+    setIsTouchDevice(checkIsTouchDevice());
+  },[])
+
   // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom(leftChatRef);
@@ -290,7 +311,6 @@ const DualChatbotInterface = ({ session }: Props) => {
   useEffect(() => {
     // Initial viewport height
     const initialViewportHeight = window.innerHeight;
-    const isTabletOrMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 
     let isResizingWindow = false;
@@ -688,7 +708,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                 <Bot size={28} />
                 <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
                   {/* {chatNameB} */}
-                  {`Visible: ${keyboardVisible}, height: ${keyboardHeight}`}
+                  {`Visible: ${keyboardVisible}, height: ${keyboardHeight}, touch device: ${isTouchDevice}`}
                 </h2>
               </div>
               {/* Active indicator for more clarity */}
