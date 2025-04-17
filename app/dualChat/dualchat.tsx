@@ -583,7 +583,7 @@ const DualChatbotInterface = ({ session }: Props) => {
 
             {/* Chat messages area with ref for keyboard scroll */}
             <div ref={leftChatRef} className="flex-1 p-5 overflow-y-auto" style={{
-      height: keyboardVisible ? `calc(100vh - ${keyboardHeight*3}px - 180px)` : 'auto',
+      height: keyboardVisible ? `40vh` : 'auto',
     }}>
               <div className="flex flex-col gap-4">
                 {leftMessages.map((message) => (
@@ -701,7 +701,7 @@ const DualChatbotInterface = ({ session }: Props) => {
 
             {/* Chat messages area with ref for keyboard scroll */}
             <div ref={rightChatRef} className="flex-1 p-5 overflow-y-auto" style={{
-      height: keyboardVisible ? `calc(100vh - ${keyboardHeight}px - 180px)` : 'auto',
+      height: keyboardVisible ? `40vh` : 'auto',
     }}>
               <div className="flex flex-col gap-4">
                 {rightMessages.map((message) => (
