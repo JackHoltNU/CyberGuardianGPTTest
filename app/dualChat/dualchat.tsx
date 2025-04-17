@@ -559,7 +559,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               activeBot === "left"
                 ? "ring-4 ring-indigo-500"
                 : "border-2 border-gray-300"
-            }`}
+            }${keyboardVisible ? `h-${keyboardHeight}px` : "h-auto"}`}
           >
             {/* Chatbot header */}
             <div
@@ -582,9 +582,7 @@ const DualChatbotInterface = ({ session }: Props) => {
             </div>
 
             {/* Chat messages area with ref for keyboard scroll */}
-            <div ref={leftChatRef} className="flex-1 p-5 overflow-y-auto" style={{
-      height: keyboardVisible ? `40vh` : 'auto',
-    }}>
+            <div ref={leftChatRef} className="flex-1 p-5 overflow-y-auto">
               <div className="flex flex-col gap-4">
                 {leftMessages.map((message) => (
                   <div
@@ -676,7 +674,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               activeBot === "right"
                 ? "ring-4 ring-teal-500"
                 : "border-2 border-gray-300"
-            }`}
+            } ${keyboardVisible ? `h-${keyboardHeight}px` : "h-auto"}`}
           >
             {/* Chatbot header */}
             <div
@@ -700,9 +698,7 @@ const DualChatbotInterface = ({ session }: Props) => {
             </div>
 
             {/* Chat messages area with ref for keyboard scroll */}
-            <div ref={rightChatRef} className="flex-1 p-5 overflow-y-auto" style={{
-      height: keyboardVisible ? `40vh` : 'auto',
-    }}>
+            <div ref={rightChatRef} className="flex-1 p-5 overflow-y-auto" >
               <div className="flex flex-col gap-4">
                 {rightMessages.map((message) => (
                   <div
