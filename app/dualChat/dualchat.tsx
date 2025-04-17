@@ -687,7 +687,8 @@ const DualChatbotInterface = ({ session }: Props) => {
               <div className="flex items-center gap-3">
                 <Bot size={28} />
                 <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
-                  {chatNameB}
+                  {/* {chatNameB} */}
+                  {keyboardHeight}
                 </h2>
               </div>
               {/* Active indicator for more clarity */}
