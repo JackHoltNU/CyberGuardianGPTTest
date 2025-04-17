@@ -308,24 +308,24 @@ const DualChatbotInterface = ({ session }: Props) => {
     if (window.visualViewport) {
       const handleVisualViewportResize = (): void => {
         // Calculate height reduction as a percentage
-        const currentHeight = window.visualViewport!.height;
-        const heightReduction =
-          1 - currentHeight / initialViewportHeight;
-          const heightDifference = initialViewportHeight - currentHeight;
+        const currentHeight = window.visualViewport!.height;        
+        const heightDifference = initialViewportHeight - currentHeight;
+        const percentageHeightReduction = heightDifference / initialViewportHeight;
+
 
 
         // Additional checks to distinguish keyboard from window resize:
       // 2. Make sure it's a significant height change     
       
-      if (heightDifference > 150) {
+      if (isFullScreen && !keyboardVisible && percentageHeightReduction > 0.25) {
         setKeyboardVisible(true);
         setKeyboardHeight(heightDifference);
         setHeaderCollapsed(true);
-      } else {
+      }else if (!isFullScreen || (keyboardVisible && heightDifference < 0)) {
         setKeyboardVisible(false);
         setKeyboardHeight(0);
         setHeaderCollapsed(false);
-      }
+      } 
           
         // Only treat significant height reductions as keyboard appearance
         // if (heightReduction > 0.25) {
