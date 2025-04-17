@@ -559,7 +559,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               activeBot === "left"
                 ? "ring-4 ring-indigo-500"
                 : "border-2 border-gray-300"
-            }${keyboardVisible ? `h-${keyboardHeight}px` : "h-auto"}`}
+            }${keyboardVisible ? `h-${keyboardHeight}` : "h-auto"}`}
           >
             {/* Chatbot header */}
             <div
@@ -674,7 +674,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               activeBot === "right"
                 ? "ring-4 ring-teal-500"
                 : "border-2 border-gray-300"
-            } ${keyboardVisible ? `h-${keyboardHeight}px` : "h-auto"}`}
+            } ${keyboardVisible ? `h-${keyboardHeight}` : "h-auto"}`}
           >
             {/* Chatbot header */}
             <div
@@ -685,8 +685,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               <div className="flex items-center gap-3">
                 <Bot size={28} />
                 <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
-                  {/* {chatNameB} */}
-                  {`Visible: ${keyboardVisible}, height: ${keyboardHeight}`}
+                  {chatNameB}                  
                 </h2>
               </div>
               {/* Active indicator for more clarity */}
