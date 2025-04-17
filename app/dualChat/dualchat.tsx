@@ -73,6 +73,7 @@ const DualChatbotInterface = ({ session }: Props) => {
   const [rightLoading, setRightLoading] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const router = useRouter();
 
@@ -286,43 +287,78 @@ const DualChatbotInterface = ({ session }: Props) => {
     scrollToBottom(rightChatRef);
   }, [rightMessages]);
 
-  // More accurate keyboard detection
   useEffect(() => {
     // Initial viewport height
     const initialViewportHeight = window.innerHeight;
+    const isTabletOrMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+
+    let isResizingWindow = false;
+  
+  // Add window resize detection
+  const handleWindowResize = () => {
+    isResizingWindow = true;
+    // Reset after a short delay
+    setTimeout(() => {
+      isResizingWindow = false;
+    }, 500);
+  };
 
     // Use visualViewport API for more accurate keyboard detection
-    if (window.visualViewport) {
+    if (window.visualViewport && isTabletOrMobile) {
       const handleVisualViewportResize = (): void => {
         // Calculate height reduction as a percentage
+        const currentHeight = window.visualViewport!.height;
         const heightReduction =
-          1 - window.visualViewport!.height / initialViewportHeight;
+          1 - currentHeight / initialViewportHeight;
+          const heightDifference = initialViewportHeight - currentHeight;
 
+
+        // Additional checks to distinguish keyboard from window resize:
+      // 1. Check if width changed minimally (keyboards don't change width much)
+      // 2. Make sure it's a significant height change
+      const widthChange = Math.abs(window.visualViewport!.width - window.innerWidth);
+      
+      if (heightDifference > 150 && widthChange < 50) {
+        setKeyboardVisible(true);
+        setKeyboardHeight(heightDifference);
+        setHeaderCollapsed(true);
+      } else {
+        setKeyboardVisible(false);
+        setKeyboardHeight(0);
+        setHeaderCollapsed(false);
+      }
+          
         // Only treat significant height reductions as keyboard appearance
-        if (heightReduction > 0.25) {
-          setKeyboardVisible(true);
-          setHeaderCollapsed(true);
+        // if (heightReduction > 0.25) {
+        //   setKeyboardVisible(true);
+        //   setHeaderCollapsed(true);
 
-          // Scroll to bottom of active chat
-          setTimeout(() => {
-            if (activeBot === "left") {
-              scrollToBottom(leftChatRef);
-            } else {
-              scrollToBottom(rightChatRef);
-            }
-          }, 100);
-        } else {
-          setKeyboardVisible(false);
-          setHeaderCollapsed(false);
-        }
+        //   // Scroll to bottom of active chat
+        //   setTimeout(() => {
+        //     if (activeBot === "left") {
+        //       scrollToBottom(leftChatRef);
+        //     } else {
+        //       scrollToBottom(rightChatRef);
+        //     }
+        //   }, 100);
+        // } else {
+        //   setKeyboardVisible(false);
+        //   setHeaderCollapsed(false);
+        // }
       };
 
+      // browser resized, ignore viewport resize
+      window.addEventListener('resize', handleWindowResize);
+
+      // viewport resize only, assume keyboard
       window.visualViewport.addEventListener(
         "resize",
         handleVisualViewportResize
       );
 
       return () => {
+        window.removeEventListener('resize', handleWindowResize);
         window.visualViewport?.removeEventListener(
           "resize",
           handleVisualViewportResize
@@ -553,7 +589,9 @@ const DualChatbotInterface = ({ session }: Props) => {
             </div>
 
             {/* Chat messages area with ref for keyboard scroll */}
-            <div ref={leftChatRef} className="flex-1 p-5 overflow-y-auto">
+            <div ref={leftChatRef} className="flex-1 p-5 overflow-y-auto" style={{
+      height: keyboardVisible ? `calc(100vh - ${keyboardHeight}px - 180px)` : 'auto',
+    }}>
               <div className="flex flex-col gap-4">
                 {leftMessages.map((message) => (
                   <div
@@ -668,7 +706,9 @@ const DualChatbotInterface = ({ session }: Props) => {
             </div>
 
             {/* Chat messages area with ref for keyboard scroll */}
-            <div ref={rightChatRef} className="flex-1 p-5 overflow-y-auto">
+            <div ref={rightChatRef} className="flex-1 p-5 overflow-y-auto" style={{
+      height: keyboardVisible ? `calc(100vh - ${keyboardHeight}px - 180px)` : 'auto',
+    }}>
               <div className="flex flex-col gap-4">
                 {rightMessages.map((message) => (
                   <div
