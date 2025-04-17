@@ -656,7 +656,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               </div>
 
               {/* Keyboard dismiss button - only visible when keyboard is showing */}
-              {keyboardVisible && activeBot === "left" && (
+              {/* {keyboardVisible && activeBot === "left" && (
                 <button
                   onClick={dismissKeyboard}
                   className="absolute bottom-20 right-6 bg-indigo-600 text-white rounded-full p-4 shadow-lg border-2 border-indigo-400"
@@ -665,7 +665,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                   <ArrowDown size={28} />
                   <span className="sr-only">Hide Keyboard</span>
                 </button>
-              )}
+              )} */}
             </div>
           </div>
 
@@ -687,7 +687,8 @@ const DualChatbotInterface = ({ session }: Props) => {
               <div className="flex items-center gap-3">
                 <Bot size={28} />
                 <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
-                  {chatNameB}                  
+                  {/* {chatNameB} */}
+                  {keyboardHeight}                  
                 </h2>
               </div>
               {/* Active indicator for more clarity */}
@@ -772,7 +773,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               </div>
 
               {/* Keyboard dismiss button - only visible when keyboard is showing */}
-              {keyboardVisible && activeBot === "right" && (
+              {/* {keyboardVisible && activeBot === "right" && (
                 <button
                   onClick={dismissKeyboard}
                   className="absolute bottom-20 right-6 bg-teal-600 text-white rounded-full p-4 shadow-lg border-2 border-teal-400"
@@ -781,7 +782,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                   <ArrowDown size={28} />
                   <span className="sr-only">Hide Keyboard</span>
                 </button>
-              )}
+              )} */}
             </div>
             {showConfigModal && (
               <DualChatConfigModal
