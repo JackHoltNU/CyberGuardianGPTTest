@@ -560,7 +560,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                 ? "ring-4 ring-indigo-500"
                 : "border-2 border-gray-300"
             } `}
-            style = {{height: (keyboardVisible && isFullScreen) ? `calc(100vh - ${keyboardHeight}px)` : "auto"}}
+            style = {{height: (keyboardVisible && isFullScreen) ? `calc(100vh - ${keyboardHeight}px - 100px)` : "auto"}}
           >
             {/* Chatbot header */}
             <div
@@ -676,7 +676,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                 ? "ring-4 ring-teal-500"
                 : "border-2 border-gray-300"
             }`}
-            style = {{height: (keyboardVisible && isFullScreen) ? `calc(100vh - ${keyboardHeight}px)` : "auto"}}
+            style = {{height: (keyboardVisible && isFullScreen) ? `calc(100vh - ${keyboardHeight}px - 100px)` : "auto"}}
           >
             {/* Chatbot header */}
             <div
