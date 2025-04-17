@@ -321,7 +321,7 @@ const DualChatbotInterface = ({ session }: Props) => {
         setKeyboardVisible(true);
         setKeyboardHeight(heightDifference);
         setHeaderCollapsed(true);
-      }else if (!isFullScreen || (keyboardVisible && heightDifference < 0)) {
+      }else {
         setKeyboardVisible(false);
         setKeyboardHeight(0);
         setHeaderCollapsed(false);
