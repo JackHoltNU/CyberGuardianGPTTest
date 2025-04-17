@@ -305,7 +305,7 @@ const DualChatbotInterface = ({ session }: Props) => {
   };
 
     // Use visualViewport API for more accurate keyboard detection
-    if (window.visualViewport && isTabletOrMobile) {
+    if (window.visualViewport) {
       const handleVisualViewportResize = (): void => {
         // Calculate height reduction as a percentage
         const currentHeight = window.visualViewport!.height;
@@ -688,7 +688,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                 <Bot size={28} />
                 <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
                   {/* {chatNameB} */}
-                  {keyboardHeight}
+                  {`Visible: ${keyboardVisible}, height: ${keyboardHeight}`}
                 </h2>
               </div>
               {/* Active indicator for more clarity */}
