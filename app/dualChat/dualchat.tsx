@@ -315,11 +315,9 @@ const DualChatbotInterface = ({ session }: Props) => {
 
 
         // Additional checks to distinguish keyboard from window resize:
-      // 1. Check if width changed minimally (keyboards don't change width much)
-      // 2. Make sure it's a significant height change
-      const widthChange = Math.abs(window.visualViewport!.width - window.innerWidth);
+      // 2. Make sure it's a significant height change     
       
-      if (heightDifference > 150 && widthChange < 50) {
+      if (heightDifference > 150) {
         setKeyboardVisible(true);
         setKeyboardHeight(heightDifference);
         setHeaderCollapsed(true);
@@ -367,12 +365,7 @@ const DualChatbotInterface = ({ session }: Props) => {
     } else {
       // Fallback for browsers that don't support visualViewport API
       const handleFocus = (): void => {
-        // Only for mobile/tablet devices
-        if (
-          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-            navigator.userAgent
-          )
-        ) {
+        
           setKeyboardVisible(true);
           setHeaderCollapsed(true);
           setTimeout(() => {
@@ -382,7 +375,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               scrollToBottom(rightChatRef);
             }
           }, 300);
-        }
+        
       };
 
       const handleBlur = (): void => {
