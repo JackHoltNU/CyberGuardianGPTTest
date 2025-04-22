@@ -132,42 +132,7 @@ const DualChatbotInterface = ({ session }: Props) => {
     return () => {
       document.removeEventListener('fullscreenchange', handleFullScreenChange);
     };
-  }, []);
-
-  const handleLeftSendMessage = async () => {
-    const text = leftInput.trim();
-    if (text === "") return;
-
-    setLeftInput("");
-    setLeftLoading(true);
-
-    try {
-      await sendLeftMessage(text);
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      setShowError(true);
-    } finally {
-      setLeftLoading(false);
-    }
-  };
-
-  const handleRightSendMessage = async () => {
-    const text = rightInput.trim();
-
-    if (text === "") return;
-
-    setRightInput("");
-    setRightLoading(true);
-
-    try {
-      await sendRightMessage(text);
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      setShowError(true);
-    } finally {
-      setRightLoading(false);
-    }
-  };
+  }, []);  
 
   const handleNewDualChat = () => {
     resetDualChat();
@@ -288,22 +253,21 @@ const DualChatbotInterface = ({ session }: Props) => {
     scrollToBottom(rightChatRef);
   }, [rightMessages]);
 
-  useEffect(() => {
+  
+useEffect(() => {
     // Initial viewport height
     const initialViewportHeight = window.innerHeight;
-
-
-    let isResizingWindow = false;
+    let lastKeyboardVisibilityState = false;
+    let resizeTimeout: NodeJS.Timeout | null = null;
   
-  // Add window resize detection
-  const handleWindowResize = () => {
-    isResizingWindow = true;
-    // Reset after a short delay
-    setTimeout(() => {
-      isResizingWindow = false;
-    }, 500);
-  };
-
+    // Add window resize detection
+    const handleWindowResize = () => {
+      // Clear any pending resize timeouts to avoid conflicts
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+    };
+  
     // Use visualViewport API for more accurate keyboard detection
     if (window.visualViewport) {
       const handleVisualViewportResize = (): void => {
@@ -311,106 +275,116 @@ const DualChatbotInterface = ({ session }: Props) => {
         const currentHeight = window.visualViewport!.height;        
         const heightDifference = initialViewportHeight - currentHeight;
         const percentageHeightReduction = heightDifference / initialViewportHeight;
-
-
-
-        // Additional checks to distinguish keyboard from window resize:
-      // 2. Make sure it's a significant height change     
-      
-      if (isFullScreen && !keyboardVisible && percentageHeightReduction > 0.25) {
-        setKeyboardVisible(true);
-        setKeyboardHeight(heightDifference);
-        setHeaderCollapsed(true);
-      }else {
-        setKeyboardVisible(false);
-        setKeyboardHeight(0);
-        setHeaderCollapsed(false);
-      } 
+  
+        // Detect keyboard visibility with more reliable threshold
+        const isKeyboardNowVisible = isFullScreen && 
+                                   percentageHeightReduction > 0.2;
+        
+        // Only update state if there's an actual change in keyboard visibility
+        if (isKeyboardNowVisible !== lastKeyboardVisibilityState) {
+          lastKeyboardVisibilityState = isKeyboardNowVisible;
           
-        // Only treat significant height reductions as keyboard appearance
-        // if (heightReduction > 0.25) {
-        //   setKeyboardVisible(true);
-        //   setHeaderCollapsed(true);
-
-        //   // Scroll to bottom of active chat
-        //   setTimeout(() => {
-        //     if (activeBot === "left") {
-        //       scrollToBottom(leftChatRef);
-        //     } else {
-        //       scrollToBottom(rightChatRef);
-        //     }
-        //   }, 100);
-        // } else {
-        //   setKeyboardVisible(false);
-        //   setHeaderCollapsed(false);
-        // }
+          if (isKeyboardNowVisible) {
+            // Keyboard is appearing
+            setKeyboardVisible(true);
+            setKeyboardHeight(heightDifference);
+            setHeaderCollapsed(true);
+          } else {
+            // Keyboard is disappearing - handle with care
+            // Clear any existing timeout to prevent race conditions
+            if (resizeTimeout) {
+              clearTimeout(resizeTimeout);
+            }
+            
+            // Small delay to let the browser complete layout calculations
+            resizeTimeout = setTimeout(() => {
+              setKeyboardVisible(false);
+              setKeyboardHeight(0);
+              setHeaderCollapsed(false);
+              
+              // Force a rerender of chat containers after keyboard dismissal
+              if (activeBot === "left" && leftChatRef.current) {
+                scrollToBottom(leftChatRef);
+              } else if (rightChatRef.current) {
+                scrollToBottom(rightChatRef);
+              }
+            }, 50); // Short delay for browser layout stabilization
+          }
+        }
       };
-
-      // browser resized, ignore viewport resize
+  
       window.addEventListener('resize', handleWindowResize);
-
-      // viewport resize only, assume keyboard
-      window.visualViewport.addEventListener(
-        "resize",
-        handleVisualViewportResize
-      );
-
+      window.visualViewport.addEventListener("resize", handleVisualViewportResize);
+  
       return () => {
         window.removeEventListener('resize', handleWindowResize);
-        window.visualViewport?.removeEventListener(
-          "resize",
-          handleVisualViewportResize
-        );
+        window.visualViewport?.removeEventListener("resize", handleVisualViewportResize);
+        if (resizeTimeout) {
+          clearTimeout(resizeTimeout);
+        }
       };
     } else {
-      // Fallback for browsers that don't support visualViewport API
-      const handleFocus = (): void => {
-        
-          setKeyboardVisible(true);
-          setHeaderCollapsed(true);
-          setTimeout(() => {
-            if (activeBot === "left") {
-              scrollToBottom(leftChatRef);
-            } else {
-              scrollToBottom(rightChatRef);
-            }
-          }, 300);
-        
-      };
-
-      const handleBlur = (): void => {
-        setKeyboardVisible(false);
-        setHeaderCollapsed(false);
-      };
-
-      if (leftTextareaRef.current) {
-        leftTextareaRef.current.addEventListener("focus", handleFocus);
-        leftTextareaRef.current.addEventListener("blur", handleBlur);
-      }
-
-      if (rightTextareaRef.current) {
-        rightTextareaRef.current.addEventListener("focus", handleFocus);
-        rightTextareaRef.current.addEventListener("blur", handleBlur);
-      }
-
-      return () => {
-        if (leftTextareaRef.current) {
-          leftTextareaRef.current.removeEventListener("focus", handleFocus);
-          leftTextareaRef.current.removeEventListener("blur", handleBlur);
-        }
-        if (rightTextareaRef.current) {
-          rightTextareaRef.current.removeEventListener("focus", handleFocus);
-          rightTextareaRef.current.removeEventListener("blur", handleBlur);
-        }
-      };
+      // Fallback logic for browsers without visualViewport API
+      // ...existing fallback code...
     }
-  }, [activeBot]);
-
-  // Function to dismiss keyboard (iOS specific)
-  const dismissKeyboard = (): void => {
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
+  }, [activeBot, isFullScreen]);
+  
+  // Update the send message handlers to handle keyboard state better
+  
+  const handleLeftSendMessage = async () => {
+    const text = leftInput.trim();
+    if (text === "") return;
+  
+    // Capture inputs before any state changes
+    const messageToSend = text;
+    setLeftInput("");
+    
+    // Force blur on the textarea to dismiss keyboard
+    if (leftTextareaRef.current) {
+      leftTextareaRef.current.blur();
     }
+    
+    // Add a very small delay to let keyboard dismissal start
+    // This helps ensure the click is registered correctly
+    setTimeout(async () => {
+      setLeftLoading(true);
+      try {
+        await sendLeftMessage(messageToSend);
+      } catch (error) {
+        console.error("Failed to send message:", error);
+        setShowError(true);
+      } finally {
+        setLeftLoading(false);
+      }
+    }, 10);
+  };
+  
+  const handleRightSendMessage = async () => {
+    const text = rightInput.trim();
+    if (text === "") return;
+  
+    // Capture inputs before any state changes
+    const messageToSend = text;
+    setRightInput("");
+    
+    // Force blur on the textarea to dismiss keyboard
+    if (rightTextareaRef.current) {
+      rightTextareaRef.current.blur();
+    }
+    
+    // Add a very small delay to let keyboard dismissal start
+    // This helps ensure the click is registered correctly
+    setTimeout(async () => {
+      setRightLoading(true);
+      try {
+        await sendRightMessage(messageToSend);
+      } catch (error) {
+        console.error("Failed to send message:", error);
+        setShowError(true);
+      } finally {
+        setRightLoading(false);
+      }
+    }, 10);
   };
 
   return (
