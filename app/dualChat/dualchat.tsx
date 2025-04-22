@@ -601,7 +601,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                 <Bot size={28} />
                 <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
                   {/* {chatNameA} */}
-                  {debugText}
+                  {`${debugText}, visible: ${keyboardVisible}, header collapsed: ${headerCollapsed}`}
                 </h2>
               </div>
               {/* Active indicator for more clarity */}
