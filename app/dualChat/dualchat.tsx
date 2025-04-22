@@ -75,6 +75,7 @@ const DualChatbotInterface = ({ session }: Props) => {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [debugText, setDebugText] = useState("");
 
 
   const router = useRouter();
@@ -318,17 +319,21 @@ const DualChatbotInterface = ({ session }: Props) => {
         if (isFullScreen) { // Only apply logic in full screen
            if (keyboardLikelyVisible) {
               if (!keyboardVisible) { // Check current state before setting
-                 console.log("Debounced: Keyboard appearing/visible");
+                 setDebugText("Keyboard is likely visible, setting keyboard to visible");
                  setKeyboardVisible(true);
                  setKeyboardHeight(heightDifference > 0 ? heightDifference : 0); // Ensure positive height
                  setHeaderCollapsed(true);
+              } else {
+                setDebugText("Keyboard is likely visible but was already set to visible");
               }
            } else {
               if (keyboardVisible) { // Check current state before setting
-                 console.log("Debounced: Keyboard closing/hidden");
+                 setDebugText("Keyboard is likely not visible, setting keyboard to not visible");
                  setKeyboardVisible(false);
                  setKeyboardHeight(0);
                  setHeaderCollapsed(false);
+              } else {
+                setDebugText("Keyboard is likely not visible and was already set to not visible")
               }
            }
         } 
@@ -383,7 +388,7 @@ const DualChatbotInterface = ({ session }: Props) => {
         window.removeEventListener('resize', handleWindowResize);
         window.visualViewport?.removeEventListener(
           "resize",
-          handleVisualViewportResize
+          debouncedVisualViewportResize
         );
       };
      } //else {
@@ -584,7 +589,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                 ? "ring-4 ring-indigo-500"
                 : "border-2 border-gray-300"
             } `}
-            style = {{height: (keyboardVisible && isFullScreen) ? `calc(100vh - ${keyboardHeight}px - 100px)` : "auto"}}
+            style = {{height: (keyboardVisible && isFullScreen) ? `calc(100vh - ${keyboardHeight}px)` : "auto"}}
           >
             {/* Chatbot header */}
             <div
@@ -595,7 +600,8 @@ const DualChatbotInterface = ({ session }: Props) => {
               <div className="flex items-center gap-3">
                 <Bot size={28} />
                 <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
-                  {chatNameA}
+                  {/* {chatNameA} */}
+                  {debugText}
                 </h2>
               </div>
               {/* Active indicator for more clarity */}
@@ -700,7 +706,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                 ? "ring-4 ring-teal-500"
                 : "border-2 border-gray-300"
             }`}
-            style = {{height: (keyboardVisible && isFullScreen) ? `calc(100vh - ${keyboardHeight}px - 100px)` : "auto"}}
+            style = {{height: (keyboardVisible && isFullScreen) ? `calc(100vh - ${keyboardHeight}px)` : "auto"}}
           >
             {/* Chatbot header */}
             <div
