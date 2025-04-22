@@ -561,7 +561,7 @@ const DualChatbotInterface = ({ session }: Props) => {
             style={{
               height:
                 keyboardVisible && isFullScreen
-                  ? `calc(100vh - ${keyboardHeight}px)`
+                  ? `calc(100vh - ${keyboardHeight}px - 100px)`
                   : "auto",
             }}
           >
@@ -682,7 +682,7 @@ const DualChatbotInterface = ({ session }: Props) => {
             style={{
               height:
                 keyboardVisible && isFullScreen
-                  ? `calc(100vh - ${keyboardHeight}px)`
+                  ? `calc(100vh - ${keyboardHeight}px - 100px)`
                   : "auto",
             }}
           >
