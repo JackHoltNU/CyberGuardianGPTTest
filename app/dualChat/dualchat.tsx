@@ -77,7 +77,6 @@ const DualChatbotInterface = ({ session }: Props) => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [debugText, setDebugText] = useState("");
 
-
   const router = useRouter();
 
   // Font size state (default: medium)
@@ -129,10 +128,10 @@ const DualChatbotInterface = ({ session }: Props) => {
     const handleFullScreenChange = (): void => {
       setIsFullScreen(!!document.fullscreenElement);
     };
-    
-    document.addEventListener('fullscreenchange', handleFullScreenChange);
+
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullScreenChange);
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
     };
   }, []);
 
@@ -290,93 +289,100 @@ const DualChatbotInterface = ({ session }: Props) => {
     scrollToBottom(rightChatRef);
   }, [rightMessages]);
 
+  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Ref for timeout ID
+
   useEffect(() => {
     // Initial viewport height
     const initialViewportHeight = window.innerHeight;
 
-
     let isResizingWindow = false;
-  
-  // Add window resize detection
-  const handleWindowResize = () => {
-    isResizingWindow = true;
-    // Reset after a short delay
-    setTimeout(() => {
-      isResizingWindow = false;
-    }, 500);
-  };
+
+    // Add window resize detection
+    const handleWindowResize = () => {
+      isResizingWindow = true;
+      // Reset after a short delay
+      setTimeout(() => {
+        isResizingWindow = false;
+      }, 500);
+    };
 
     // Use visualViewport API for more accurate keyboard detection
     if (window.visualViewport && !isResizingWindow) {
       const handleVisualViewportResize = (): void => {
+        // Clear any pending timeout from previous resize events
+        if (resizeTimeoutRef.current) {
+          clearTimeout(resizeTimeoutRef.current);
+          resizeTimeoutRef.current = null;
+        }
+
         // Calculate height reduction as a percentage
-        const currentHeight = window.visualViewport!.height;        
+        const currentHeight = window.visualViewport!.height;
         const heightDifference = initialViewportHeight - currentHeight;
-        const percentageHeightReduction = heightDifference / initialViewportHeight;
+        const percentageHeightReduction =
+          heightDifference / initialViewportHeight;
 
-        const keyboardLikelyVisible = percentageHeightReduction > 0.20 && heightDifference > 100; // Added absolute check
+        const keyboardLikelyVisible =
+          percentageHeightReduction > 0.2 && heightDifference > 100;
+        const keyboardLikelyClosing =
+          isFullScreen &&
+          keyboardVisible &&
+          currentHeight >= initialViewportHeight - 20;
 
-        if (isFullScreen) { // Only apply logic in full screen
-           if (keyboardLikelyVisible) {
-              if (!keyboardVisible) { // Check current state before setting
-                 setDebugText("Keyboard is likely visible, setting keyboard to visible");
-                 setKeyboardVisible(true);
-                 setKeyboardHeight(heightDifference > 0 ? heightDifference : 0); // Ensure positive height
-                 setHeaderCollapsed(true);
-              } else {
-                setDebugText("Keyboard is likely visible but was already set to visible");
-              }
-           } else {
-              if (keyboardVisible) { // Check current state before setting
-                 setDebugText("Keyboard is likely not visible, setting keyboard to not visible");
-                 setKeyboardVisible(false);
-                 setKeyboardHeight(0);
-                 setHeaderCollapsed(false);
-              } else {
-                setDebugText("Keyboard is likely not visible and was already set to not visible")
-              }
-           }
-        } 
+        if (isFullScreen) {
+          // Only apply logic in full screen
+          if (keyboardLikelyVisible) {
+            if (!keyboardVisible) {
+              // Check current state before setting
+              setDebugText(
+                "Keyboard is likely visible, setting keyboard to visible"
+              );
+              setKeyboardVisible(true);
+              setKeyboardHeight(heightDifference > 0 ? heightDifference : 0); // Ensure positive height
+              setHeaderCollapsed(true);
+            } else {
+              setDebugText(
+                "Keyboard is likely visible but was already set to visible"
+              );
+            }
+          } else if (keyboardLikelyClosing) {
+            console.log(
+              "Resize: Keyboard Closing detected, delaying state update"
+            );
+            // --- DELAY ADDED HERE ---
+            resizeTimeoutRef.current = setTimeout(() => {
+              console.log(
+                "Resize: Applying delayed state update for closed keyboard"
+              );
+              setKeyboardVisible(false);
+              setKeyboardHeight(0);
+              setHeaderCollapsed(false);
+              resizeTimeoutRef.current = null;
+            }, 100); // Adjust delay (e.g., 100ms) - needs testing else {
+          } else {
+            if (keyboardVisible) {
+              // Check current state before setting
+              setDebugText(
+                "Keyboard is likely not visible, setting keyboard to not visible"
+              );
+              setKeyboardVisible(false);
+              setKeyboardHeight(0);
+              setHeaderCollapsed(false);
+            } else {
+              setDebugText(
+                "Keyboard is likely not visible and was already set to not visible"
+              );
+            }
+          }
+        }
       };
 
-
-
-        // Additional checks to distinguish keyboard from window resize:
-      // 2. Make sure it's a significant height change     
-      
-    //   if (isFullScreen && !keyboardVisible && percentageHeightReduction > 0.25) {
-    //     setKeyboardVisible(true);
-    //     setKeyboardHeight(heightDifference);
-    //     setHeaderCollapsed(true);
-    //   }else {
-    //     setKeyboardVisible(false);
-    //     setKeyboardHeight(0);
-    //     setHeaderCollapsed(false);
-    //   } 
-          
-        // Only treat significant height reductions as keyboard appearance
-        // if (heightReduction > 0.25) {
-        //   setKeyboardVisible(true);
-        //   setHeaderCollapsed(true);
-
-        //   // Scroll to bottom of active chat
-        //   setTimeout(() => {
-        //     if (activeBot === "left") {
-        //       scrollToBottom(leftChatRef);
-        //     } else {
-        //       scrollToBottom(rightChatRef);
-        //     }
-        //   }, 100);
-        // } else {
-        //   setKeyboardVisible(false);
-        //   setHeaderCollapsed(false);
-        // }
-      //};
-
-      const debouncedVisualViewportResize = debounce(handleVisualViewportResize,150);
+      const debouncedVisualViewportResize = debounce(
+        handleVisualViewportResize,
+        150
+      );
 
       // browser resized, ignore viewport resize
-      window.addEventListener('resize', handleWindowResize);
+      window.addEventListener("resize", handleWindowResize);
 
       // viewport resize only, assume keyboard
       window.visualViewport.addEventListener(
@@ -385,55 +391,20 @@ const DualChatbotInterface = ({ session }: Props) => {
       );
 
       return () => {
-        window.removeEventListener('resize', handleWindowResize);
+        window.removeEventListener("resize", handleWindowResize);
         window.visualViewport?.removeEventListener(
           "resize",
           debouncedVisualViewportResize
         );
       };
-     } //else {
-    //   // Fallback for browsers that don't support visualViewport API
-    //   const handleFocus = (): void => {
-        
-    //       setKeyboardVisible(true);
-    //       setHeaderCollapsed(true);
-    //       setTimeout(() => {
-    //         if (activeBot === "left") {
-    //           scrollToBottom(leftChatRef);
-    //         } else {
-    //           scrollToBottom(rightChatRef);
-    //         }
-    //       }, 300);
-        
-    //   };
-
-    //   const handleBlur = (): void => {
-    //     setKeyboardVisible(false);
-    //     setHeaderCollapsed(false);
-    //   };
-
-    //   if (leftTextareaRef.current) {
-    //     leftTextareaRef.current.addEventListener("focus", handleFocus);
-    //     leftTextareaRef.current.addEventListener("blur", handleBlur);
-    //   }
-
-    //   if (rightTextareaRef.current) {
-    //     rightTextareaRef.current.addEventListener("focus", handleFocus);
-    //     rightTextareaRef.current.addEventListener("blur", handleBlur);
-    //   }
-
-    //   return () => {
-    //     if (leftTextareaRef.current) {
-    //       leftTextareaRef.current.removeEventListener("focus", handleFocus);
-    //       leftTextareaRef.current.removeEventListener("blur", handleBlur);
-    //     }
-    //     if (rightTextareaRef.current) {
-    //       rightTextareaRef.current.removeEventListener("focus", handleFocus);
-    //       rightTextareaRef.current.removeEventListener("blur", handleBlur);
-    //     }
-    //   };
-    // }
-  }, [activeBot, isFullScreen, keyboardVisible, keyboardHeight, headerCollapsed]);
+    }
+  }, [
+    activeBot,
+    isFullScreen,
+    keyboardVisible,
+    keyboardHeight,
+    headerCollapsed,
+  ]);
 
   // Function to dismiss keyboard (iOS specific)
   const dismissKeyboard = (): void => {
@@ -466,7 +437,7 @@ const DualChatbotInterface = ({ session }: Props) => {
             >
               {sidebarOpen ? <ChevronRight size={28} /> : <Menu size={28} />}
             </button>
-          </div>          
+          </div>
         </div>
       </div>
 
@@ -488,9 +459,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                 <Menu size={28} />
               </button>
             )}
-            <h1 className={`font-medium text-3xl`}>
-              Dual Chat
-            </h1>
+            <h1 className={`font-medium text-3xl`}>Dual Chat</h1>
           </div>
 
           {/* Text size adjustment controls */}
@@ -535,7 +504,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
               onClick={() => setShowConfigModal(true)}
             >
-              <Settings size={24} />              
+              <Settings size={24} />
             </button>
             <button
               className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
@@ -589,7 +558,12 @@ const DualChatbotInterface = ({ session }: Props) => {
                 ? "ring-4 ring-indigo-500"
                 : "border-2 border-gray-300"
             } `}
-            style = {{height: (keyboardVisible && isFullScreen) ? `calc(100vh - ${keyboardHeight}px)` : "auto"}}
+            style={{
+              height:
+                keyboardVisible && isFullScreen
+                  ? `calc(100vh - ${keyboardHeight}px)`
+                  : "auto",
+            }}
           >
             {/* Chatbot header */}
             <div
@@ -600,8 +574,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               <div className="flex items-center gap-3">
                 <Bot size={28} />
                 <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
-                  {/* {chatNameA} */}
-                  {`${debugText}, visible: ${keyboardVisible}, header collapsed: ${headerCollapsed}`}
+                  {chatNameA}                  
                 </h2>
               </div>
               {/* Active indicator for more clarity */}
@@ -706,7 +679,12 @@ const DualChatbotInterface = ({ session }: Props) => {
                 ? "ring-4 ring-teal-500"
                 : "border-2 border-gray-300"
             }`}
-            style = {{height: (keyboardVisible && isFullScreen) ? `calc(100vh - ${keyboardHeight}px)` : "auto"}}
+            style={{
+              height:
+                keyboardVisible && isFullScreen
+                  ? `calc(100vh - ${keyboardHeight}px)`
+                  : "auto",
+            }}
           >
             {/* Chatbot header */}
             <div
@@ -717,8 +695,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               <div className="flex items-center gap-3">
                 <Bot size={28} />
                 <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
-                  {/* {chatNameB} */}
-                  {keyboardHeight}                  
+                  {chatNameB}                  
                 </h2>
               </div>
               {/* Active indicator for more clarity */}
@@ -730,7 +707,7 @@ const DualChatbotInterface = ({ session }: Props) => {
             </div>
 
             {/* Chat messages area with ref for keyboard scroll */}
-            <div ref={rightChatRef} className="flex-1 p-5 overflow-y-auto" >
+            <div ref={rightChatRef} className="flex-1 p-5 overflow-y-auto">
               <div className="flex flex-col gap-4">
                 {rightMessages.map((message) => (
                   <div
