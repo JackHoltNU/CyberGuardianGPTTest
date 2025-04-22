@@ -306,7 +306,7 @@ const DualChatbotInterface = ({ session }: Props) => {
   };
 
     // Use visualViewport API for more accurate keyboard detection
-    if (window.visualViewport) {
+    if (window.visualViewport && !isResizingWindow) {
       const handleVisualViewportResize = (): void => {
         // Calculate height reduction as a percentage
         const currentHeight = window.visualViewport!.height;        
@@ -368,15 +368,15 @@ const DualChatbotInterface = ({ session }: Props) => {
         // }
       //};
 
-      const debouncedHandleWindowResize = debounce(handleWindowResize,150);
+      const debouncedVisualViewportResize = debounce(handleVisualViewportResize,150);
 
       // browser resized, ignore viewport resize
-      window.addEventListener('resize', debouncedHandleWindowResize);
+      window.addEventListener('resize', handleWindowResize);
 
       // viewport resize only, assume keyboard
       window.visualViewport.addEventListener(
         "resize",
-        handleVisualViewportResize
+        debouncedVisualViewportResize
       );
 
       return () => {
@@ -386,48 +386,48 @@ const DualChatbotInterface = ({ session }: Props) => {
           handleVisualViewportResize
         );
       };
-    } else {
-      // Fallback for browsers that don't support visualViewport API
-      const handleFocus = (): void => {
+     } //else {
+    //   // Fallback for browsers that don't support visualViewport API
+    //   const handleFocus = (): void => {
         
-          setKeyboardVisible(true);
-          setHeaderCollapsed(true);
-          setTimeout(() => {
-            if (activeBot === "left") {
-              scrollToBottom(leftChatRef);
-            } else {
-              scrollToBottom(rightChatRef);
-            }
-          }, 300);
+    //       setKeyboardVisible(true);
+    //       setHeaderCollapsed(true);
+    //       setTimeout(() => {
+    //         if (activeBot === "left") {
+    //           scrollToBottom(leftChatRef);
+    //         } else {
+    //           scrollToBottom(rightChatRef);
+    //         }
+    //       }, 300);
         
-      };
+    //   };
 
-      const handleBlur = (): void => {
-        setKeyboardVisible(false);
-        setHeaderCollapsed(false);
-      };
+    //   const handleBlur = (): void => {
+    //     setKeyboardVisible(false);
+    //     setHeaderCollapsed(false);
+    //   };
 
-      if (leftTextareaRef.current) {
-        leftTextareaRef.current.addEventListener("focus", handleFocus);
-        leftTextareaRef.current.addEventListener("blur", handleBlur);
-      }
+    //   if (leftTextareaRef.current) {
+    //     leftTextareaRef.current.addEventListener("focus", handleFocus);
+    //     leftTextareaRef.current.addEventListener("blur", handleBlur);
+    //   }
 
-      if (rightTextareaRef.current) {
-        rightTextareaRef.current.addEventListener("focus", handleFocus);
-        rightTextareaRef.current.addEventListener("blur", handleBlur);
-      }
+    //   if (rightTextareaRef.current) {
+    //     rightTextareaRef.current.addEventListener("focus", handleFocus);
+    //     rightTextareaRef.current.addEventListener("blur", handleBlur);
+    //   }
 
-      return () => {
-        if (leftTextareaRef.current) {
-          leftTextareaRef.current.removeEventListener("focus", handleFocus);
-          leftTextareaRef.current.removeEventListener("blur", handleBlur);
-        }
-        if (rightTextareaRef.current) {
-          rightTextareaRef.current.removeEventListener("focus", handleFocus);
-          rightTextareaRef.current.removeEventListener("blur", handleBlur);
-        }
-      };
-    }
+    //   return () => {
+    //     if (leftTextareaRef.current) {
+    //       leftTextareaRef.current.removeEventListener("focus", handleFocus);
+    //       leftTextareaRef.current.removeEventListener("blur", handleBlur);
+    //     }
+    //     if (rightTextareaRef.current) {
+    //       rightTextareaRef.current.removeEventListener("focus", handleFocus);
+    //       rightTextareaRef.current.removeEventListener("blur", handleBlur);
+    //     }
+    //   };
+    // }
   }, [activeBot]);
 
   // Function to dismiss keyboard (iOS specific)
