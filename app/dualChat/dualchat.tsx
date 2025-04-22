@@ -433,7 +433,7 @@ const DualChatbotInterface = ({ session }: Props) => {
     //     }
     //   };
     // }
-  }, [activeBot]);
+  }, [activeBot, isFullScreen, keyboardVisible, keyboardHeight, headerCollapsed]);
 
   // Function to dismiss keyboard (iOS specific)
   const dismissKeyboard = (): void => {
