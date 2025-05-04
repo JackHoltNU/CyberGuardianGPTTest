@@ -119,7 +119,7 @@ const DualChatConfigModal = ({ closeModal, availableConfigs, onConfigSelect, cha
               
             </div>
 
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <label className="flex items-center">
                 <input
                   type="checkbox"
@@ -129,7 +129,7 @@ const DualChatConfigModal = ({ closeModal, availableConfigs, onConfigSelect, cha
                 />
                 <span>Randomize positions (hide which config is which)</span>
               </label>
-            </div>
+            </div> */}
 
             {showValidationError && (
               <div className="text-red-500 mb-4">
