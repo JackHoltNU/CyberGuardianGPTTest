@@ -520,6 +520,7 @@ const DualChatbotInterface = ({ session }: Props) => {
               <X size={28} />
               <span className="sr-only">Exit</span>
             </button> */}
+            {/*
             <button
               className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
               onClick={toggleFullScreen}
@@ -539,6 +540,7 @@ const DualChatbotInterface = ({ session }: Props) => {
                 </>
               )}
             </button>
+            */}
           </div>
         </header>
 
