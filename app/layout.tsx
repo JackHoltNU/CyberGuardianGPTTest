@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { AdminProvider } from "./context/useAdmin";
 import { ComparisonChatbotProvider } from "./context/useComparisonChatbot";
 import { DualChatProvider } from "./context/useDualChat";
+import { PromptBuilderProvider } from "./context/usePromptBuilder";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -33,12 +34,14 @@ export default async function RootLayout({
     <ChatbotProvider>
       <ComparisonChatbotProvider>
         <DualChatProvider>
-          <AdminProvider>
-            <html lang="en">
-              <link rel="icon" href="/favicon.ico" sizes="any" />
-              <body className={inter.className}>{children}</body>
-            </html>
-          </AdminProvider>
+          <PromptBuilderProvider>
+            <AdminProvider>
+              <html lang="en">
+                <link rel="icon" href="/favicon.ico" sizes="any" />
+                <body className={inter.className}>{children}</body>
+              </html>
+            </AdminProvider>
+          </PromptBuilderProvider>            
         </DualChatProvider>  
       </ComparisonChatbotProvider>     
     </ChatbotProvider>
