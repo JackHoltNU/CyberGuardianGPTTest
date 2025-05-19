@@ -18,7 +18,7 @@ interface ChatbotContextType {
   threadId: string | undefined;
   messages: Array<MessageHistory>;
   title: string;
-  sendMessage: (text: string) => Promise<void>;
+  sendMessage: (text: string, prompt?: string) => Promise<void>;
   user?: string;
   setUser: (user: string) => void;
   loadUserChats: () => void;
@@ -158,7 +158,7 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
     resetChat();
   };
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async (text: string, prompt?: string) => {
     const newID = crypto.randomUUID();
     const updatedMessages: MessageHistory[] = [
       ...messages,
@@ -178,9 +178,10 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
         },
         body: JSON.stringify({
           messageHistory: updatedMessages,
-          user: user,
+          user,
           threadID: threadId,
           model: "primary",
+          userPrompt: prompt,
           saveUserMsgToDB: true,
           saveResponseToDB: true
         }),

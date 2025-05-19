@@ -119,10 +119,7 @@ const PromptBuilderChat = ({ session }: Props) => {
     setLoading(true);
 
     try {
-      
-      // For now we're just sending the message and using the existing API
-      // In a real implementation, we'd need to modify the API to accept the system prompt
-      await sendMessage(text);
+      await sendMessage(text, systemPrompt);
     } catch (error) {
       console.error("Failed to send message:", error);
       setShowError(true);
@@ -383,8 +380,8 @@ const PromptBuilderChat = ({ session }: Props) => {
               <Sliders size={24} />
               <span>
                 {promptBuilderOpen
-                  ? "Hide Prompt Builder"
-                  : "Show Prompt Builder"}
+                  ? "Hide Customise Chat"
+                  : "Show Customise Chat"}
               </span>
             </button>
             <button
@@ -418,10 +415,10 @@ const PromptBuilderChat = ({ session }: Props) => {
         )}
 
         {/* Chat and Prompt Builder content area */}
-        <div className="flex flex-1 p-6 gap-6 overflow-hidden">
+        <div className="flex flex-1 p-6 gap-6 overflow-hidden justify-center">
           {/* Chat Panel */}
           <div
-            className={`flex-1 flex flex-col bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-300`}
+            className={`w-1/2  flex flex-col bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-300`}
             style={{
               height:
                 keyboardVisible && isFullScreen

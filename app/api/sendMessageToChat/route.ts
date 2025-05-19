@@ -13,6 +13,7 @@ interface Props {
   threadID: string | undefined;
   model?: string;
   mainPrompt?: string;
+  userPrompt?: string;
   formatPrompt?: string;
   saveUserMsgToDB?: Boolean;
   saveResponseToDB?: Boolean;
@@ -26,11 +27,9 @@ interface ChatCompletionRequestMessage {
 export const POST = async (req: Request) => {
   const body = await req.json();
   const session = await getServerSession(options);
-  let { messageHistory, user, threadID, model, mainPrompt, formatPrompt, saveResponseToDB, saveUserMsgToDB } = body as Props;
+  let { messageHistory, user, threadID, model, mainPrompt, userPrompt, formatPrompt, saveResponseToDB, saveUserMsgToDB } = body as Props;
 
-  console.log(`Model: ${model}`);
-  console.log(`Main: ${mainPrompt}`);
-  console.log(`Format: ${formatPrompt}`);
+  
 
 
   if (!session) {
@@ -71,19 +70,29 @@ export const POST = async (req: Request) => {
   let messagesParam: ChatCompletionRequestMessage[] = [];
 
   if(!model || !mainPrompt == undefined || formatPrompt == undefined){
-    console.log("resorting to defaults")
-    config = await getAIConfig();
-    if(config){
+    if(userPrompt){
+      config = await getAIConfig("BuilderPhase1");
+    } else {
+      config = await getAIConfig();
+      console.log("no user prompt")
+    }
+    if(config){      
       model = config.primary;
-      mainPrompt = config.mainPrompt;
-      formatPrompt = config.formatPrompt;
+      mainPrompt = mainPrompt ?? config.mainPrompt;
+      if(userPrompt){
+        mainPrompt += userPrompt;
+      }
+      formatPrompt = formatPrompt ?? config.formatPrompt;
     } else {
       return new Response("Could not create chat completion, missing AI config", {
         status: 500,
       });
-    }
-    
+    }    
   }  
+
+  console.log(`Model: ${model}`);
+  console.log(`Main: ${mainPrompt}`);
+  console.log(`Format: ${formatPrompt}`);
    
   messagesParam = [
       {
@@ -213,8 +222,13 @@ const getCompletion = async (
   });
 };
 
-const getAIConfig = async () => {
-  const aiConfig: AIConfigType | null = await AIConfig.findOne();
+const getAIConfig = async (config?: string) => {
+  let aiConfig: AIConfigType | null;
+  if(config){
+    aiConfig = await AIConfig.findOne({ name: config });
+  } else {
+    aiConfig = await AIConfig.findOne({ isDefault: true });
+  }
   return aiConfig;
 };
 

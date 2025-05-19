@@ -55,15 +55,17 @@ export const PromptBuilderProvider = ({
   // Prompt builder state
   const [personality, setPersonality] = useState("professional");
   const [languageDifficulty, setLanguageDifficulty] = useState("unrestricted");
-  const [answerLength, setAnswerLength] = useState("single-paragraphs");
+  const [answerLength, setAnswerLength] = useState("single-sentences");
   const [personalization, setPersonalization] = useState("");
-  const [technicalDifficulty, setTechnicalDifficulty] = useState("basic");
-  const [instructionFormat, setInstructionFormat] = useState("step-by-step");
+  const [technicalDifficulty, setTechnicalDifficulty] = useState("technical");
+  const [instructionFormat, setInstructionFormat] = useState("full-lists");
   const [asksQuestions, setAsksQuestions] = useState(false);
   const [includesFollowup, setIncludesFollowup] = useState(false);
   const [promptBuilderOpen, setPromptBuilderOpen] = useState(true);
   const [promptSections, setPromptSections] = useState<PromptSection[] | undefined>();
   const [systemPrompt, setSystemPrompt] = useState("");
+
+  
 
   // Define the prompt sections and their options
   useEffect(() => {setPromptSections([
@@ -84,7 +86,7 @@ export const PromptBuilderProvider = ({
         {
           id: 'factual',
           title: 'Factual robot',
-          detailedInstruction: 'You will provide purely factual, objective information without emotional coloring or subjective assessment. Focus exclusively on verified information and clearly indicate when something is speculative.'
+          detailedInstruction: 'You will provide purely factual, objective information without emotional colouring or subjective assessment. Focus exclusively on verified information and clearly indicate when something is speculative.'
         }
       ],
       canDefine: false,
@@ -120,17 +122,17 @@ export const PromptBuilderProvider = ({
         {
           id: 'unrestricted',
           title: 'Unrestricted',
-          detailedInstruction: 'You will use your full vocabulary range without restrictions, including complex or uncommon words when they most precisely express the intended meaning.'
+          detailedInstruction: 'You will use your full vocabulary range without restrictions, including complex or uncommon words when they most precisely express the intended meaning, except where these conflict with preferences around technical jargon.'
         },
         {
           id: 'basic',
           title: 'Basic',
-          detailedInstruction: 'You will restrict your vocabulary to commonly understood words and phrases, avoiding obscure terminology. Sentences will be straightforward with simple structure.'
+          detailedInstruction: 'You will restrict your vocabulary to commonly understood words and phrases, avoiding obscure terminology. Language will be straightforward, avoiding complex sentence structures.'
         },
         {
           id: 'simple',
           title: 'As simple as possible',
-          detailedInstruction: 'You will use only the most common and easily understood words, keeping sentences short and direct. You will avoid complex sentence structures and write at approximately a 5th-grade reading level.'
+          detailedInstruction: 'You will use only the most common and easily understood words, keeping sentences short and direct. You will use only very simple sentence structures and write in a way that is understandable to those of all reading levels.'
         }
       ],
       canDefine: false,
@@ -182,7 +184,7 @@ export const PromptBuilderProvider = ({
   useEffect(() => {
     const prompt = generateSystemPrompt();
     setSystemPrompt(prompt);
-  },[personality,technicalDifficulty,languageDifficulty,answerLength,instructionFormat])
+  },[promptSections, personality,technicalDifficulty,languageDifficulty,answerLength,instructionFormat])
 
   // Generate system prompt based on settings
   const generateSystemPrompt = (): string => {
