@@ -21,6 +21,7 @@ import { useChatbot } from "../context/useChatbot";
 import { Session } from "next-auth";
 import { usePromptBuilder } from "../context/usePromptBuilder";
 import PromptBuilder from "./promptBuilder";
+import { signOut } from "next-auth/react";
 
 // Define font size options
 type FontSizeOption = "small" | "medium" | "large" | "largest";
@@ -390,6 +391,12 @@ const PromptBuilderChat = ({ session }: Props) => {
             >
               <RotateCcw size={24} />
               <span>Reset Chat</span>
+            </button>
+            <button
+              className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
+              onClick={() => signOut()}
+            >              
+              <span>Log out</span>
             </button>
           </div>
         </header>
