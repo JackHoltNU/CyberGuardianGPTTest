@@ -38,6 +38,8 @@ interface ChatbotContextType {
   botTokens: number;
   userCost: number;
   botCost: number;
+  breakpoint: boolean;
+  setBreakpoint: (newState: boolean) => void;
 }
 
 const ChatbotContext = createContext<ChatbotContextType | undefined>(undefined);
@@ -60,6 +62,7 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
   const [selectedChat, setSelectedChat] = useState<string>();
   const [isNewChat, setIsNewChat] = useState<boolean>(true);
   const [showError, setShowError] = useState(false);
+  const [breakpoint, setBreakpoint] = useState(false);
 
   const loadUserChats = debounce(async () => {
     if (user) {
@@ -195,6 +198,8 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
       throw new Error(`Failed to send message to chat ${error.message}`);
     }
 
+    setBreakpoint(response.breakpoint ?? false);
+
     setThreadId(response.threadID);
     let latest = response.message;
 
@@ -292,6 +297,8 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
         botTokens,
         userCost,
         botCost,
+        breakpoint,
+        setBreakpoint
       }}
     >
       {children}

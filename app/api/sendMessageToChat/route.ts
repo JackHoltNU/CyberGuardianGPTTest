@@ -116,6 +116,7 @@ export const POST = async (req: Request) => {
     let response: string = "";
     let title: string | undefined = "";
     let tags: string[] | undefined = [];
+    let breakpoint: false;
     const emptyFeedback: MessageRating = {
       upvoted: false,
       downvoted: false,
@@ -156,6 +157,7 @@ export const POST = async (req: Request) => {
 
       title = jsonResponse.title;
       response = jsonResponse.response;
+      breakpoint = jsonResponse.breakpoint;
       const tagsRaw: string = jsonResponse.tags;
       if (tagsRaw) {
         tags = tagsRaw.split(",");
@@ -195,6 +197,7 @@ export const POST = async (req: Request) => {
       threadID: threadID,
       userTokens: completion.usage?.prompt_tokens,
       botTokens: completion.usage?.completion_tokens,
+      breakpoint
     });
   } catch (error: any) {
     console.error("Couldn't create chat completion", error);

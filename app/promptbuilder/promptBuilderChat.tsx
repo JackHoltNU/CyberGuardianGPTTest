@@ -53,6 +53,8 @@ const PromptBuilderChat = ({ session }: Props) => {
     chatCollection,
     loadUserChats,
     openChat,
+    breakpoint,
+    setBreakpoint
   } = useChatbot();
 
   const {
@@ -73,6 +75,8 @@ const PromptBuilderChat = ({ session }: Props) => {
 
   // History sidebar state
   const [historySidebarOpen, setHistorySidebarOpen] = useState<boolean>(false);
+  const [feedbackInput, setFeedbackInput] = useState("");
+  const [showFeedbackInput, setShowFeedbackInput] = useState(false);
 
   // Refs
   const chatRef = useRef<HTMLDivElement>(null);
@@ -128,6 +132,21 @@ const PromptBuilderChat = ({ session }: Props) => {
       setLoading(false);
     }
   };
+
+  const handlePositiveFeedback = () => {
+    setBreakpoint(false);
+  }
+
+  const handleNegativeFeedback = () => {
+    setBreakpoint(false);
+    setShowFeedbackInput(true);
+  }
+
+  const handleFeedbackText = () => {
+    console.log(feedbackInput);
+    setFeedbackInput("");
+    setShowFeedbackInput(false);
+  }
 
   // Show confirmation message and automatically hide it
   const showConfirmation = (message: string): void => {
@@ -490,7 +509,7 @@ const PromptBuilderChat = ({ session }: Props) => {
 
             {/* Input area */}
             <div className="border-t-2 border-gray-200 p-4 relative">
-              <div className="flex items-center bg-gray-100 rounded-lg p-3 border border-gray-300">
+              {!breakpoint && !showFeedbackInput ? (<div className="flex items-center bg-gray-100 rounded-lg p-3 border border-gray-300">
                 <textarea
                   ref={textareaRef}
                   className={`flex-1 bg-transparent outline-none resize-none min-h-8 max-h-40 overflow-y-auto p-2 ${fontSizes[fontSize].input}`}
@@ -514,7 +533,44 @@ const PromptBuilderChat = ({ session }: Props) => {
                   <Send size={28} />
                   <span className="font-medium">Send</span>
                 </button>
-              </div>
+              </div>) : !showFeedbackInput ? (
+                <div className="flex p-4 relative items-center justify-center">
+                  <span>How are my latest responses?</span>
+                  <button
+                  className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
+                  onClick={handlePositiveFeedback}
+                  aria-label="Send message"
+                >                  
+                  <span className="font-medium">Perfect</span>
+                </button>
+                <button
+                  className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
+                  onClick={handleNegativeFeedback}
+                  aria-label="Send message"
+                >                  
+                  <span className="font-medium">Could be better</span>
+                </button>
+                </div>
+              ) : (
+                <div className="flex p-4 relative items-center justify-center">
+                  <span>What would you improve?</span>
+                  <textarea
+                  ref={textareaRef}
+                  className={`flex-1 bg-transparent rounded-lg outline-none resize-none min-h-16 max-h-40 overflow-y-auto px-6 py-2 ml-3 border-2 border-teal-400 ${fontSizes[fontSize].input}`}
+                  placeholder="In your own words..."
+                  rows={1}
+                  value={feedbackInput}
+                  onChange={(e) => setFeedbackInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleFeedbackText();
+                    }
+                  }}
+                  style={{ height: "42px" }}
+                />
+                </div>
+              )}
             </div>
           </div>
 

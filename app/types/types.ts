@@ -35,6 +35,7 @@ export interface ChatResponses {
   threadID: string | undefined;
   userTokens: number | undefined;
   botTokens: number | undefined;
+  breakpoint?: boolean;
 }
 
 export type MessageInstance = {
