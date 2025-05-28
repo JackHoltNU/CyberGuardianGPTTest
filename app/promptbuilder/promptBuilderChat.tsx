@@ -607,67 +607,7 @@ const PromptBuilderChat = ({ session }: Props) => {
                   >
                   <span className="font-medium">Continue with this configuration</span>
                 </button>
-                </div>
-                )
-              //   <div className="flex p-4 relative items-center justify-center">
-              //     <span>How are my latest responses?</span>
-              //     <button
-              //       className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
-              //       onClick={handlePositiveFeedback}
-              //       aria-label="Send message"
-              //     >
-              //       <span className="font-medium">Perfect</span>
-              //     </button>
-              //     <button
-              //       className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
-              //       onClick={handleNegativeFeedback}
-              //       aria-label="Send message"
-              //     >
-              //       <span className="font-medium">Could be better</span>
-              //     </button>
-              //   </div>
-              // ) : (
-              //   <div className="flex flex-col p-4 relative items-center justify-center">
-              //     <span>Evaluation question to go here (Select all that apply?)</span>
-              //     <div className="flex flex-col p-4 w-full">
-              //       <button
-              //         className="p-4 m-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
-              //         onClick={() => {setShowFeedbackInput(false)}}
-              //         aria-label="Send message"
-              //       >
-              //         <span className="font-medium">E.g. I haven't got the answer I wanted</span>
-              //       </button>
-              //       <button
-              //         className="p-4 m-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
-              //         onClick={() => {setShowFeedbackInput(false)}}
-              //         aria-label="Send message"
-              //       >
-              //         <span className="font-medium">E.g. It's not talking to me how I'd like</span>
-              //       </button>
-              //       <button
-              //         className="p-4 m-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
-              //         onClick={() => {setShowFeedbackInput(false)}}
-              //         aria-label="Send message"
-              //       >
-              //         <span className="font-medium">E.g. Something else</span>
-              //       </button>
-              //     </div>
-                  /* <textarea
-                  ref={textareaRef}
-                  className={`flex-1 bg-transparent rounded-lg outline-none resize-none min-h-16 max-h-40 overflow-y-auto px-6 py-2 ml-3 border-2 border-teal-400 ${fontSizes[fontSize].input}`}
-                  placeholder="In your own words..."
-                  rows={1}
-                  value={feedbackInput}
-                  onChange={(e) => setFeedbackInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleFeedbackText();
-                    }
-                  }}
-                  style={{ height: "42px" }}
-                /> */
-                //</div>
+                </div>)              
               }
             </div>
           </div>
