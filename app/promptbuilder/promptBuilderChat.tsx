@@ -7,11 +7,13 @@ import {
   Settings,
   RotateCcw,
   Bot,
+  ChevronLeft,
   ChevronRight,
   Type,
   MinusCircle,
   PlusCircle,
   Sliders,
+  RefreshCcw
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -54,7 +56,9 @@ const PromptBuilderChat = ({ session }: Props) => {
     loadUserChats,
     openChat,
     breakpoint,
-    setBreakpoint
+    setBreakpoint,
+    comparisonMessages,
+    setComparisonMessages
   } = useChatbot();
 
   const {
@@ -71,6 +75,8 @@ const PromptBuilderChat = ({ session }: Props) => {
   const [keyboardVisible, setKeyboardVisible] = useState<boolean>(false);
   const [headerCollapsed, setHeaderCollapsed] = useState<boolean>(false);
   const [promptBuilderOpen, setPromptBuilderOpen] = useState<boolean>(false);
+  const [comparisonMode, setComparisonMode] = useState<boolean>(false);
+  const [comparisonCounter, setComparisonCounter ] = useState(0);
   
 
   // History sidebar state
@@ -125,6 +131,7 @@ const PromptBuilderChat = ({ session }: Props) => {
 
     try {
       await sendMessage(text, systemPrompt);
+      setComparisonMessages([]);
     } catch (error) {
       console.error("Failed to send message:", error);
       setShowError(true);
@@ -132,6 +139,22 @@ const PromptBuilderChat = ({ session }: Props) => {
       setLoading(false);
     }
   };
+
+  const refreshLatestMessage = async () => {
+    setLoading(true);
+    setComparisonMode(true);
+    setComparisonCounter(comparisonCounter + 1);
+    console.log("refreshing");
+
+    try {
+      await sendMessage("", systemPrompt, true);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      setShowError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const handlePositiveFeedback = () => {
     setBreakpoint(false);
@@ -394,8 +417,7 @@ const PromptBuilderChat = ({ session }: Props) => {
           <div className="flex items-center gap-3">
             <button
               className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
-              onClick={() => setPromptBuilderOpen(!promptBuilderOpen)
-              }
+              onClick={() => setPromptBuilderOpen(!promptBuilderOpen)}
             >
               <Sliders size={24} />
               <span>
@@ -414,7 +436,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             <button
               className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
               onClick={() => signOut()}
-            >              
+            >
               <span>Log out</span>
             </button>
           </div>
@@ -466,7 +488,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             {/* Chat messages area */}
             <div ref={chatRef} className="flex-1 p-5 overflow-y-auto">
               <div className="flex flex-col gap-4">
-                {messages.map((message) => (
+                {messages.map((message, index) => (
                   <div
                     key={message.id}
                     className={`flex ${
@@ -475,6 +497,17 @@ const PromptBuilderChat = ({ session }: Props) => {
                         : "justify-start"
                     }`}
                   >
+                    {comparisonMode && comparisonMessages.length > 0 && message.sender === "assistant" && index == messages.length - 1 && (
+                      <button
+                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 ${comparisonCounter < 1 ? "invisible" : "bg-blue-200"} mr-2 ${
+                        fontSizes[fontSize].chat
+                      }`}
+                      disabled={comparisonCounter < 1}
+                      onClick={() => setComparisonCounter(comparisonCounter - 1)}
+                      >
+                        <ChevronLeft />
+                      </button>
+                    )}
                     <div
                       className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${
                         fontSizes[fontSize].chat
@@ -484,15 +517,45 @@ const PromptBuilderChat = ({ session }: Props) => {
                           : "bg-gray-100 text-gray-800 border border-gray-300"
                       }`}
                     >
+                      {comparisonMode && comparisonCounter <= comparisonMessages.length - 1 && index == messages.length - 1 ? (
                       <ReactMarkdown
                         className="markdown-content"
                         remarkPlugins={[remarkGfm]}
-                      >
-                        {typeof message.text === "string"
+                      >                        
+                          {comparisonMessages[comparisonCounter].text as string}
+                      </ReactMarkdown>
+                        ) : (
+                          <ReactMarkdown
+                        className="markdown-content"
+                        remarkPlugins={[remarkGfm]}
+                      >    
+                          {typeof message.text === "string"
                           ? message.text
                           : "Loading..."}
-                      </ReactMarkdown>
+                          </ReactMarkdown>
+                        )}
                     </div>
+                    {comparisonMode && comparisonMessages.length > 0 && message.sender === "assistant" && index == messages.length - 1 && (
+                      <button
+                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 ${comparisonCounter >= comparisonMessages.length ? "invisible" : "bg-blue-200"} ml-2 ${
+                        fontSizes[fontSize].chat
+                      }`}
+                      disabled={comparisonCounter >= comparisonMessages.length}
+                      onClick={() => setComparisonCounter(comparisonCounter + 1)}
+                      >
+                        <ChevronRight />
+                      </button>
+                    )}
+                    {index == messages.length - 1 && message.sender === "assistant" && (
+                      <button
+                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 bg-blue-200 ml-2 ${
+                        fontSizes[fontSize].chat
+                      }`}
+                      onClick={() => refreshLatestMessage()}
+                      >
+                        <RefreshCcw />
+                      </button>
+                    )}
                   </div>
                 ))}
                 {loading && (
@@ -509,52 +572,87 @@ const PromptBuilderChat = ({ session }: Props) => {
 
             {/* Input area */}
             <div className="border-t-2 border-gray-200 p-4 relative">
-              {!breakpoint && !showFeedbackInput ? (<div className="flex items-center bg-gray-100 rounded-lg p-3 border border-gray-300">
-                <textarea
-                  ref={textareaRef}
-                  className={`flex-1 bg-transparent outline-none resize-none min-h-8 max-h-40 overflow-y-auto p-2 ${fontSizes[fontSize].input}`}
-                  placeholder="Type your message..."
-                  rows={1}
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  style={{ height: "42px" }}
-                />
-                <button
-                  className="p-4 ml-3 flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-indigo-400 gap-2"
-                  onClick={handleSendMessage}
-                  aria-label="Send message"
-                >
-                  <Send size={28} />
-                  <span className="font-medium">Send</span>
-                </button>
-              </div>) : !showFeedbackInput ? (
-                <div className="flex p-4 relative items-center justify-center">
-                  <span>How are my latest responses?</span>
+              {!comparisonMode ? (
+                <div className="flex items-center bg-gray-100 rounded-lg p-3 border border-gray-300">
+                  <textarea
+                    ref={textareaRef}
+                    className={`flex-1 bg-transparent outline-none resize-none min-h-8 max-h-40 overflow-y-auto p-2 ${fontSizes[fontSize].input}`}
+                    placeholder="Type your message..."
+                    rows={1}
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    style={{ height: "42px" }}
+                  />
                   <button
-                  className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
-                  onClick={handlePositiveFeedback}
-                  aria-label="Send message"
-                >                  
-                  <span className="font-medium">Perfect</span>
-                </button>
-                <button
-                  className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
-                  onClick={handleNegativeFeedback}
-                  aria-label="Send message"
-                >                  
-                  <span className="font-medium">Could be better</span>
-                </button>
+                    className="p-4 ml-3 flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-indigo-400 gap-2"
+                    onClick={handleSendMessage}
+                    aria-label="Send message"
+                  >
+                    <Send size={28} />
+                    <span className="font-medium">Send</span>
+                  </button>
                 </div>
               ) : (
-                <div className="flex p-4 relative items-center justify-center">
-                  <span>What would you improve?</span>
-                  <textarea
+                <div className="flex px-4 relative items-center justify-center">
+                  <button
+                    className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
+                    onClick={() => {setComparisonMode(false)}}
+                    aria-label="Accept configuration"
+                  >
+                  <span className="font-medium">Continue with this configuration</span>
+                </button>
+                </div>
+                )
+              //   <div className="flex p-4 relative items-center justify-center">
+              //     <span>How are my latest responses?</span>
+              //     <button
+              //       className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
+              //       onClick={handlePositiveFeedback}
+              //       aria-label="Send message"
+              //     >
+              //       <span className="font-medium">Perfect</span>
+              //     </button>
+              //     <button
+              //       className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
+              //       onClick={handleNegativeFeedback}
+              //       aria-label="Send message"
+              //     >
+              //       <span className="font-medium">Could be better</span>
+              //     </button>
+              //   </div>
+              // ) : (
+              //   <div className="flex flex-col p-4 relative items-center justify-center">
+              //     <span>Evaluation question to go here (Select all that apply?)</span>
+              //     <div className="flex flex-col p-4 w-full">
+              //       <button
+              //         className="p-4 m-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
+              //         onClick={() => {setShowFeedbackInput(false)}}
+              //         aria-label="Send message"
+              //       >
+              //         <span className="font-medium">E.g. I haven't got the answer I wanted</span>
+              //       </button>
+              //       <button
+              //         className="p-4 m-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
+              //         onClick={() => {setShowFeedbackInput(false)}}
+              //         aria-label="Send message"
+              //       >
+              //         <span className="font-medium">E.g. It's not talking to me how I'd like</span>
+              //       </button>
+              //       <button
+              //         className="p-4 m-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
+              //         onClick={() => {setShowFeedbackInput(false)}}
+              //         aria-label="Send message"
+              //       >
+              //         <span className="font-medium">E.g. Something else</span>
+              //       </button>
+              //     </div>
+                  /* <textarea
                   ref={textareaRef}
                   className={`flex-1 bg-transparent rounded-lg outline-none resize-none min-h-16 max-h-40 overflow-y-auto px-6 py-2 ml-3 border-2 border-teal-400 ${fontSizes[fontSize].input}`}
                   placeholder="In your own words..."
@@ -568,44 +666,44 @@ const PromptBuilderChat = ({ session }: Props) => {
                     }
                   }}
                   style={{ height: "42px" }}
-                />
-                </div>
-              )}
+                /> */
+                //</div>
+              }
             </div>
           </div>
 
           {/* Prompt Builder Sidebar */}
-          
+
+          <div
+            className={`bg-white rounded-lg overflow-hidden border-gray-300 right-0 transition-all duration-500 ease ${
+              promptBuilderOpen
+                ? "flex-2 basis-1/2 border-2 shadow-lg "
+                : "basis-0 w-0"
+            }`}
+            style={{
+              height:
+                keyboardVisible && isFullScreen
+                  ? `calc(100vh - ${keyboardHeight}px - 180px)`
+                  : "auto",
+            }}
+          >
+            <div className="p-4 border-b border-gray-200 bg-indigo-600 text-white">
+              <div className="flex items-center justify-between">
+                <h2
+                  className={`font-semibold ${fontSizes[fontSize].header} text-nowrap`}
+                >
+                  Customise Chat Style
+                </h2>
+              </div>
+            </div>
+
             <div
-              className={`bg-white rounded-lg overflow-hidden border-gray-300 right-0 transition-all duration-500 ease ${
-                promptBuilderOpen
-                  ? 'flex-2 basis-1/2 border-2 shadow-lg ' 
-                  : 'basis-0 w-0'
-              }`}
-              style={{
-                height:
-                  keyboardVisible && isFullScreen
-                    ? `calc(100vh - ${keyboardHeight}px - 180px)`
-                    : "auto",
-              }}
+              className="p-4 space-y-6 overflow-y-auto"
+              style={{ maxHeight: "calc(100vh - 250px)" }}
             >
-              <div className="p-4 border-b border-gray-200 bg-indigo-600 text-white">
-                <div className="flex items-center justify-between">
-                  <h2 className={`font-semibold ${fontSizes[fontSize].header} text-nowrap`}>
-                    Customise Chat Style
-                  </h2>                  
-                </div>               
-              </div>
-
-              <div
-                className="p-4 space-y-6 overflow-y-auto"
-                style={{ maxHeight: "calc(100vh - 250px)" }}
-              >
-                <PromptBuilder />
-
-              </div>  
-              </div>
-          
+              <PromptBuilder />
+            </div>
+          </div>
         </div>
       </div>
     </div>

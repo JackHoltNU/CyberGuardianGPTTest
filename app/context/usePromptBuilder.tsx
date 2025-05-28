@@ -55,7 +55,7 @@ export const PromptBuilderProvider = ({
   // Prompt builder state
   const [personality, setPersonality] = useState("professional");
   const [languageDifficulty, setLanguageDifficulty] = useState("unrestricted");
-  const [answerLength, setAnswerLength] = useState("single-sentences");
+  const [answerLength, setAnswerLength] = useState("conversational");
   const [personalization, setPersonalization] = useState("");
   const [technicalDifficulty, setTechnicalDifficulty] = useState("technical");
   const [instructionFormat, setInstructionFormat] = useState("full-lists");
@@ -143,9 +143,9 @@ export const PromptBuilderProvider = ({
       title: 'Answer Length',
       options: [
         {
-          id: 'single-sentences',
-          title: 'Single sentences',
-          detailedInstruction: 'You will respond to the user using a single, normal-length sentence, where possible.'
+          id: 'conversational',
+          title: 'Conversational',
+          detailedInstruction: 'You will respond to the user using short, conversational responses that are one or two sentences long.'
         },
         {
           id: 'single-paragraphs',

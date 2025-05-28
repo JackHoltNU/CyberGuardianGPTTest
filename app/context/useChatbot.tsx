@@ -18,7 +18,7 @@ interface ChatbotContextType {
   threadId: string | undefined;
   messages: Array<MessageHistory>;
   title: string;
-  sendMessage: (text: string, prompt?: string) => Promise<void>;
+  sendMessage: (text: string, prompt?: string, refreshLatest?: boolean) => Promise<void>;
   user?: string;
   setUser: (user: string) => void;
   loadUserChats: () => void;
@@ -40,6 +40,8 @@ interface ChatbotContextType {
   botCost: number;
   breakpoint: boolean;
   setBreakpoint: (newState: boolean) => void;
+  comparisonMessages: MessageHistory[];
+  setComparisonMessages: (newArray: MessageHistory[]) => void;
 }
 
 const ChatbotContext = createContext<ChatbotContextType | undefined>(undefined);
@@ -161,15 +163,25 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
     resetChat();
   };
 
-  const sendMessage = async (text: string, prompt?: string) => {
+  const sendMessage = async (text: string, prompt?: string, refreshLatest?: boolean) => {
     const newID = crypto.randomUUID();
-    const updatedMessages: MessageHistory[] = [
-      ...messages,
-      { sender: "user", text, id: newID },
-    ];
-    setMessages((prev) => [...prev, { sender: "user", text, id: newID }]);
+    let updatedMessages: MessageHistory[];
+    if (refreshLatest) {
+      // If refreshing latest message, rather than adding, remove latest AI message and don't add new user message
+      let shortenedMessages = messages;
+      const replacedMessage = shortenedMessages.pop();
+      if(replacedMessage){
+        setComparisonMessages((prev) => [...prev, replacedMessage]);
+      }
+      updatedMessages = shortenedMessages;
+      setMessages(shortenedMessages);
+    } else {
+      updatedMessages = [...messages, { sender: "user", text, id: newID }];
+      setMessages((prev) => [...prev, { sender: "user", text, id: newID }]);      
+    }
+    
     if (user === undefined) {
-      return;
+        return;
     }
 
     let response: ChatResponses;
@@ -185,7 +197,7 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
           threadID: threadId,
           model: "primary",
           userPrompt: prompt,
-          saveUserMsgToDB: true,
+          saveUserMsgToDB: refreshLatest ? false : true,
           saveResponseToDB: true
         }),
       });
@@ -298,7 +310,9 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
         userCost,
         botCost,
         breakpoint,
-        setBreakpoint
+        setBreakpoint,
+        comparisonMessages,
+        setComparisonMessages
       }}
     >
       {children}
