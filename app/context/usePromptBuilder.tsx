@@ -2,6 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { PromptConfiguration } from "../types/types";
 
 interface PromptBuilderContextType {
   promptSections: PromptSection[] | undefined;
@@ -25,6 +26,8 @@ interface PromptBuilderContextType {
   promptBuilderOpen: boolean;
   setPromptBuilderOpen: (value: boolean) => void;
   systemPrompt: string;
+  getCurrentConfiguration: () => PromptConfiguration;
+  applyConfiguration: (config: PromptConfiguration) => void;
 }
 
 const PromptBuilderContext = createContext<
@@ -65,7 +68,34 @@ export const PromptBuilderProvider = ({
   const [promptSections, setPromptSections] = useState<PromptSection[] | undefined>();
   const [systemPrompt, setSystemPrompt] = useState("");
 
-  
+  const getCurrentConfiguration = (): PromptConfiguration => {
+  const getDisplayLabel = (sectionId: string, optionId: string): string => {
+    const section = promptSections?.find(s => s.id === sectionId);
+    const option = section?.options.find(o => o.id === optionId);
+    return option?.title || optionId;
+  };
+
+  return {
+    personality,
+    languageDifficulty,
+    answerLength,
+    technicalDifficulty,
+    instructionFormat,
+    personalityLabel: getDisplayLabel('personality', personality),
+    languageDifficultyLabel: getDisplayLabel('language-difficulty', languageDifficulty),
+    answerLengthLabel: getDisplayLabel('answer-length', answerLength),
+    technicalDifficultyLabel: getDisplayLabel('technical-difficulty', technicalDifficulty),
+    instructionFormatLabel: getDisplayLabel('instruction-style', instructionFormat),
+  };
+};
+
+const applyConfiguration = (config: PromptConfiguration) => {
+  setPersonality(config.personality);
+  setLanguageDifficulty(config.languageDifficulty);
+  setAnswerLength(config.answerLength);
+  setTechnicalDifficulty(config.technicalDifficulty);
+  setInstructionFormat(config.instructionFormat);
+};
 
   // Define the prompt sections and their options
   useEffect(() => {setPromptSections([
@@ -237,7 +267,9 @@ export const PromptBuilderProvider = ({
         generateSystemPrompt,
         promptBuilderOpen,
         setPromptBuilderOpen,
-        systemPrompt
+        systemPrompt,
+        getCurrentConfiguration,
+        applyConfiguration
       }}
     >
       {children}

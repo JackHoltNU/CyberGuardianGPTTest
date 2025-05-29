@@ -26,6 +26,7 @@ export type MessageHistory = {
   model?: string;
   mainPrompt?: string;
   formatPrompt?: string;
+  promptConfig?: PromptConfiguration;
 };
 
 export interface ChatResponses {
@@ -98,4 +99,17 @@ export type UserCollection = {
 
 export type AIConfigCollection = {
   configs: AIConfigType[];
+};
+
+export type PromptConfiguration = {
+  personality: string;
+  languageDifficulty: string;
+  answerLength: string;
+  technicalDifficulty: string;
+  instructionFormat: string;
+  personalityLabel: string;
+  languageDifficultyLabel: string;
+  answerLengthLabel: string;
+  technicalDifficultyLabel: string;
+  instructionFormatLabel: string;
 };

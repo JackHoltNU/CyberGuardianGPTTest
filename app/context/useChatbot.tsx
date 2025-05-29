@@ -9,6 +9,7 @@ import {
   ChatResponses,
   MessageHistory,
   MessageRating,
+  PromptConfiguration,
 } from "../types/types";
 import { debounce } from "../utils/debounce";
 import { signOut } from "next-auth/react";
@@ -18,7 +19,7 @@ interface ChatbotContextType {
   threadId: string | undefined;
   messages: Array<MessageHistory>;
   title: string;
-  sendMessage: (text: string, prompt?: string, refreshLatest?: boolean) => Promise<void>;
+  sendMessage: (text: string, prompt?: string, promptConfig?: PromptConfiguration, refreshLatest?: boolean) => Promise<void>;
   user?: string;
   setUser: (user: string) => void;
   loadUserChats: () => void;
@@ -163,7 +164,7 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
     resetChat();
   };
 
-  const sendMessage = async (text: string, prompt?: string, refreshLatest?: boolean) => {
+  const sendMessage = async (text: string, prompt?: string, promptConfig?: PromptConfiguration, refreshLatest?: boolean) => {
     const newID = crypto.randomUUID();
     let updatedMessages: MessageHistory[];
     if (refreshLatest) {
@@ -217,7 +218,7 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
 
     setMessages((prev) => [
       ...prev,
-      { id: response.id, sender: "assistant", text: latest },
+      { id: response.id, sender: "assistant", text: latest, promptConfig },
     ]);
     setThreadId(response.threadID);
     if (response.title != "") {

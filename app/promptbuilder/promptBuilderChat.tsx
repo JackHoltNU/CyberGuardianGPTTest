@@ -2,28 +2,23 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import {
-  Send,
   Menu,
   Settings,
   RotateCcw,
-  Bot,
-  ChevronLeft,
-  ChevronRight,
   Type,
   MinusCircle,
   PlusCircle,
   Sliders,
-  RefreshCcw
 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import LoadingDots from "../components/loadingdots";
 import { debounce } from "../utils/debounce";
 import { useChatbot } from "../context/useChatbot";
 import { Session } from "next-auth";
 import { usePromptBuilder } from "../context/usePromptBuilder";
 import PromptBuilder from "./promptBuilder";
 import { signOut } from "next-auth/react";
+import ChatHistorySidebar from "./chatHistorySidebar";
+import ChatPanel from "./chatPanel";
+import { PromptConfiguration } from "../types/types";
 
 // Define font size options
 type FontSizeOption = "small" | "medium" | "large" | "largest";
@@ -61,9 +56,7 @@ const PromptBuilderChat = ({ session }: Props) => {
     setComparisonMessages
   } = useChatbot();
 
-  const {
-    systemPrompt,
-  } = usePromptBuilder();
+  const { systemPrompt, getCurrentConfiguration, applyConfiguration } = usePromptBuilder();
 
   // Local state for chat UI
   const [userInput, setUserInput] = useState<string>("");
@@ -76,8 +69,7 @@ const PromptBuilderChat = ({ session }: Props) => {
   const [headerCollapsed, setHeaderCollapsed] = useState<boolean>(false);
   const [promptBuilderOpen, setPromptBuilderOpen] = useState<boolean>(false);
   const [comparisonMode, setComparisonMode] = useState<boolean>(false);
-  const [comparisonCounter, setComparisonCounter ] = useState(0);
-  
+  const [comparisonCounter, setComparisonCounter] = useState(0);
 
   // History sidebar state
   const [historySidebarOpen, setHistorySidebarOpen] = useState<boolean>(false);
@@ -85,11 +77,9 @@ const PromptBuilderChat = ({ session }: Props) => {
   const [showFeedbackInput, setShowFeedbackInput] = useState(false);
 
   // Refs
-  const chatRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fonts sizes
+  // Font sizes
   const fontSizes: FontSizeMapping = {
     small: {
       chat: "text-base",
@@ -130,7 +120,7 @@ const PromptBuilderChat = ({ session }: Props) => {
     setLoading(true);
 
     try {
-      await sendMessage(text, systemPrompt);
+      await sendMessage(text, systemPrompt, getCurrentConfiguration());
       setComparisonMessages([]);
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -140,6 +130,10 @@ const PromptBuilderChat = ({ session }: Props) => {
     }
   };
 
+  const handleConfigurationChange = (config: PromptConfiguration) => {
+  applyConfiguration(config);
+};
+
   const refreshLatestMessage = async () => {
     setLoading(true);
     setComparisonMode(true);
@@ -147,29 +141,29 @@ const PromptBuilderChat = ({ session }: Props) => {
     console.log("refreshing");
 
     try {
-      await sendMessage("", systemPrompt, true);
+      await sendMessage("", systemPrompt, getCurrentConfiguration(), true);
     } catch (error) {
       console.error("Failed to send message:", error);
       setShowError(true);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const handlePositiveFeedback = () => {
     setBreakpoint(false);
-  }
+  };
 
   const handleNegativeFeedback = () => {
     setBreakpoint(false);
     setShowFeedbackInput(true);
-  }
+  };
 
   const handleFeedbackText = () => {
     console.log(feedbackInput);
     setFeedbackInput("");
     setShowFeedbackInput(false);
-  }
+  };
 
   // Show confirmation message and automatically hide it
   const showConfirmation = (message: string): void => {
@@ -208,34 +202,8 @@ const PromptBuilderChat = ({ session }: Props) => {
     }
   };
 
-  // Auto-resize textarea function
-  const autoResizeTextarea = (textarea: HTMLTextAreaElement | null): void => {
-    if (textarea) {
-      textarea.style.height = "auto";
-      const newHeight = Math.min(textarea.scrollHeight, 150); // Max height 150px
-      textarea.style.height = `${newHeight}px`;
-    }
-  };
-
-  // Apply auto-resize on input change
+  // Keyboard detection effect
   useEffect(() => {
-    autoResizeTextarea(textareaRef.current);
-  }, [userInput]);
-
-  // Scroll to the bottom of chat when new message arrives
-  const scrollToBottom = (chatRef: React.RefObject<HTMLDivElement>): void => {
-    if (chatRef && chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
-  };
-
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    scrollToBottom(chatRef);
-  }, [messages]);
-
-  useEffect(() => {
-    // Handle viewport changes (for keyboard detection)
     const initialViewportHeight = window.innerHeight;
 
     if (window.visualViewport) {
@@ -247,8 +215,7 @@ const PromptBuilderChat = ({ session }: Props) => {
 
         const currentHeight = window.visualViewport!.height;
         const heightDifference = initialViewportHeight - currentHeight;
-        const percentageHeightReduction =
-          heightDifference / initialViewportHeight;
+        const percentageHeightReduction = heightDifference / initialViewportHeight;
 
         const keyboardLikelyVisible =
           percentageHeightReduction > 0.2 && heightDifference > 100;
@@ -277,84 +244,23 @@ const PromptBuilderChat = ({ session }: Props) => {
         }
       }, 150);
 
-      window.visualViewport.addEventListener(
-        "resize",
-        handleVisualViewportResize
-      );
+      window.visualViewport.addEventListener("resize", handleVisualViewportResize);
 
       return () => {
-        window.visualViewport?.removeEventListener(
-          "resize",
-          handleVisualViewportResize
-        );
+        window.visualViewport?.removeEventListener("resize", handleVisualViewportResize);
       };
     }
-  }, [isFullScreen, keyboardVisible]); 
+  }, [isFullScreen, keyboardVisible]);
 
   return (
     <div className="flex h-screen bg-gray-50">
       {/* History Sidebar */}
-      <div
-        className={`fixed md:relative h-full z-10 bg-gray-800 text-white transition-all duration-300 ${
-          historySidebarOpen ? "w-72" : "w-0"
-        } overflow-hidden shadow-lg`}
-      >
-        <div className="flex flex-col h-full">
-          <div className="p-6 flex items-center justify-between">
-            <h2
-              className={`font-semibold whitespace-nowrap text-xl ${
-                !historySidebarOpen && "md:hidden"
-              }`}
-            >
-              Chat History
-            </h2>
-            <button
-              onClick={() => setHistorySidebarOpen(!historySidebarOpen)}
-              className="p-3 rounded hover:bg-gray-700 text-gray-300 min-w-14 min-h-14 flex items-center justify-center"
-              aria-label={historySidebarOpen ? "Close menu" : "Open menu"}
-            >
-              {historySidebarOpen ? (
-                <ChevronRight size={28} />
-              ) : (
-                <Menu size={28} />
-              )}
-            </button>
-          </div>
-          {/* Chat history items */}
-          <div className="flex-1 overflow-y-auto">
-            {chatCollection && chatCollection.chats.length > 0 ? (
-              <div className="space-y-2 px-4">
-                {chatCollection.chats.map((chat) => (
-                  <div
-                    key={chat.threadID}
-                    className="p-3 hover:bg-gray-700 rounded-lg cursor-pointer"
-                    onClick={() => openChat(chat)}
-                  >
-                    <div className="text-white font-medium truncate">
-                      {chat.title || "Untitled Chat"}
-                    </div>
-                    <div className="text-sm text-gray-400 truncate">
-                      {chat.messages && chat.messages.length > 0
-                        ? typeof chat.messages[chat.messages.length - 1]
-                            .text === "string"
-                          ? (
-                              chat.messages[chat.messages.length - 1]
-                                .text as string
-                            ).substring(0, 30) + "..."
-                          : "Loading..."
-                        : "No messages"}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="px-6 py-4 text-gray-400">
-                No previous conversations
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <ChatHistorySidebar
+        isOpen={historySidebarOpen}
+        onToggle={() => setHistorySidebarOpen(!historySidebarOpen)}
+        chatCollection={chatCollection}
+        onChatSelect={openChat}
+      />
 
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
@@ -374,7 +280,7 @@ const PromptBuilderChat = ({ session }: Props) => {
                 <Menu size={28} />
               </button>
             )}
-            <h1 className={`font-medium text-3xl`}>CyberGuardian Chat</h1>
+            <h1 className="font-medium text-3xl">CyberGuardian Chat</h1>
           </div>
 
           {/* Text size adjustment controls */}
@@ -395,8 +301,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             <div className="px-3 flex items-center gap-2 text-lg">
               <Type size={24} />
               <span className="font-medium">
-                Text Size:{" "}
-                {fontSize.charAt(0).toUpperCase() + fontSize.slice(1)}
+                Text Size: {fontSize.charAt(0).toUpperCase() + fontSize.slice(1)}
               </span>
             </div>
             <button
@@ -421,9 +326,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             >
               <Sliders size={24} />
               <span>
-                {promptBuilderOpen
-                  ? "Hide Customise Chat"
-                  : "Show Customise Chat"}
+                {promptBuilderOpen ? "Hide Customise Chat" : "Show Customise Chat"}
               </span>
             </button>
             <button
@@ -465,159 +368,31 @@ const PromptBuilderChat = ({ session }: Props) => {
         {/* Chat and Prompt Builder content area */}
         <div className="flex flex-1 p-6 gap-6 overflow-hidden justify-center">
           {/* Chat Panel */}
-          <div
-            className={`w-1/2  flex flex-col bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-300`}
-            style={{
-              height:
-                keyboardVisible && isFullScreen
-                  ? `calc(100vh - ${keyboardHeight}px - 180px)`
-                  : "auto",
-              transition: "all 0.3s ease",
-            }}
-          >
-            {/* Chatbot header */}
-            <div className="bg-indigo-600 text-white p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Bot size={28} />
-                <h2 className={`font-semibold ${fontSizes[fontSize].header}`}>
-                  {title || "New Chat"}
-                </h2>
-              </div>
-            </div>
-
-            {/* Chat messages area */}
-            <div ref={chatRef} className="flex-1 p-5 overflow-y-auto">
-              <div className="flex flex-col gap-4">
-                {messages.map((message, index) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.sender === "user"
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
-                    {comparisonMode && comparisonMessages.length > 0 && message.sender === "assistant" && index == messages.length - 1 && (
-                      <button
-                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 ${comparisonCounter < 1 ? "invisible" : "bg-blue-200"} mr-2 ${
-                        fontSizes[fontSize].chat
-                      }`}
-                      disabled={comparisonCounter < 1}
-                      onClick={() => setComparisonCounter(comparisonCounter - 1)}
-                      >
-                        <ChevronLeft />
-                      </button>
-                    )}
-                    <div
-                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${
-                        fontSizes[fontSize].chat
-                      } ${
-                        message.sender === "user"
-                          ? "bg-indigo-100 text-gray-800 border border-indigo-200"
-                          : "bg-gray-100 text-gray-800 border border-gray-300"
-                      }`}
-                    >
-                      {comparisonMode && comparisonCounter <= comparisonMessages.length - 1 && index == messages.length - 1 ? (
-                      <ReactMarkdown
-                        className="markdown-content"
-                        remarkPlugins={[remarkGfm]}
-                      >                        
-                          {comparisonMessages[comparisonCounter].text as string}
-                      </ReactMarkdown>
-                        ) : (
-                          <ReactMarkdown
-                        className="markdown-content"
-                        remarkPlugins={[remarkGfm]}
-                      >    
-                          {typeof message.text === "string"
-                          ? message.text
-                          : "Loading..."}
-                          </ReactMarkdown>
-                        )}
-                    </div>
-                    {comparisonMode && comparisonMessages.length > 0 && message.sender === "assistant" && index == messages.length - 1 && (
-                      <button
-                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 ${comparisonCounter >= comparisonMessages.length ? "invisible" : "bg-blue-200"} ml-2 ${
-                        fontSizes[fontSize].chat
-                      }`}
-                      disabled={comparisonCounter >= comparisonMessages.length}
-                      onClick={() => setComparisonCounter(comparisonCounter + 1)}
-                      >
-                        <ChevronRight />
-                      </button>
-                    )}
-                    {index == messages.length - 1 && message.sender === "assistant" && (
-                      <button
-                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 bg-blue-200 ml-2 ${
-                        fontSizes[fontSize].chat
-                      }`}
-                      onClick={() => refreshLatestMessage()}
-                      >
-                        <RefreshCcw />
-                      </button>
-                    )}
-                  </div>
-                ))}
-                {loading && (
-                  <div key="loading" className="flex justify-start">
-                    <div
-                      className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg ${fontSizes[fontSize].chat} bg-gray-100 text-gray-800 border border-gray-300`}
-                    >
-                      <LoadingDots />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Input area */}
-            <div className="border-t-2 border-gray-200 p-4 relative">
-              {!comparisonMode ? (
-                <div className="flex items-center bg-gray-100 rounded-lg p-3 border border-gray-300">
-                  <textarea
-                    ref={textareaRef}
-                    className={`flex-1 bg-transparent outline-none resize-none min-h-8 max-h-40 overflow-y-auto p-2 ${fontSizes[fontSize].input}`}
-                    placeholder="Type your message..."
-                    rows={1}
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                    style={{ height: "42px" }}
-                  />
-                  <button
-                    className="p-4 ml-3 flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-indigo-400 gap-2"
-                    onClick={handleSendMessage}
-                    aria-label="Send message"
-                  >
-                    <Send size={28} />
-                    <span className="font-medium">Send</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="flex px-4 relative items-center justify-center">
-                  <button
-                    className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
-                    onClick={() => {setComparisonMode(false)}}
-                    aria-label="Accept configuration"
-                  >
-                  <span className="font-medium">Continue with this configuration</span>
-                </button>
-                </div>)              
-              }
-            </div>
-          </div>
+          <ChatPanel
+            title={title}
+            messages={messages}
+            loading={loading}
+            userInput={userInput}
+            onInputChange={setUserInput}
+            onSendMessage={handleSendMessage}
+            fontSizes={fontSizes[fontSize]}
+            keyboardHeight={keyboardHeight}
+            keyboardVisible={keyboardVisible}
+            isFullScreen={isFullScreen}
+            comparisonMode={comparisonMode}
+            comparisonMessages={comparisonMessages}
+            comparisonCounter={comparisonCounter}
+            onComparisonCounterChange={setComparisonCounter}
+            onRefreshLatestMessage={refreshLatestMessage}
+            onExitComparisonMode={() => setComparisonMode(false)}
+            onConfigurationChange={handleConfigurationChange}
+          />
 
           {/* Prompt Builder Sidebar */}
-
           <div
             className={`bg-white rounded-lg overflow-hidden border-gray-300 right-0 transition-all duration-500 ease ${
               promptBuilderOpen
-                ? "flex-2 basis-1/2 border-2 shadow-lg "
+                ? "flex-2 basis-1/2 border-2 shadow-lg"
                 : "basis-0 w-0"
             }`}
             style={{
@@ -629,9 +404,7 @@ const PromptBuilderChat = ({ session }: Props) => {
           >
             <div className="p-4 border-b border-gray-200 bg-indigo-600 text-white">
               <div className="flex items-center justify-between">
-                <h2
-                  className={`font-semibold ${fontSizes[fontSize].header} text-nowrap`}
-                >
+                <h2 className={`font-semibold ${fontSizes[fontSize].header} text-nowrap`}>
                   Customise Chat Style
                 </h2>
               </div>
