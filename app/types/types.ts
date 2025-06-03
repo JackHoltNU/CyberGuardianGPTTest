@@ -68,11 +68,11 @@ export type Comparison = {
 
 export type ComparisonThread = {
   comparisons: Comparison[];
-}
+};
 
 export type ComparisonChatCollection = {
   threads: ComparisonThread[];
-}
+};
 
 export type ChatInstance = {
   threadID: string;
@@ -102,6 +102,7 @@ export type AIConfigCollection = {
 };
 
 export type PromptConfiguration = {
+  id: string;
   personality: string;
   languageDifficulty: string;
   answerLength: string;

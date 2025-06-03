@@ -167,13 +167,14 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
   const sendMessage = async (text: string, prompt?: string, promptConfig?: PromptConfiguration, refreshLatest?: boolean) => {
     const newID = crypto.randomUUID();
     let updatedMessages: MessageHistory[];
+    
     if (refreshLatest) {
       // If refreshing latest message, rather than adding, remove latest AI message and don't add new user message
       let shortenedMessages = messages;
       const replacedMessage = shortenedMessages.pop();
-      if(replacedMessage){
-        setComparisonMessages((prev) => [...prev, replacedMessage]);
-      }
+      // if(replacedMessage){
+      //   setComparisonMessages((prev) => [...prev, replacedMessage]);
+      // }
       updatedMessages = shortenedMessages;
       setMessages(shortenedMessages);
     } else {
@@ -220,6 +221,13 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
       ...prev,
       { id: response.id, sender: "assistant", text: latest, promptConfig },
     ]);
+
+    if(promptConfig){
+      // always add responses for comparison when using prompt configuration page
+      console.log("adding to comparison messages array");
+      setComparisonMessages((prev) => [...prev, { id: response.id, sender: "assistant", text: latest, promptConfig }]);
+    }
+
     setThreadId(response.threadID);
     if (response.title != "") {
       setTitle(response.title);

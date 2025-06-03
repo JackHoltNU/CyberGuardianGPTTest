@@ -37,6 +37,29 @@ interface Props {
   session: Session;
 }
 
+// Define color palette for comparison configs
+const CONFIG_COLOR_NAMES = [
+  "blue",
+  "green",
+  "orange",
+  "purple",
+  "red",
+  "yellow",
+  "pink",
+  "indigo",
+];
+
+// Helper to generate a config hash
+const getConfigHash = (config: PromptConfiguration): string => {
+  return `${config.personality}-${config.languageDifficulty}-${config.answerLength}-${config.technicalDifficulty}-${config.instructionFormat}`;
+};
+
+// Helper to ensure a config has an id
+const withConfigId = (config: PromptConfiguration): PromptConfiguration => {
+  if (config.id) return config;
+  return { ...config, id: getConfigHash(config) };
+};
+
 const PromptBuilderChat = ({ session }: Props) => {
   // Get states and functions from context
   const {
@@ -53,10 +76,11 @@ const PromptBuilderChat = ({ session }: Props) => {
     breakpoint,
     setBreakpoint,
     comparisonMessages,
-    setComparisonMessages
+    setComparisonMessages,
   } = useChatbot();
 
-  const { systemPrompt, getCurrentConfiguration, applyConfiguration } = usePromptBuilder();
+  const { systemPrompt, getCurrentConfiguration, applyConfiguration } =
+    usePromptBuilder();
 
   // Local state for chat UI
   const [userInput, setUserInput] = useState<string>("");
@@ -103,6 +127,47 @@ const PromptBuilderChat = ({ session }: Props) => {
     },
   };
 
+  // Stable color assignment using useRef
+  const configColorMapRef = useRef<Map<string, string>>(new Map());
+  const colorIndexRef = useRef(0);
+
+  // Track previous config for change detection
+  const previousConfigRef = useRef<PromptConfiguration | null>(null);
+
+  // Helper to get changed config fields
+  const getConfigChanges = (
+    prev: PromptConfiguration,
+    curr: PromptConfiguration
+  ) => {
+    const changes: string[] = [];
+    if (prev.personality !== curr.personality) {
+      changes.push(
+        `personality from "${prev.personalityLabel}" to "${curr.personalityLabel}"`
+      );
+    }
+    if (prev.languageDifficulty !== curr.languageDifficulty) {
+      changes.push(
+        `language from "${prev.languageDifficultyLabel}" to "${curr.languageDifficultyLabel}"`
+      );
+    }
+    if (prev.answerLength !== curr.answerLength) {
+      changes.push(
+        `length from "${prev.answerLengthLabel}" to "${curr.answerLengthLabel}"`
+      );
+    }
+    if (prev.technicalDifficulty !== curr.technicalDifficulty) {
+      changes.push(
+        `technical difficulty from "${prev.technicalDifficultyLabel}" to "${curr.technicalDifficultyLabel}"`
+      );
+    }
+    if (prev.instructionFormat !== curr.instructionFormat) {
+      changes.push(
+        `format from "${prev.instructionFormatLabel}" to "${curr.instructionFormatLabel}"`
+      );
+    }
+    return changes;
+  };
+
   // Set the user when session is available
   useEffect(() => {
     if (session.user?.name) {
@@ -111,17 +176,99 @@ const PromptBuilderChat = ({ session }: Props) => {
     loadUserChats();
   }, [session]);
 
-  // Handle sending a message with the system prompt
+  // Get all unique configurations from comparisonMessages only
+  const getComparisonMessageConfigs = (): PromptConfiguration[] => {
+    const configs: PromptConfiguration[] = [];
+    const configHashes = new Set<string>();
+    comparisonMessages.forEach((msg) => {
+      if (msg.promptConfig) {
+        const hash = getConfigHash(msg.promptConfig);
+        if (!configHashes.has(hash)) {
+          configHashes.add(hash);
+          configs.push(withConfigId(msg.promptConfig));
+        }
+      }
+    });
+    return configs;
+  };
+
+  // Update the color map only for new configs
+  useEffect(() => {
+    const allConfigs = getComparisonMessageConfigs();
+    const map = configColorMapRef.current;
+    allConfigs.forEach((config) => {
+      const hash = getConfigHash(config);
+      if (!map.has(hash)) {
+        map.set(
+          hash,
+          CONFIG_COLOR_NAMES[colorIndexRef.current % CONFIG_COLOR_NAMES.length]
+        );
+        colorIndexRef.current += 1;
+      }
+    });
+    // No setState needed, map is stable in ref
+  }, [comparisonMessages]);
+
+  // For downstream components, pass a stable copy
+  const configColorMap = configColorMapRef.current;
+
+  // Debug logging for color map and message configs
+  console.log(
+    "[ColorMap] Config hashes in color map:",
+    Array.from(configColorMap.keys())
+  );
+  console.log(
+    "[ColorMap] All configs in color map:",
+    Array.from(configColorMap.entries())
+  );
+  const debugGetConfigHash = (config: PromptConfiguration | undefined) =>
+    config
+      ? `${config.personality}-${config.languageDifficulty}-${config.answerLength}-${config.technicalDifficulty}-${config.instructionFormat}`
+      : "undefined";
+  console.log(
+    "[ColorMap] Message hashes:",
+    messages.map((m) => debugGetConfigHash(m.promptConfig))
+  );
+  console.log(
+    "[ColorMap] ComparisonMessage hashes:",
+    comparisonMessages.map((m) => debugGetConfigHash(m.promptConfig))
+  );
+
+  // Modified handleSendMessage to insert config change message if needed
   const handleSendMessage = async () => {
     const text = userInput.trim();
     if (text === "") return;
+
+    const currentConfig = getCurrentConfiguration();
+    const prevConfig = previousConfigRef.current;
+    let configChangeMessages: string[] = [];
+    if (prevConfig) {
+      const changes = getConfigChanges(prevConfig, currentConfig);
+      if (changes.length > 0) {
+        configChangeMessages = changes.map(
+          (change) => `You changed the ${change}`
+        );
+      }
+    }
+    previousConfigRef.current = { ...currentConfig };
 
     setUserInput("");
     setLoading(true);
 
     try {
-      await sendMessage(text, systemPrompt, getCurrentConfiguration());
       setComparisonMessages([]);
+      setComparisonMode(false);
+      setComparisonCounter(0);
+      // If config changed, insert a system/info message for each change before user message
+      for (const msg of configChangeMessages) {
+        messages.push({
+          id: `system-${Date.now()}-${Math.random()}`,
+          sender: "system",
+          text: msg,
+          timestamp: new Date(),
+        });
+      }
+      await sendMessage(text, systemPrompt, currentConfig);
     } catch (error) {
       console.error("Failed to send message:", error);
       setShowError(true);
@@ -131,13 +278,27 @@ const PromptBuilderChat = ({ session }: Props) => {
   };
 
   const handleConfigurationChange = (config: PromptConfiguration) => {
-  applyConfiguration(config);
-};
+    applyConfiguration(config);
+  };
+
+  // Get the configuration that should be displayed in the panel
+  const getCurrentDisplayConfig = (): PromptConfiguration => {
+    // if (
+    //   comparisonMode &&
+    //   comparisonMessages.length > 0 &&
+    //   comparisonCounter < comparisonMessages.length
+    // ) {
+    //   return (
+    //     comparisonMessages[comparisonCounter].promptConfig ||
+    //     getCurrentConfiguration()
+    //   );
+    // }
+    return getCurrentConfiguration();
+  };
 
   const refreshLatestMessage = async () => {
     setLoading(true);
     setComparisonMode(true);
-    setComparisonCounter(comparisonCounter + 1);
     console.log("refreshing");
 
     try {
@@ -148,6 +309,35 @@ const PromptBuilderChat = ({ session }: Props) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Ensure we always show the latest (rightmost) comparison message after refresh
+  useEffect(() => {
+    if (comparisonMode && comparisonMessages.length > 0) {
+      setComparisonCounter(comparisonMessages.length - 1);
+    }
+  }, [comparisonMessages, comparisonMode]);
+
+  const handleExitComparisonMode = () => {
+    // If in comparison mode and a comparison message is selected, apply its config
+    if (
+      comparisonMode &&
+      comparisonMessages.length > 0 &&
+      comparisonCounter < comparisonMessages.length
+    ) {
+      const selectedConfig = comparisonMessages[comparisonCounter].promptConfig;
+      if (selectedConfig) {
+        applyConfiguration(selectedConfig);
+      }
+      // Keep only the accepted message in comparisonMessages
+      const acceptedMessage = comparisonMessages[comparisonCounter];
+      setComparisonMessages([acceptedMessage]);
+      setComparisonCounter(0);
+    } else {
+      setComparisonMessages([]);
+      setComparisonCounter(0);
+    }
+    setComparisonMode(false);
   };
 
   const handlePositiveFeedback = () => {
@@ -215,7 +405,8 @@ const PromptBuilderChat = ({ session }: Props) => {
 
         const currentHeight = window.visualViewport!.height;
         const heightDifference = initialViewportHeight - currentHeight;
-        const percentageHeightReduction = heightDifference / initialViewportHeight;
+        const percentageHeightReduction =
+          heightDifference / initialViewportHeight;
 
         const keyboardLikelyVisible =
           percentageHeightReduction > 0.2 && heightDifference > 100;
@@ -244,10 +435,16 @@ const PromptBuilderChat = ({ session }: Props) => {
         }
       }, 150);
 
-      window.visualViewport.addEventListener("resize", handleVisualViewportResize);
+      window.visualViewport.addEventListener(
+        "resize",
+        handleVisualViewportResize
+      );
 
       return () => {
-        window.visualViewport?.removeEventListener("resize", handleVisualViewportResize);
+        window.visualViewport?.removeEventListener(
+          "resize",
+          handleVisualViewportResize
+        );
       };
     }
   }, [isFullScreen, keyboardVisible]);
@@ -301,7 +498,8 @@ const PromptBuilderChat = ({ session }: Props) => {
             <div className="px-3 flex items-center gap-2 text-lg">
               <Type size={24} />
               <span className="font-medium">
-                Text Size: {fontSize.charAt(0).toUpperCase() + fontSize.slice(1)}
+                Text Size:{" "}
+                {fontSize.charAt(0).toUpperCase() + fontSize.slice(1)}
               </span>
             </div>
             <button
@@ -326,7 +524,9 @@ const PromptBuilderChat = ({ session }: Props) => {
             >
               <Sliders size={24} />
               <span>
-                {promptBuilderOpen ? "Hide Customise Chat" : "Show Customise Chat"}
+                {promptBuilderOpen
+                  ? "Hide Customise Chat"
+                  : "Show Customise Chat"}
               </span>
             </button>
             <button
@@ -384,8 +584,10 @@ const PromptBuilderChat = ({ session }: Props) => {
             comparisonCounter={comparisonCounter}
             onComparisonCounterChange={setComparisonCounter}
             onRefreshLatestMessage={refreshLatestMessage}
-            onExitComparisonMode={() => setComparisonMode(false)}
+            onExitComparisonMode={handleExitComparisonMode}
             onConfigurationChange={handleConfigurationChange}
+            currentPanelConfig={getCurrentDisplayConfig()}
+            configColorMap={configColorMap}
           />
 
           {/* Prompt Builder Sidebar */}
@@ -404,7 +606,9 @@ const PromptBuilderChat = ({ session }: Props) => {
           >
             <div className="p-4 border-b border-gray-200 bg-indigo-600 text-white">
               <div className="flex items-center justify-between">
-                <h2 className={`font-semibold ${fontSizes[fontSize].header} text-nowrap`}>
+                <h2
+                  className={`font-semibold ${fontSizes[fontSize].header} text-nowrap`}
+                >
                   Customise Chat Style
                 </h2>
               </div>
@@ -414,7 +618,16 @@ const PromptBuilderChat = ({ session }: Props) => {
               className="p-4 space-y-6 overflow-y-auto"
               style={{ maxHeight: "calc(100vh - 250px)" }}
             >
-              <PromptBuilder />
+              <PromptBuilder
+                comparisonConfigs={getComparisonMessageConfigs()}
+                currentConfig={getCurrentDisplayConfig()}
+                comparisonMessages={comparisonMessages}
+                comparisonMode={comparisonMode}
+                comparisonCounter={comparisonCounter}
+                totalComparisons={comparisonMessages.length}
+                fontSizes={fontSizes[fontSize]}
+                configColorMap={configColorMap}
+              />
             </div>
           </div>
         </div>

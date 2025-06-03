@@ -28,6 +28,8 @@ interface ChatPanelProps {
   onRefreshLatestMessage: () => void;
   onExitComparisonMode: () => void;
   onConfigurationChange: (config: PromptConfiguration) => void;
+  currentPanelConfig: PromptConfiguration;
+  configColorMap: Map<string, string>;
 }
 
 const ChatPanel: React.FC<ChatPanelProps> = ({
@@ -47,7 +49,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   onComparisonCounterChange,
   onRefreshLatestMessage,
   onExitComparisonMode,
-  onConfigurationChange
+  onConfigurationChange,
+  currentPanelConfig,
+  configColorMap,
 }) => {
   const chatStyle = {
     height:
@@ -57,13 +61,20 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     transition: "all 0.3s ease",
   };
 
+  // Check if latest message has been rerun by looking for comparison messages
+  const latestMessageHasBeenRerun =
+    comparisonMessages.length > 0 && messages.length > 0;
+
+  // Hide input when in comparison mode, but show if no messages exist or latest hasn't been rerun
+  const shouldHideInput = comparisonMode && latestMessageHasBeenRerun;
+
   return (
     <div
       className="w-1/2 flex flex-col bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-300"
       style={chatStyle}
     >
       <ChatHeader title={title} fontSizes={fontSizes} />
-      
+
       <MessageList
         messages={messages}
         loading={loading}
@@ -73,17 +84,22 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         comparisonCounter={comparisonCounter}
         onComparisonCounterChange={onComparisonCounterChange}
         onRefreshLatestMessage={onRefreshLatestMessage}
-        onConfigurationChange={onConfigurationChange}
-      />
-      
-      <MessageInput
-        userInput={userInput}
-        onInputChange={onInputChange}
-        onSendMessage={onSendMessage}
-        fontSizes={fontSizes}
-        comparisonMode={comparisonMode}
         onExitComparisonMode={onExitComparisonMode}
+        onConfigurationChange={onConfigurationChange}
+        currentPanelConfig={currentPanelConfig}
+        configColorMap={configColorMap}
       />
+
+      {!shouldHideInput && (
+        <MessageInput
+          userInput={userInput}
+          onInputChange={onInputChange}
+          onSendMessage={onSendMessage}
+          fontSizes={fontSizes}
+          comparisonMode={comparisonMode}
+          onExitComparisonMode={onExitComparisonMode}
+        />
+      )}
     </div>
   );
 };
