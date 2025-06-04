@@ -34,6 +34,20 @@ interface PromptBuilderContextType {
   systemPrompt: string;
   getCurrentConfiguration: () => PromptConfiguration;
   applyConfiguration: (config: PromptConfiguration) => void;
+  specifyDevices: boolean;
+  setSpecifyDevices: (value: boolean) => void;
+  selectedDevices: string[];
+  setSelectedDevices: (value: string[]) => void;
+  computerType: string;
+  setComputerType: (value: string) => void;
+  tabletType: string;
+  setTabletType: (value: string) => void;
+  mobileType: string;
+  setMobileType: (value: string) => void;
+  browser: string;
+  setBrowser: (value: string) => void;
+  additionalInstructions: string;
+  setAdditionalInstructions: (value: string) => void;
 }
 
 const PromptBuilderContext = createContext<
@@ -75,6 +89,13 @@ export const PromptBuilderProvider = ({
     PromptSection[] | undefined
   >();
   const [systemPrompt, setSystemPrompt] = useState("");
+  const [specifyDevices, setSpecifyDevices] = useState(false);
+  const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
+  const [computerType, setComputerType] = useState("");
+  const [tabletType, setTabletType] = useState("");
+  const [mobileType, setMobileType] = useState("");
+  const [browser, setBrowser] = useState("");
+  const [additionalInstructions, setAdditionalInstructions] = useState("");
 
   const getCurrentConfiguration = (): PromptConfiguration => {
     const getDisplayLabel = (sectionId: string, optionId: string): string => {
@@ -90,6 +111,13 @@ export const PromptBuilderProvider = ({
       answerLength,
       technicalDifficulty,
       instructionFormat,
+      specifyDevices ? "1" : "0",
+      (selectedDevices || []).join(","),
+      computerType || "",
+      tabletType || "",
+      mobileType || "",
+      browser || "",
+      additionalInstructions || "",
     ].join("|");
 
     return {
@@ -113,6 +141,13 @@ export const PromptBuilderProvider = ({
         "instruction-style",
         instructionFormat
       ),
+      specifyDevices,
+      selectedDevices,
+      computerType,
+      tabletType,
+      mobileType,
+      browser,
+      additionalInstructions,
     };
   };
 
@@ -264,6 +299,9 @@ export const PromptBuilderProvider = ({
     languageDifficulty,
     answerLength,
     instructionFormat,
+    selectedDevices,
+    browser,
+    additionalInstructions,
   ]);
 
   // Generate system prompt based on settings
@@ -291,6 +329,25 @@ export const PromptBuilderProvider = ({
       instructionFormat
     );
 
+    // --- New device/browser/instructions logic ---
+    if (specifyDevices && selectedDevices.length > 0) {
+      prompt += `\n\nThe user has indicated that they are using the following devices:`;
+      if (selectedDevices.includes("computer") && computerType) {
+        prompt += `\n- A Computer: (${computerType})`;
+      }
+      if (selectedDevices.includes("tablet") && tabletType) {
+        prompt += `\n- A tablet: (${tabletType})`;
+      }
+      if (selectedDevices.includes("mobile") && mobileType) {
+        prompt += `\n- A mobile phone: (${mobileType})`;
+      }
+      if (browser) {
+        prompt += `\n\nThe user has specified that they are using the following browser: ${browser}`;
+      }
+      if (additionalInstructions) {
+        prompt += `\n\nThe user has also included the following additional instructions: ${additionalInstructions}`;
+      }
+    }
     return prompt;
   };
 
@@ -332,6 +389,20 @@ export const PromptBuilderProvider = ({
         systemPrompt,
         getCurrentConfiguration,
         applyConfiguration,
+        specifyDevices,
+        setSpecifyDevices,
+        selectedDevices,
+        setSelectedDevices,
+        computerType,
+        setComputerType,
+        tabletType,
+        setTabletType,
+        mobileType,
+        setMobileType,
+        browser,
+        setBrowser,
+        additionalInstructions,
+        setAdditionalInstructions,
       }}
     >
       {children}

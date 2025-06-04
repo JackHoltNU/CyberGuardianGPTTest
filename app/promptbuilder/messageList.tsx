@@ -58,7 +58,20 @@ const MessageList: React.FC<MessageListProps> = ({
   // Helper to get config hash
   const getConfigHash = (config: PromptConfiguration | undefined) => {
     if (!config) return "";
-    return `${config.personality}-${config.languageDifficulty}-${config.answerLength}-${config.technicalDifficulty}-${config.instructionFormat}`;
+    return [
+      config.personality,
+      config.languageDifficulty,
+      config.answerLength,
+      config.technicalDifficulty,
+      config.instructionFormat,
+      config.specifyDevices ? "1" : "0",
+      (config.selectedDevices || []).join(","),
+      config.computerType || "",
+      config.tabletType || "",
+      config.mobileType || "",
+      config.browser || "",
+      config.additionalInstructions || "",
+    ].join("|");
   };
 
   // Helper to get color name for a config
@@ -170,6 +183,35 @@ const MessageList: React.FC<MessageListProps> = ({
           <span className="col-span-2">
             <strong>Format:</strong> {config.instructionFormatLabel}
           </span>
+          {/* New fields for device/browser/instructions */}
+          {config.specifyDevices &&
+            (config.selectedDevices?.length || 0) > 0 && (
+              <span className="col-span-2">
+                <strong>Devices:</strong> {config.selectedDevices?.join(", ")}
+                {config.computerType &&
+                  config.selectedDevices?.includes("computer") && (
+                    <> | Computer: {config.computerType}</>
+                  )}
+                {config.tabletType &&
+                  config.selectedDevices?.includes("tablet") && (
+                    <> | Tablet: {config.tabletType}</>
+                  )}
+                {config.mobileType &&
+                  config.selectedDevices?.includes("mobile") && (
+                    <> | Mobile: {config.mobileType}</>
+                  )}
+              </span>
+            )}
+          {config.browser && (
+            <span className="col-span-2">
+              <strong>Browser:</strong> {config.browser}
+            </span>
+          )}
+          {config.additionalInstructions && (
+            <span className="col-span-2">
+              <strong>Additional:</strong> {config.additionalInstructions}
+            </span>
+          )}
         </div>
       </div>
     );

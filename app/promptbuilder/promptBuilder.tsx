@@ -2,6 +2,10 @@ import { useState } from "react";
 import CardSelector from "./cardSelector";
 import { usePromptBuilder } from "../context/usePromptBuilder";
 import { MessageHistory, PromptConfiguration } from "../types/types";
+import TickAllSelector from "../components/tickAllSelector";
+import ToggleSwitch from "../components/toggleSwitch";
+import DropdownSelector from "../components/dropdownSelector";
+import TextInputBox from "../components/textInputBox";
 
 interface PromptBuilderProps {
   comparisonConfigs?: PromptConfiguration[];
@@ -35,6 +39,20 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
     answerLength,
     technicalDifficulty,
     instructionFormat,
+    specifyDevices,
+    setSpecifyDevices,
+    selectedDevices,
+    setSelectedDevices,
+    computerType,
+    setComputerType,
+    tabletType,
+    setTabletType,
+    mobileType,
+    setMobileType,
+    browser,
+    setBrowser,
+    additionalInstructions,
+    setAdditionalInstructions,
   } = usePromptBuilder();
 
   // Mapping of section IDs to PromptConfiguration keys and current values
@@ -69,6 +87,37 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
         return "";
     }
   };
+
+  const deviceOptions = [
+    { id: "computer", label: "Computers" },
+    { id: "tablet", label: "Tablets" },
+    { id: "mobile", label: "Mobile Devices" },
+  ];
+
+  const computerOptions = [
+    { id: "windows", label: "Windows" },
+    { id: "apple", label: "Apple" },
+    { id: "chromebook", label: "Chromebook" },
+    { id: "other", label: "Other" },
+  ];
+  const tabletOptions = [
+    { id: "ios", label: "iOS" },
+    { id: "android", label: "Android" },
+    { id: "other", label: "Other" },
+  ];
+  const mobileOptions = [
+    { id: "ios", label: "iOS" },
+    { id: "android", label: "Android" },
+    { id: "other", label: "Other" },
+  ];
+  const browserOptions = [
+    { id: "chrome", label: "Chrome" },
+    { id: "firefox", label: "Firefox" },
+    { id: "edge", label: "Edge" },
+    { id: "safari", label: "Safari" },
+    { id: "opera", label: "Opera" },
+    { id: "other", label: "Other" },
+  ];
 
   return (
     <>
@@ -105,6 +154,65 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
             comparisonCounter={comparisonCounter}
           />
         ))}
+      </div>
+
+      {/* --- DEMO OF NEW COMPONENTS --- */}
+      <div className="mt-10 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h2 className={`font-bold mb-4 ${fontSizes.header}`}>
+          Personalise Instructions
+        </h2>
+        <ToggleSwitch
+          label="Specify instructions for particular devices or browser?"
+          checked={specifyDevices}
+          onChange={setSpecifyDevices}
+        />
+        {specifyDevices && (
+          <>
+            <TickAllSelector
+              title="Which devices?"
+              options={deviceOptions}
+              defaultSelected={selectedDevices}
+              onSelectionChange={setSelectedDevices}
+            />
+            {selectedDevices.includes("computer") && (
+              <DropdownSelector
+                title="Computer Type"
+                options={computerOptions}
+                selected={computerType}
+                onChange={setComputerType}
+              />
+            )}
+            {selectedDevices.includes("tablet") && (
+              <DropdownSelector
+                title="Tablet Type"
+                options={tabletOptions}
+                selected={tabletType}
+                onChange={setTabletType}
+              />
+            )}
+            {selectedDevices.includes("mobile") && (
+              <DropdownSelector
+                title="Mobile Type"
+                options={mobileOptions}
+                selected={mobileType}
+                onChange={setMobileType}
+              />
+            )}
+            <DropdownSelector
+              title="Browser"
+              options={browserOptions}
+              selected={browser}
+              onChange={setBrowser}
+            />
+            <TextInputBox
+              label="Additional Instructions"
+              value={additionalInstructions}
+              onChange={setAdditionalInstructions}
+              placeholder="Enter any extra details here..."
+              rows={3}
+            />
+          </>
+        )}
       </div>
     </>
   );
