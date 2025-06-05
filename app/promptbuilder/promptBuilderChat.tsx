@@ -588,6 +588,8 @@ const PromptBuilderChat = ({ session }: Props) => {
             onConfigurationChange={handleConfigurationChange}
             currentPanelConfig={getCurrentDisplayConfig()}
             configColorMap={configColorMap}
+            onOpenCustomisePanel={() => setPromptBuilderOpen((open) => !open)}
+            isCustomisePanelOpen={promptBuilderOpen}
           />
 
           {/* Prompt Builder Sidebar */}

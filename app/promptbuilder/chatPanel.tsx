@@ -30,6 +30,8 @@ interface ChatPanelProps {
   onConfigurationChange: (config: PromptConfiguration) => void;
   currentPanelConfig: PromptConfiguration;
   configColorMap: Map<string, string>;
+  onOpenCustomisePanel: () => void;
+  isCustomisePanelOpen: boolean;
 }
 
 const ChatPanel: React.FC<ChatPanelProps> = ({
@@ -52,6 +54,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   onConfigurationChange,
   currentPanelConfig,
   configColorMap,
+  onOpenCustomisePanel,
+  isCustomisePanelOpen,
 }) => {
   const chatStyle = {
     height:
@@ -88,6 +92,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         onConfigurationChange={onConfigurationChange}
         currentPanelConfig={currentPanelConfig}
         configColorMap={configColorMap}
+        onOpenCustomisePanel={onOpenCustomisePanel}
+        isCustomisePanelOpen={isCustomisePanelOpen}
       />
 
       {!shouldHideInput && (

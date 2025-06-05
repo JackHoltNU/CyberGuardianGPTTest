@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight, RefreshCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCcw, Sliders } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import LoadingDots from "../components/loadingdots";
@@ -25,6 +25,8 @@ interface MessageListProps {
   onConfigurationChange: (config: PromptConfiguration) => void;
   currentPanelConfig: PromptConfiguration;
   configColorMap: Map<string, string>;
+  onOpenCustomisePanel: () => void;
+  isCustomisePanelOpen: boolean;
 }
 
 const MessageList: React.FC<MessageListProps> = ({
@@ -40,7 +42,9 @@ const MessageList: React.FC<MessageListProps> = ({
   onConfigurationChange,
   currentPanelConfig,
   configColorMap,
-}) => {
+  onOpenCustomisePanel,
+  isCustomisePanelOpen,
+}): React.ReactElement => {
   const chatRef = useRef<HTMLDivElement>(null);
 
   // Scroll to the bottom of chat when new message arrives
@@ -161,58 +165,125 @@ const MessageList: React.FC<MessageListProps> = ({
     return message.promptConfig;
   };
 
+  // Helper to get a smaller font size class for config summary
+  const getSmallerFontSize = (chatFontSize: string) => {
+    switch (chatFontSize) {
+      case "text-2xl":
+        return "text-xl";
+      case "text-xl":
+        return "text-lg";
+      case "text-lg":
+        return "text-base";
+      case "text-base":
+        return "text-sm";
+      case "text-sm":
+        return "text-xs";
+      default:
+        return "text-xs";
+    }
+  };
+
   // Helper to render config summary
   const renderConfigSummary = (config: PromptConfiguration | undefined) => {
     if (!config) return null;
 
     return (
-      <div className="mt-2 text-xs text-gray-600 border-t pt-2">
-        <div className="grid grid-cols-2 gap-1">
-          <span>
-            <strong>Personality:</strong> {config.personalityLabel}
-          </span>
-          <span>
-            <strong>Language:</strong> {config.languageDifficultyLabel}
-          </span>
-          <span>
-            <strong>Length:</strong> {config.answerLengthLabel}
-          </span>
-          <span>
-            <strong>Technical:</strong> {config.technicalDifficultyLabel}
-          </span>
-          <span className="col-span-2">
-            <strong>Format:</strong> {config.instructionFormatLabel}
-          </span>
-          {/* New fields for device/browser/instructions */}
-          {config.specifyDevices &&
-            (config.selectedDevices?.length || 0) > 0 && (
-              <span className="col-span-2">
-                <strong>Devices:</strong> {config.selectedDevices?.join(", ")}
-                {config.computerType &&
-                  config.selectedDevices?.includes("computer") && (
-                    <> | Computer: {config.computerType}</>
-                  )}
-                {config.tabletType &&
-                  config.selectedDevices?.includes("tablet") && (
-                    <> | Tablet: {config.tabletType}</>
-                  )}
-                {config.mobileType &&
-                  config.selectedDevices?.includes("mobile") && (
-                    <> | Mobile: {config.mobileType}</>
-                  )}
+      <div
+        className={`mt-2 text-gray-600 border-t pt-2 flex items-center justify-between ${getSmallerFontSize(
+          fontSizes.chat
+        )}`}
+      >
+        {/** Determine if we are in single column mode */}
+        {/** Single column if fontSizes.chat === 'text-2xl' */}
+        {/** Used to conditionally apply col-span-2 */}
+        {/** This ensures no col-span-2 in single column mode */}
+        {/** and keeps two-column layout on larger screens/font sizes */}
+        {/** for better readability */}
+        {(() => {
+          const isSingleColumn = fontSizes.chat === "text-2xl";
+          return (
+            <div
+              className={`grid ${
+                isSingleColumn ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"
+              } gap-x-1 gap-y-2 flex-1`}
+            >
+              <span className="break-words">
+                <strong>Personality:</strong> {config.personalityLabel}
               </span>
-            )}
-          {config.browser && (
-            <span className="col-span-2">
-              <strong>Browser:</strong> {config.browser}
-            </span>
-          )}
-          {config.additionalInstructions && (
-            <span className="col-span-2">
-              <strong>Additional:</strong> {config.additionalInstructions}
-            </span>
-          )}
-        </div>
+              <span className="break-words">
+                <strong>Language:</strong> {config.languageDifficultyLabel}
+              </span>
+              <span className="break-words">
+                <strong>Length:</strong> {config.answerLengthLabel}
+              </span>
+              <span className="break-words">
+                <strong>Technical:</strong> {config.technicalDifficultyLabel}
+              </span>
+              <span
+                className={`${isSingleColumn ? "" : "col-span-2"} break-words`}
+              >
+                <strong>Format:</strong> {config.instructionFormatLabel}
+              </span>
+              {/* New fields for device/browser/instructions */}
+              {config.specifyDevices &&
+                (config.selectedDevices?.length || 0) > 0 && (
+                  <span
+                    className={`${
+                      isSingleColumn ? "" : "col-span-2"
+                    } break-words`}
+                  >
+                    <strong>Devices:</strong>{" "}
+                    {config.selectedDevices?.join(", ")}
+                    {config.computerType &&
+                      config.selectedDevices?.includes("computer") && (
+                        <> | Computer: {config.computerType}</>
+                      )}
+                    {config.tabletType &&
+                      config.selectedDevices?.includes("tablet") && (
+                        <> | Tablet: {config.tabletType}</>
+                      )}
+                    {config.mobileType &&
+                      config.selectedDevices?.includes("mobile") && (
+                        <> | Mobile: {config.mobileType}</>
+                      )}
+                  </span>
+                )}
+              {config.browser && (
+                <span
+                  className={`${
+                    isSingleColumn ? "" : "col-span-2"
+                  } break-words`}
+                >
+                  <strong>Browser:</strong> {config.browser}
+                </span>
+              )}
+              {config.additionalInstructions && (
+                <span
+                  className={`${
+                    isSingleColumn ? "" : "col-span-2"
+                  } break-words`}
+                >
+                  <strong>Additional:</strong> {config.additionalInstructions}
+                </span>
+              )}
+            </div>
+          );
+        })()}
+        {/* Settings cog button */}
+        <button
+          className={`ml-2 p-2 rounded-full border flex items-center justify-center transition-colors duration-200
+            ${
+              isCustomisePanelOpen
+                ? "bg-indigo-600 text-white border-indigo-700"
+                : "bg-indigo-500 text-white border-indigo-700 hover:bg-indigo-600"
+            }`}
+          title={
+            isCustomisePanelOpen ? "Hide Customise Chat" : "Show Customise Chat"
+          }
+          onClick={onOpenCustomisePanel}
+        >
+          <Sliders size={18} />
+        </button>
       </div>
     );
   };

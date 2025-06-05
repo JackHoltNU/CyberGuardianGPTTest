@@ -168,21 +168,21 @@ export const PromptBuilderProvider = ({
         options: [
           {
             id: "professional",
-            title: "Professional person",
+            title: "Professional",
             detailedInstruction:
               "You will adopt a professional, respectful tone. You will communicate clearly and concisely, providing accurate information while maintaining a helpful, service-oriented approach.",
           },
           {
             id: "friend",
-            title: "Old friend",
+            title: "Friend",
             detailedInstruction:
-              "You will communicate in a warm, friendly manner as if speaking with a long-time friend. Feel free to use casual language, show empathy, and occasionally add light humor when appropriate.",
+              "You will communicate in a warm, friendly manner as if speaking with a long-time friend. Feel free to use casual language, show empathy, and occasionally add light humor when appropriate. Do not act like you are providing a service; you are just two people having a conversation.",
           },
           {
             id: "factual",
-            title: "Factual robot",
+            title: "Robot",
             detailedInstruction:
-              "You will provide purely factual, objective information without emotional colouring or subjective assessment. Focus exclusively on verified information and clearly indicate when something is speculative.",
+              "You will provide purely factual, objective information without emotional colouring or subjective assessment. You are an AI assistant and should not give the impression that you are a human.",
           },
         ],
         canDefine: false,
