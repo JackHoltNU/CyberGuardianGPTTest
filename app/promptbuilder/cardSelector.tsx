@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { MessageHistory, PromptConfiguration } from "../types/types";
 import { ActivitySquareIcon } from "lucide-react";
+import { usePromptBuilder } from "../context/usePromptBuilder";
+import styles from "../styles/promptbuilder.module.css";
 
 type Option = {
   id: string;
@@ -49,6 +51,8 @@ const CardSelector: React.FC<CardSelectorProps> = ({
   comparisonMessages,
   comparisonCounter,
 }) => {
+  const { getPromptConfigHash } = usePromptBuilder();
+
   // If custom option is included, add it to the options
   const allOptions = includeCustomOption
     ? [
@@ -128,14 +132,9 @@ const CardSelector: React.FC<CardSelectorProps> = ({
     return fullText || "";
   };
 
-  // Generate a hash for configuration to assign consistent colors
-  const getConfigHash = (config: PromptConfiguration): string => {
-    return `${config.personality}-${config.languageDifficulty}-${config.answerLength}-${config.technicalDifficulty}-${config.instructionFormat}`;
-  };
-
   // Get color for a specific configuration using shared mapping
   const getConfigColor = (config: PromptConfiguration): string => {
-    const configHash = getConfigHash(config);
+    const configHash = getPromptConfigHash(config);
     return configColorMap.get(configHash) || "gray";
   };
 
@@ -175,7 +174,11 @@ const CardSelector: React.FC<CardSelectorProps> = ({
       comparisonMessages[comparisonCounter]?.promptConfig?.id;
 
     return (
-      <span className="flex flex-row gap-1 items-center">
+      <span
+        className={`${
+          configsUsingOption.length <= 2 ? "flex flex-row" : `grid grid-cols-2`
+        } gap-1 items-center`}
+      >
         {configsUsingOption.map((config, index) => {
           // Only fill the dot if this config is the one for the currently displayed comparison message
           const isCurrentConfig =
@@ -204,28 +207,32 @@ const CardSelector: React.FC<CardSelectorProps> = ({
   return (
     <>
       {title && (
-        <h2 className={`mb-3 text-gray-800 ${fontSizes.header}`}>{title}</h2>
+        <h2
+          className={`${styles["pb-cardselector-title"]} ${fontSizes.header}`}
+        >
+          {title}
+        </h2>
       )}
 
-      <div className="flex space-x-5">
-        <div className="w-1/3">
-          <div className="grid grid-cols-1 gap-3">
+      <div className={styles["pb-cardselector-layout"]}>
+        <div className={styles["pb-cardselector-options-col"]}>
+          <div className={styles["pb-cardselector-options-grid"]}>
             {allOptions.map((option) => (
               <div
                 key={option.id}
                 onClick={() => handleSelect(option.id)}
-                className={`
-                  px-3 py-3 rounded-md cursor-pointer transition-all h-auto flex items-center gap-2
-                  ${fontSizes.chat}
-                  ${
-                    selectedOption === option.id
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "bg-gray-200 hover:bg-gray-300 text-gray-800"
-                  }
-                `}
+                className={`${styles["pb-cardselector-option-card"]} ${
+                  fontSizes.chat
+                } ${
+                  selectedOption === option.id
+                    ? styles["pb-cardselector-option-selected"]
+                    : styles["pb-cardselector-option-unselected"]
+                }`}
               >
-                <span className="flex-1 text-left">{option.title}</span>
-                <span className="flex flex-row gap-1 items-center">
+                <span className={styles["pb-cardselector-option-title"]}>
+                  {option.title}
+                </span>
+                <span className={styles["pb-cardselector-dots-row"]}>
                   {renderConfigDots(option.id)}
                 </span>
               </div>
@@ -233,22 +240,20 @@ const CardSelector: React.FC<CardSelectorProps> = ({
           </div>
         </div>
 
-        <div className="w-2/3">
+        <div className={styles["pb-cardselector-textarea-col"]}>
           <textarea
             value={
               isCustomSelected ? customInstruction : getDetailedInstruction()
             }
             onChange={handleCustomInstructionChange}
             disabled={!isCustomSelected}
-            className={`
-              w-full h-full p-4 border border-gray-400 rounded-md 
-              ${fontSizes.input}
-              ${
-                isCustomSelected
-                  ? "focus:ring-blue-500 focus:border-blue-500 bg-white"
-                  : "bg-gray-100 text-gray-800"
-              }
-            `}
+            className={`${styles["pb-cardselector-textarea"]} ${
+              fontSizes.input
+            } ${
+              isCustomSelected
+                ? styles["pb-cardselector-textarea-active"]
+                : styles["pb-cardselector-textarea-inactive"]
+            }`}
             rows={5}
             placeholder={isCustomSelected ? "Enter custom instruction..." : ""}
           />

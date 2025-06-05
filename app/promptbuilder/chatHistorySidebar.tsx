@@ -1,6 +1,7 @@
 import React from "react";
 import { Menu, ChevronRight } from "lucide-react";
 import { ChatCollection, ChatInstance } from "../types/types";
+import styles from "../styles/promptbuilder.module.css";
 
 interface ChatHistorySidebarProps {
   isOpen: boolean;
@@ -17,44 +18,50 @@ const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
 }) => {
   return (
     <div
-      className={`fixed md:relative h-full z-10 bg-gray-800 text-white transition-all duration-300 ${
-        isOpen ? "w-72" : "w-0"
-      } overflow-hidden shadow-lg`}
+      className={`${styles["pb-sidebar-container"]} ${
+        isOpen
+          ? styles["pb-sidebar-container-open"]
+          : styles["pb-sidebar-container-closed"]
+      }`}
     >
-      <div className="flex flex-col h-full">
-        <div className="p-6 flex items-center justify-between">
+      <div className={styles["pb-sidebar-inner"]}>
+        <div className={styles["pb-sidebar-header"]}>
           <h2
-            className={`font-semibold whitespace-nowrap text-xl ${
-              !isOpen && "md:hidden"
+            className={`${styles["pb-sidebar-title"]} ${
+              !isOpen ? styles["pb-sidebar-title-hidden"] : ""
             }`}
           >
             Chat History
           </h2>
           <button
             onClick={onToggle}
-            className="p-3 rounded hover:bg-gray-700 text-gray-300 min-w-14 min-h-14 flex items-center justify-center"
+            className={styles["pb-sidebar-toggle-btn"]}
             aria-label={isOpen ? "Close menu" : "Open menu"}
           >
             {isOpen ? <ChevronRight size={28} /> : <Menu size={28} />}
           </button>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto">
           {chatCollection && chatCollection.chats.length > 0 ? (
-            <div className="space-y-2 px-4">
+            <div className={styles["pb-sidebar-chats-list"]}>
               {chatCollection.chats.map((chat) => (
                 <div
                   key={chat.threadID}
-                  className="p-3 hover:bg-gray-700 rounded-lg cursor-pointer"
+                  className={styles["pb-sidebar-chat-item"]}
                   onClick={() => onChatSelect(chat)}
                 >
-                  <div className="text-white font-medium truncate">
+                  <div className={styles["pb-sidebar-chat-title"]}>
                     {chat.title || "Untitled Chat"}
                   </div>
-                  <div className="text-sm text-gray-400 truncate">
+                  <div className={styles["pb-sidebar-chat-preview"]}>
                     {chat.messages && chat.messages.length > 0
-                      ? typeof chat.messages[chat.messages.length - 1].text === "string"
-                        ? (chat.messages[chat.messages.length - 1].text as string).substring(0, 30) + "..."
+                      ? typeof chat.messages[chat.messages.length - 1].text ===
+                        "string"
+                        ? (
+                            chat.messages[chat.messages.length - 1]
+                              .text as string
+                          ).substring(0, 30) + "..."
                         : "Loading..."
                       : "No messages"}
                   </div>
@@ -62,7 +69,7 @@ const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
               ))}
             </div>
           ) : (
-            <div className="px-6 py-4 text-gray-400">
+            <div className={styles["pb-sidebar-empty"]}>
               No previous conversations
             </div>
           )}

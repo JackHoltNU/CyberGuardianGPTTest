@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import LoadingDots from "../components/loadingdots";
 import MessageSkeleton from "../components/MessageSkeleton";
 import { MessageHistory, PromptConfiguration } from "../types/types";
+import styles from "../styles/promptbuilder.module.css";
 
 interface FontSizes {
   chat: string;
@@ -81,6 +82,8 @@ const MessageList: React.FC<MessageListProps> = ({
   // Helper to get color name for a config
   const getConfigColorName = (config: PromptConfiguration | undefined) => {
     const hash = getConfigHash(config);
+    console.log(`THIS ONE: ${configColorMap.entries().toArray()[0]}`);
+
     return configColorMap?.get(hash) || "gray";
   };
 
@@ -169,17 +172,17 @@ const MessageList: React.FC<MessageListProps> = ({
   const getSmallerFontSize = (chatFontSize: string) => {
     switch (chatFontSize) {
       case "text-2xl":
-        return "text-xl";
-      case "text-xl":
         return "text-lg";
-      case "text-lg":
+      case "text-xl":
         return "text-base";
-      case "text-base":
+      case "text-lg":
         return "text-sm";
+      case "text-base":
+        return "text-xs";
       case "text-sm":
-        return "text-xs";
+        return "text-2xs";
       default:
-        return "text-xs";
+        return "text-2xs";
     }
   };
 
@@ -189,7 +192,7 @@ const MessageList: React.FC<MessageListProps> = ({
 
     return (
       <div
-        className={`mt-2 text-gray-600 border-t pt-2 flex items-center justify-between ${getSmallerFontSize(
+        className={`${styles["pb-config-summary"]} ${getSmallerFontSize(
           fontSizes.chat
         )}`}
       >
@@ -271,12 +274,11 @@ const MessageList: React.FC<MessageListProps> = ({
         })()}
         {/* Settings cog button */}
         <button
-          className={`ml-2 p-2 rounded-full border flex items-center justify-center transition-colors duration-200
-            ${
-              isCustomisePanelOpen
-                ? "bg-indigo-600 text-white border-indigo-700"
-                : "bg-indigo-500 text-white border-indigo-700 hover:bg-indigo-600"
-            }`}
+          className={`${styles["pb-cog-btn"]} ${
+            isCustomisePanelOpen
+              ? styles["pb-cog-btn-active"]
+              : styles["pb-cog-btn-inactive"]
+          }`}
           title={
             isCustomisePanelOpen ? "Hide Customise Chat" : "Show Customise Chat"
           }
@@ -326,10 +328,10 @@ const MessageList: React.FC<MessageListProps> = ({
             return (
               <div
                 key={message.id}
-                className={`flex justify-center ${fontSizes.chat}`}
+                className={`${styles["pb-message-row"]} ${styles["pb-message-row-assistant"]} ${fontSizes.chat}`}
               >
                 <div
-                  className={`bg-gray-200 text-gray-600 rounded px-3 py-1 my-2 max-w-lg text-center border border-gray-300 ${fontSizes.chat}`}
+                  className={`${styles["pb-message-system"]} ${fontSizes.chat}`}
                 >
                   {typeof message.text === "string" ? message.text : ""}
                 </div>
@@ -345,16 +347,20 @@ const MessageList: React.FC<MessageListProps> = ({
           return (
             <div
               key={message.id}
-              className={`flex ${
-                message.sender === "user" ? "justify-end" : "justify-start"
+              className={`${styles["pb-message-row"]} ${
+                message.sender === "user"
+                  ? styles["pb-message-row-user"]
+                  : styles["pb-message-row-assistant"]
               }`}
             >
               {/* Left comparison arrow */}
               {showComparisonControls(message, index) && (
                 <button
-                  className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 ${
-                    comparisonCounter < 1 ? "invisible" : "bg-blue-200"
-                  } mr-2 ${fontSizes.chat}`}
+                  className={`${styles["pb-arrow-btn"]} ${
+                    comparisonCounter < 1
+                      ? styles["pb-arrow-btn-invisible"]
+                      : ""
+                  } ${styles["pb-arrow-btn-margin-right"]} ${fontSizes.chat}`}
                   disabled={comparisonCounter < 1}
                   onClick={() =>
                     handleComparisonNavigation(comparisonCounter - 1)
@@ -366,17 +372,15 @@ const MessageList: React.FC<MessageListProps> = ({
 
               {/* Message content */}
               <div
-                className={`max-w-xs md:max-w-md lg:max-w-lg ${
-                  fontSizes.chat
-                } ${
+                className={`${styles["pb-message-bubble"]} ${fontSizes.chat} ${
                   message.sender === "user"
-                    ? "bg-indigo-100 text-gray-800 border border-indigo-200"
-                    : `bg-gray-100 text-gray-800 border-l-4 ${
+                    ? styles["pb-message-user"]
+                    : `${styles["pb-message-assistant"]} ${
                         colorClassMap[
                           getConfigColorName(getCurrentConfig(message, index))
                         ]
                       }`
-                } rounded-lg overflow-hidden`}
+                }`}
               >
                 <div className="p-4">
                   {renderMessageContent(message, index)}
@@ -390,12 +394,14 @@ const MessageList: React.FC<MessageListProps> = ({
                     {/* Continue with this configuration button */}
                     {showContinueButton(message, index) && (
                       <div className="mt-3">
-                        <button
-                          className="w-full p-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium transition-colors duration-200"
-                          onClick={onExitComparisonMode}
-                        >
-                          Continue with this configuration
-                        </button>
+                        <div>
+                          <button
+                            className={styles["pb-continue-btn"]}
+                            onClick={onExitComparisonMode}
+                          >
+                            Continue with this configuration
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -405,11 +411,11 @@ const MessageList: React.FC<MessageListProps> = ({
               {/* Right comparison arrow */}
               {showComparisonControls(message, index) && (
                 <button
-                  className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 ${
+                  className={`${styles["pb-arrow-btn"]} ${
                     comparisonCounter >= comparisonMessages.length - 1
-                      ? "invisible"
-                      : "bg-blue-200"
-                  } ml-2 ${fontSizes.chat}`}
+                      ? styles["pb-arrow-btn-invisible"]
+                      : ""
+                  } ${styles["pb-arrow-btn-margin-left"]} ${fontSizes.chat}`}
                   disabled={comparisonCounter >= comparisonMessages.length - 1}
                   onClick={() =>
                     handleComparisonNavigation(comparisonCounter + 1)
@@ -422,7 +428,7 @@ const MessageList: React.FC<MessageListProps> = ({
               {/* Refresh button - only show when config has changed */}
               {showRefreshButton(message, index) && (
                 <button
-                  className={`max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 bg-blue-200 ml-2 ${fontSizes.chat}`}
+                  className={`${styles["pb-refresh-btn"]} ${fontSizes.chat}`}
                   onClick={onRefreshLatestMessage}
                   title="Try different style"
                 >

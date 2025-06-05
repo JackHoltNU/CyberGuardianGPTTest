@@ -113,7 +113,7 @@ export type PromptConfiguration = {
   answerLengthLabel: string;
   technicalDifficultyLabel: string;
   instructionFormatLabel: string;
-  specifyDevices?: boolean;
+  specifyDevices: boolean;
   selectedDevices?: string[];
   computerType?: string;
   tabletType?: string;

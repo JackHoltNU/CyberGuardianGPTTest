@@ -48,6 +48,7 @@ interface PromptBuilderContextType {
   setBrowser: (value: string) => void;
   additionalInstructions: string;
   setAdditionalInstructions: (value: string) => void;
+  getPromptConfigHash: (config: PromptConfiguration) => string;
 }
 
 const PromptBuilderContext = createContext<
@@ -97,6 +98,23 @@ export const PromptBuilderProvider = ({
   const [browser, setBrowser] = useState("");
   const [additionalInstructions, setAdditionalInstructions] = useState("");
 
+  const getPromptConfigHash = (config: PromptConfiguration): string => {
+    return [
+      config.personality,
+      config.languageDifficulty,
+      config.answerLength,
+      config.technicalDifficulty,
+      config.instructionFormat,
+      config.specifyDevices ? "1" : "0",
+      config.specifyDevices ? (config.selectedDevices || []).join(",") : [],
+      config.specifyDevices ? config.computerType || "" : "",
+      config.specifyDevices ? config.tabletType || "" : "",
+      config.specifyDevices ? config.mobileType || "" : "",
+      config.browser || "",
+      config.additionalInstructions || "",
+    ].join("|");
+  };
+
   const getCurrentConfiguration = (): PromptConfiguration => {
     const getDisplayLabel = (sectionId: string, optionId: string): string => {
       const section = promptSections?.find((s) => s.id === sectionId);
@@ -104,24 +122,8 @@ export const PromptBuilderProvider = ({
       return option?.title || optionId;
     };
 
-    // Generate a hash for the config to use as id
-    const id = [
-      personality,
-      languageDifficulty,
-      answerLength,
-      technicalDifficulty,
-      instructionFormat,
-      specifyDevices ? "1" : "0",
-      (selectedDevices || []).join(","),
-      computerType || "",
-      tabletType || "",
-      mobileType || "",
-      browser || "",
-      additionalInstructions || "",
-    ].join("|");
-
-    return {
-      id,
+    let promptConfig: PromptConfiguration = {
+      id: "",
       personality,
       languageDifficulty,
       answerLength,
@@ -149,6 +151,12 @@ export const PromptBuilderProvider = ({
       browser,
       additionalInstructions,
     };
+
+    // Generate a hash for the config to use as id
+    const id = getPromptConfigHash(promptConfig);
+    promptConfig.id = id;
+
+    return promptConfig;
   };
 
   const applyConfiguration = (config: PromptConfiguration) => {
@@ -157,6 +165,7 @@ export const PromptBuilderProvider = ({
     setAnswerLength(config.answerLength);
     setTechnicalDifficulty(config.technicalDifficulty);
     setInstructionFormat(config.instructionFormat);
+    setSpecifyDevices(config.specifyDevices);
   };
 
   // Define the prompt sections and their options
@@ -403,6 +412,7 @@ export const PromptBuilderProvider = ({
         setBrowser,
         additionalInstructions,
         setAdditionalInstructions,
+        getPromptConfigHash,
       }}
     >
       {children}

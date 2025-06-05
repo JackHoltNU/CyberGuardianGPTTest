@@ -19,6 +19,7 @@ import { signOut } from "next-auth/react";
 import ChatHistorySidebar from "./chatHistorySidebar";
 import ChatPanel from "./chatPanel";
 import { PromptConfiguration } from "../types/types";
+import styles from "../styles/promptbuilder.module.css";
 
 // Define font size options
 type FontSizeOption = "small" | "medium" | "large" | "largest";
@@ -49,17 +50,6 @@ const CONFIG_COLOR_NAMES = [
   "indigo",
 ];
 
-// Helper to generate a config hash
-const getConfigHash = (config: PromptConfiguration): string => {
-  return `${config.personality}-${config.languageDifficulty}-${config.answerLength}-${config.technicalDifficulty}-${config.instructionFormat}`;
-};
-
-// Helper to ensure a config has an id
-const withConfigId = (config: PromptConfiguration): PromptConfiguration => {
-  if (config.id) return config;
-  return { ...config, id: getConfigHash(config) };
-};
-
 const PromptBuilderChat = ({ session }: Props) => {
   // Get states and functions from context
   const {
@@ -79,8 +69,12 @@ const PromptBuilderChat = ({ session }: Props) => {
     setComparisonMessages,
   } = useChatbot();
 
-  const { systemPrompt, getCurrentConfiguration, applyConfiguration } =
-    usePromptBuilder();
+  const {
+    systemPrompt,
+    getCurrentConfiguration,
+    applyConfiguration,
+    getPromptConfigHash,
+  } = usePromptBuilder();
 
   // Local state for chat UI
   const [userInput, setUserInput] = useState<string>("");
@@ -182,10 +176,10 @@ const PromptBuilderChat = ({ session }: Props) => {
     const configHashes = new Set<string>();
     comparisonMessages.forEach((msg) => {
       if (msg.promptConfig) {
-        const hash = getConfigHash(msg.promptConfig);
+        const hash = getPromptConfigHash(msg.promptConfig);
         if (!configHashes.has(hash)) {
           configHashes.add(hash);
-          configs.push(withConfigId(msg.promptConfig));
+          configs.push(msg.promptConfig);
         }
       }
     });
@@ -197,7 +191,7 @@ const PromptBuilderChat = ({ session }: Props) => {
     const allConfigs = getComparisonMessageConfigs();
     const map = configColorMapRef.current;
     allConfigs.forEach((config) => {
-      const hash = getConfigHash(config);
+      const hash = getPromptConfigHash(config);
       if (!map.has(hash)) {
         map.set(
           hash,
@@ -220,18 +214,6 @@ const PromptBuilderChat = ({ session }: Props) => {
   console.log(
     "[ColorMap] All configs in color map:",
     Array.from(configColorMap.entries())
-  );
-  const debugGetConfigHash = (config: PromptConfiguration | undefined) =>
-    config
-      ? `${config.personality}-${config.languageDifficulty}-${config.answerLength}-${config.technicalDifficulty}-${config.instructionFormat}`
-      : "undefined";
-  console.log(
-    "[ColorMap] Message hashes:",
-    messages.map((m) => debugGetConfigHash(m.promptConfig))
-  );
-  console.log(
-    "[ColorMap] ComparisonMessage hashes:",
-    comparisonMessages.map((m) => debugGetConfigHash(m.promptConfig))
   );
 
   // Modified handleSendMessage to insert config change message if needed
@@ -450,7 +432,7 @@ const PromptBuilderChat = ({ session }: Props) => {
   }, [isFullScreen, keyboardVisible]);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className={styles["pb-main-layout"]}>
       {/* History Sidebar */}
       <ChatHistorySidebar
         isOpen={historySidebarOpen}
@@ -460,18 +442,20 @@ const PromptBuilderChat = ({ session }: Props) => {
       />
 
       {/* Main content */}
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className={styles["pb-main-content"]}>
         {/* Header with title, text size controls, and other controls */}
         <header
-          className={`bg-gray-100 text-gray-800 border-b border-gray-200 flex items-center justify-between transition-all duration-300 ${
-            headerCollapsed ? "h-0 p-0 overflow-hidden opacity-0" : "p-4"
+          className={`${styles["pb-header"]} ${
+            headerCollapsed
+              ? styles["pb-header-collapsed"]
+              : styles["pb-header-padding"]
           }`}
         >
           <div className="flex items-center">
             {!historySidebarOpen && (
               <button
                 onClick={() => setHistorySidebarOpen(true)}
-                className="mr-4 p-3 rounded hover:bg-gray-200 min-w-14 min-h-14 flex items-center justify-center shadow border border-gray-300"
+                className={styles["pb-sidebar-btn"]}
                 aria-label="Open menu"
               >
                 <Menu size={28} />
@@ -481,21 +465,21 @@ const PromptBuilderChat = ({ session }: Props) => {
           </div>
 
           {/* Text size adjustment controls */}
-          <div className="flex items-center justify-between bg-gray-200 rounded-lg p-2 mr-3 border border-gray-300 shadow w-1/3">
+          <div className={styles["pb-textsize-controls"]}>
             <button
               onClick={decreaseFontSize}
-              className={`p-3 rounded-lg hover:bg-gray-300 ${
+              className={`${styles["pb-textsize-btn"]} ${
                 fontSize === "small"
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "text-gray-700"
-              } border border-gray-300 shadow`}
+                  ? styles["pb-textsize-btn-disabled"]
+                  : styles["pb-textsize-btn-enabled"]
+              }`}
               disabled={fontSize === "small"}
               aria-label="Decrease text size"
             >
               <MinusCircle size={24} />
               <span className="sr-only">Smaller Text</span>
             </button>
-            <div className="px-3 flex items-center gap-2 text-lg">
+            <div className={styles["pb-textsize-label"]}>
               <Type size={24} />
               <span className="font-medium">
                 Text Size:{" "}
@@ -504,11 +488,11 @@ const PromptBuilderChat = ({ session }: Props) => {
             </div>
             <button
               onClick={increaseFontSize}
-              className={`p-3 rounded-lg hover:bg-gray-300 ${
+              className={`${styles["pb-textsize-btn"]} ${
                 fontSize === "largest"
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "text-gray-700"
-              } border border-gray-300 shadow`}
+                  ? styles["pb-textsize-btn-disabled"]
+                  : styles["pb-textsize-btn-enabled"]
+              }`}
               disabled={fontSize === "largest"}
               aria-label="Increase text size"
             >
@@ -519,7 +503,7 @@ const PromptBuilderChat = ({ session }: Props) => {
 
           <div className="flex items-center gap-3">
             <button
-              className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
+              className={styles["pb-header-action-btn"]}
               onClick={() => setPromptBuilderOpen(!promptBuilderOpen)}
             >
               <Sliders size={24} />
@@ -530,14 +514,14 @@ const PromptBuilderChat = ({ session }: Props) => {
               </span>
             </button>
             <button
-              className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
+              className={styles["pb-header-action-btn"]}
               onClick={resetChat}
             >
               <RotateCcw size={24} />
               <span>Reset Chat</span>
             </button>
             <button
-              className="px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow"
+              className={styles["pb-header-action-btn"]}
               onClick={() => signOut()}
             >
               <span>Log out</span>
@@ -547,18 +531,16 @@ const PromptBuilderChat = ({ session }: Props) => {
 
         {/* Confirmation message toast */}
         {confirmMessage && (
-          <div className="fixed z-50 top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-800 px-6 py-4 rounded-lg shadow-lg border border-green-200 text-lg">
-            {confirmMessage}
-          </div>
+          <div className={styles["pb-toast-success"]}>{confirmMessage}</div>
         )}
 
         {/* Error message toast */}
         {showError && (
-          <div className="fixed z-50 top-4 left-1/2 transform -translate-x-1/2 bg-red-100 text-red-800 px-6 py-4 rounded-lg shadow-lg border border-red-200 text-lg">
+          <div className={styles["pb-toast-error"]}>
             An error occurred. Please try again.
             <button
               onClick={() => setShowError(false)}
-              className="ml-3 text-red-600 hover:text-red-800"
+              className={styles["pb-toast-dismiss"]}
             >
               Dismiss
             </button>
@@ -566,7 +548,7 @@ const PromptBuilderChat = ({ session }: Props) => {
         )}
 
         {/* Chat and Prompt Builder content area */}
-        <div className="flex flex-1 p-6 gap-6 overflow-hidden justify-center">
+        <div className={styles["pb-chat-area"]}>
           {/* Chat Panel */}
           <ChatPanel
             title={title}
@@ -594,10 +576,10 @@ const PromptBuilderChat = ({ session }: Props) => {
 
           {/* Prompt Builder Sidebar */}
           <div
-            className={`bg-white rounded-lg overflow-hidden border-gray-300 right-0 transition-all duration-500 ease ${
+            className={`${styles["pb-promptbuilder-sidebar"]} ${
               promptBuilderOpen
-                ? "flex-2 basis-1/2 border-2 shadow-lg"
-                : "basis-0 w-0"
+                ? styles["pb-promptbuilder-sidebar-open"]
+                : styles["pb-promptbuilder-sidebar-closed"]
             }`}
             style={{
               height:
@@ -606,10 +588,10 @@ const PromptBuilderChat = ({ session }: Props) => {
                   : "auto",
             }}
           >
-            <div className="p-4 border-b border-gray-200 bg-indigo-600 text-white">
+            <div className={styles["pb-promptbuilder-sidebar-header"]}>
               <div className="flex items-center justify-between">
                 <h2
-                  className={`font-semibold ${fontSizes[fontSize].header} text-nowrap`}
+                  className={`${styles["pb-promptbuilder-sidebar-title"]} ${fontSizes[fontSize].header}`}
                 >
                   Customise Chat Style
                 </h2>
@@ -617,7 +599,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             </div>
 
             <div
-              className="p-4 space-y-6 overflow-y-auto"
+              className={styles["pb-promptbuilder-sidebar-content"]}
               style={{ maxHeight: "calc(100vh - 250px)" }}
             >
               <PromptBuilder

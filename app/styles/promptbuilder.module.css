@@ -1,0 +1,304 @@
+/* Message bubble for user and assistant */
+.pb-message-bubble {
+  @apply max-w-xs md:max-w-md lg:max-w-lg rounded-lg overflow-hidden;
+}
+
+/* User message bubble */
+.pb-message-user {
+  @apply bg-indigo-100 text-gray-800 border border-indigo-200;
+}
+
+/* Assistant message bubble (base, color border applied dynamically) */
+.pb-message-assistant {
+  @apply bg-gray-100 text-gray-800 border-l-4;
+}
+
+/* System/info message */
+.pb-message-system {
+  @apply bg-gray-200 text-gray-600 rounded px-3 py-1 my-2 max-w-lg text-center border border-gray-300;
+}
+
+/* Message container flex alignment */
+.pb-message-row {
+  @apply flex;
+}
+.pb-message-row-user {
+  @apply justify-end;
+}
+.pb-message-row-assistant {
+  @apply justify-start;
+}
+
+/* Arrow button for comparison navigation */
+.pb-arrow-btn {
+  @apply max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 bg-blue-200;
+}
+.pb-arrow-btn-invisible {
+  @apply invisible;
+}
+.pb-arrow-btn-margin-right {
+  @apply mr-2;
+}
+.pb-arrow-btn-margin-left {
+  @apply ml-2;
+}
+
+/* Refresh button */
+.pb-refresh-btn {
+  @apply max-w-xs md:max-w-md lg:max-w-lg p-4 rounded-lg border-2 bg-blue-200 ml-2;
+}
+
+/* Config summary */
+.pb-config-summary {
+  @apply mt-2 text-gray-600 border-t pt-2 flex items-center justify-between;
+}
+
+/* Settings cog button */
+.pb-cog-btn {
+  @apply ml-2 p-2 rounded-full border flex items-center justify-center transition-colors duration-200;
+}
+.pb-cog-btn-active {
+  @apply bg-indigo-600 text-white border-indigo-700;
+}
+.pb-cog-btn-inactive {
+  @apply bg-indigo-500 text-white border-indigo-700 hover:bg-indigo-600;
+}
+
+/* Continue button */
+.pb-continue-btn {
+  @apply w-full p-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium transition-colors duration-200 mt-3;
+}
+
+/* Markdown content */
+.markdown-content {
+  @apply prose prose-sm sm:prose lg:prose-lg max-w-none;
+}
+
+/* Chat panel container */
+.pb-chat-panel-container {
+  @apply w-1/2 flex flex-col bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-300;
+}
+
+/* Main chat layout */
+.pb-main-layout {
+  @apply flex h-screen bg-gray-50;
+}
+
+/* Main content area */
+.pb-main-content {
+  @apply flex flex-col flex-1 overflow-hidden;
+}
+
+/* Header */
+.pb-header {
+  @apply bg-gray-100 text-gray-800 border-b border-gray-200 flex items-center justify-between transition-all duration-300;
+}
+.pb-header-collapsed {
+  @apply h-0 p-0 overflow-hidden opacity-0;
+}
+.pb-header-padding {
+  @apply p-4;
+}
+
+/* Sidebar open/close button */
+.pb-sidebar-btn {
+  @apply mr-4 p-3 rounded hover:bg-gray-200 min-w-14 min-h-14 flex items-center justify-center shadow border border-gray-300;
+}
+
+/* Text size controls */
+.pb-textsize-controls {
+  @apply flex items-center justify-between bg-gray-200 rounded-lg p-2 mr-3 border border-gray-300 shadow w-1/3;
+}
+.pb-textsize-btn {
+  @apply p-3 rounded-lg hover:bg-gray-300 border border-gray-300 shadow;
+}
+.pb-textsize-btn-disabled {
+  @apply text-gray-400 cursor-not-allowed;
+}
+.pb-textsize-btn-enabled {
+  @apply text-gray-700;
+}
+.pb-textsize-label {
+  @apply px-3 flex items-center gap-2 text-lg;
+}
+
+/* Header action buttons */
+.pb-header-action-btn {
+  @apply px-4 py-3 text-lg bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 min-h-14 border border-gray-300 shadow;
+}
+
+/* Toast notifications */
+.pb-toast-success {
+  @apply fixed z-50 top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-800 px-6 py-4 rounded-lg shadow-lg border border-green-200 text-lg;
+}
+.pb-toast-error {
+  @apply fixed z-50 top-4 left-1/2 transform -translate-x-1/2 bg-red-100 text-red-800 px-6 py-4 rounded-lg shadow-lg border border-red-200 text-lg;
+}
+.pb-toast-dismiss {
+  @apply ml-3 text-red-600 hover:text-red-800;
+}
+
+/* Chat and prompt builder area */
+.pb-chat-area {
+  @apply flex flex-1 p-6 gap-6 overflow-hidden justify-center;
+}
+
+/* Prompt builder sidebar */
+.pb-promptbuilder-sidebar {
+  @apply bg-white rounded-lg overflow-hidden border-gray-300 right-0 transition-all duration-500 ease-in-out;
+}
+.pb-promptbuilder-sidebar-open {
+  @apply flex flex-col basis-1/2 border-2 shadow-lg;
+}
+.pb-promptbuilder-sidebar-closed {
+  @apply basis-0 w-0;
+}
+.pb-promptbuilder-sidebar-header {
+  @apply p-4 border-b border-gray-200 bg-indigo-600 text-white;
+}
+.pb-promptbuilder-sidebar-title {
+  @apply font-semibold text-nowrap;
+}
+.pb-promptbuilder-sidebar-content {
+  @apply p-4 space-y-6 overflow-y-auto;
+}
+
+/* Comparison status header */
+.pb-comparison-status {
+  @apply mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg;
+}
+.pb-comparison-status-title {
+  @apply text-sm font-medium text-blue-800;
+}
+.pb-comparison-status-desc {
+  @apply text-xs text-blue-600 mt-1;
+}
+
+/* Section spacing */
+.pb-section-spacing {
+  @apply space-y-6;
+}
+
+/* Demo/personalise instructions box */
+.pb-personalise-box {
+  @apply mt-10 p-4 bg-gray-50 rounded-lg border border-gray-200;
+}
+.pb-personalise-title {
+  @apply font-bold mb-4;
+}
+
+/* CardSelector layout */
+.pb-cardselector-layout {
+  @apply flex space-x-5;
+}
+.pb-cardselector-options-col {
+  @apply w-1/3;
+}
+.pb-cardselector-options-grid {
+  @apply grid grid-cols-1 gap-3;
+}
+.pb-cardselector-option-card {
+  @apply px-3 py-3 rounded-md cursor-pointer transition-all h-auto flex items-center gap-2;
+}
+.pb-cardselector-option-selected {
+  @apply bg-blue-600 text-white shadow-md;
+}
+.pb-cardselector-option-unselected {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-800;
+}
+.pb-cardselector-title {
+  @apply mb-3 text-gray-800;
+}
+.pb-cardselector-option-title {
+  @apply flex-1 text-left;
+}
+.pb-cardselector-dots-row {
+  @apply flex flex-row gap-1 items-center;
+}
+.pb-cardselector-dots-grid {
+  @apply grid grid-cols-2 gap-1 items-center;
+}
+.pb-cardselector-textarea-col {
+  @apply w-2/3;
+}
+.pb-cardselector-textarea {
+  @apply w-full h-full p-4 border border-gray-400 rounded-md;
+}
+.pb-cardselector-textarea-active {
+  @apply focus:ring-blue-500 focus:border-blue-500 bg-white;
+}
+.pb-cardselector-textarea-inactive {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* Chat header */
+.pb-chat-header {
+  @apply bg-indigo-600 text-white p-4 flex items-center justify-between;
+}
+.pb-chat-header-title-row {
+  @apply flex items-center gap-3;
+}
+.pb-chat-header-title {
+  @apply font-semibold;
+}
+
+/* Message input */
+.pb-messageinput-container {
+  @apply border-t-2 border-gray-200 p-4 relative;
+}
+.pb-messageinput-inner {
+  @apply flex items-center bg-gray-100 rounded-lg p-3 border border-gray-300;
+}
+.pb-messageinput-textarea {
+  @apply flex-1 bg-transparent outline-none resize-none min-h-8 max-h-40 overflow-y-auto p-2;
+}
+.pb-messageinput-send-btn {
+  @apply p-4 ml-3 flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-indigo-400 gap-2;
+}
+.pb-messageinput-continue-row {
+  @apply flex px-4 relative items-center justify-center;
+}
+.pb-messageinput-continue-btn {
+  @apply p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2;
+}
+
+/* Chat history sidebar */
+.pb-sidebar-container {
+  @apply fixed md:relative h-full z-10 bg-gray-800 text-white transition-all duration-300 overflow-hidden shadow-lg;
+}
+.pb-sidebar-container-open {
+  @apply w-72;
+}
+.pb-sidebar-container-closed {
+  @apply w-0;
+}
+.pb-sidebar-inner {
+  @apply flex flex-col h-full;
+}
+.pb-sidebar-header {
+  @apply p-6 flex items-center justify-between;
+}
+.pb-sidebar-title {
+  @apply font-semibold whitespace-nowrap text-xl;
+}
+.pb-sidebar-title-hidden {
+  @apply md:hidden;
+}
+.pb-sidebar-toggle-btn {
+  @apply p-3 rounded hover:bg-gray-700 text-gray-300 min-w-14 min-h-14 flex items-center justify-center;
+}
+.pb-sidebar-chats-list {
+  @apply space-y-2 px-4;
+}
+.pb-sidebar-chat-item {
+  @apply p-3 hover:bg-gray-700 rounded-lg cursor-pointer;
+}
+.pb-sidebar-chat-title {
+  @apply text-white font-medium truncate;
+}
+.pb-sidebar-chat-preview {
+  @apply text-sm text-gray-400 truncate;
+}
+.pb-sidebar-empty {
+  @apply px-6 py-4 text-gray-400;
+}

@@ -1,5 +1,6 @@
 import React from "react";
 import { Bot } from "lucide-react";
+import styles from "../styles/promptbuilder.module.css";
 
 interface FontSizes {
   chat: string;
@@ -14,12 +15,16 @@ interface ChatHeaderProps {
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({ title, fontSizes }) => {
   return (
-    <div className="bg-indigo-600 text-white p-4 flex items-center justify-between">
+    <div className={styles["pb-chat-header"]}>
       <div className="flex items-center gap-3">
-        <Bot size={28} />
-        <h2 className={`font-semibold ${fontSizes.header}`}>
-          {title || "New Chat"}
-        </h2>
+        <div className={styles["pb-chat-header-title-row"]}>
+          <Bot size={28} />
+          <h2
+            className={`${styles["pb-chat-header-title"]} ${fontSizes.header}`}
+          >
+            {title || "New Chat"}
+          </h2>
+        </div>
       </div>
     </div>
   );

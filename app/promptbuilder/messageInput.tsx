@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { Send } from "lucide-react";
+import styles from "../styles/promptbuilder.module.css";
 
 interface FontSizes {
   chat: string;
@@ -48,12 +49,12 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className="border-t-2 border-gray-200 p-4 relative">
+    <div className={styles["pb-messageinput-container"]}>
       {!comparisonMode ? (
-        <div className="flex items-center bg-gray-100 rounded-lg p-3 border border-gray-300">
+        <div className={styles["pb-messageinput-inner"]}>
           <textarea
             ref={textareaRef}
-            className={`flex-1 bg-transparent outline-none resize-none min-h-8 max-h-40 overflow-y-auto p-2 ${fontSizes.input}`}
+            className={`${styles["pb-messageinput-textarea"]} ${fontSizes.input}`}
             placeholder="Type your message..."
             rows={1}
             value={userInput}
@@ -62,7 +63,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
             style={{ height: "42px" }}
           />
           <button
-            className="p-4 ml-3 flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-indigo-400 gap-2"
+            className={styles["pb-messageinput-send-btn"]}
             onClick={onSendMessage}
             aria-label="Send message"
           >
@@ -71,13 +72,15 @@ const MessageInput: React.FC<MessageInputProps> = ({
           </button>
         </div>
       ) : (
-        <div className="flex px-4 relative items-center justify-center">
+        <div className={styles["pb-messageinput-continue-row"]}>
           <button
-            className="p-4 ml-3 flex-shrink-0 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-lg min-w-16 min-h-16 flex items-center justify-center transition-colors duration-200 border-2 border-teal-400 gap-2"
+            className={styles["pb-messageinput-continue-btn"]}
             onClick={onExitComparisonMode}
             aria-label="Accept configuration"
           >
-            <span className="font-medium">Continue with this configuration</span>
+            <span className="font-medium">
+              Continue with this configuration
+            </span>
           </button>
         </div>
       )}

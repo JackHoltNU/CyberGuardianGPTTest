@@ -6,6 +6,7 @@ import TickAllSelector from "../components/tickAllSelector";
 import ToggleSwitch from "../components/toggleSwitch";
 import DropdownSelector from "../components/dropdownSelector";
 import TextInputBox from "../components/textInputBox";
+import styles from "../styles/promptbuilder.module.css";
 
 interface PromptBuilderProps {
   comparisonConfigs?: PromptConfiguration[];
@@ -123,19 +124,21 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
     <>
       {/* Header with comparison status */}
       {comparisonMode && totalComparisons > 0 && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className={styles["pb-comparison-status"]}>
           <h3
-            className={`text-sm font-medium text-blue-800 ${fontSizes.header}`}
+            className={`${styles["pb-comparison-status-title"]} ${fontSizes.header}`}
           >
             Viewing: Configuration {comparisonCounter + 1} of {totalComparisons}
           </h3>
-          <p className={`text-xs text-blue-600 mt-1 ${fontSizes.chat}`}>
+          <p
+            className={`${styles["pb-comparison-status-desc"]} ${fontSizes.chat}`}
+          >
             Settings below reflect the currently displayed message
           </p>
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className={styles["pb-section-spacing"]}>
         {promptSections?.map((section) => (
           <CardSelector
             key={section.id}
@@ -157,8 +160,8 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
       </div>
 
       {/* --- DEMO OF NEW COMPONENTS --- */}
-      <div className="mt-10 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <h2 className={`font-bold mb-4 ${fontSizes.header}`}>
+      <div className={styles["pb-personalise-box"]}>
+        <h2 className={`${styles["pb-personalise-title"]} ${fontSizes.header}`}>
           Personalise Instructions
         </h2>
         <ToggleSwitch

@@ -15,17 +15,17 @@ const config: Config = {
       },
       keyframes: {
         dot: {
-          '0%, 20%': { opacity: "1" },
-          '25%, 100%': { opacity: "0" },
+          "0%, 20%": { opacity: "1" },
+          "25%, 100%": { opacity: "0" },
         },
       },
       animation: {
-        'dot1': 'dot 1.4s infinite steps(4, end)',
-        'dot2': 'dot 1.4s infinite steps(4, end) 0.2s',
-        'dot3': 'dot 1.4s infinite steps(4, end) 0.4s',
-      }
+        dot1: "dot 1.4s infinite steps(4, end)",
+        dot2: "dot 1.4s infinite steps(4, end) 0.2s",
+        dot3: "dot 1.4s infinite steps(4, end) 0.4s",
+      },
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/typography")],
 };
 export default config;

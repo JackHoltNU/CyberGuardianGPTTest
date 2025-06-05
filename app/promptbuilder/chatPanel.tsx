@@ -3,6 +3,7 @@ import ChatHeader from "./chatHeader";
 import MessageList from "./messageList";
 import MessageInput from "./messageInput";
 import { MessageHistory, PromptConfiguration } from "../types/types";
+import styles from "../styles/promptbuilder.module.css";
 
 interface FontSizes {
   chat: string;
@@ -73,10 +74,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const shouldHideInput = comparisonMode && latestMessageHasBeenRerun;
 
   return (
-    <div
-      className="w-1/2 flex flex-col bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-300"
-      style={chatStyle}
-    >
+    <div className={styles["pb-chat-panel-container"]} style={chatStyle}>
       <ChatHeader title={title} fontSizes={fontSizes} />
 
       <MessageList
