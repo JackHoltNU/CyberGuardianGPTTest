@@ -10,7 +10,6 @@ import { ComparisonChatbotProvider } from "./context/useComparisonChatbot";
 import { DualChatProvider } from "./context/useDualChat";
 import { PromptBuilderProvider } from "./context/usePromptBuilder";
 
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -23,13 +22,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   const session = await getServerSession(options);
 
   if (!session) {
-    redirect('api/auth/signin?callbackUrl=%2F')
+    redirect("api/auth/signin?callbackUrl=%2F");
   }
-  
+
   return (
     <ChatbotProvider>
       <ComparisonChatbotProvider>
@@ -37,13 +35,17 @@ export default async function RootLayout({
           <PromptBuilderProvider>
             <AdminProvider>
               <html lang="en">
+                <meta
+                  name="viewport"
+                  content="width=device-width, initial-scale=1"
+                />
                 <link rel="icon" href="/favicon.ico" sizes="any" />
                 <body className={inter.className}>{children}</body>
               </html>
             </AdminProvider>
-          </PromptBuilderProvider>            
-        </DualChatProvider>  
-      </ComparisonChatbotProvider>     
+          </PromptBuilderProvider>
+        </DualChatProvider>
+      </ComparisonChatbotProvider>
     </ChatbotProvider>
   );
 }

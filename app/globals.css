@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  height: 100%;
+  min-height: 100%;
+  padding: 0;
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+@media (max-width: 600px) {
+  .pb-main-layout,
+  .pb-main-content,
+  .pb-chat-area {
+    height: 100vh;
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+  .pb-promptbuilder-sidebar-open {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 .chat {
   @apply flex flex-col h-dvh w-full md:w-4/5 px-8;
 }
@@ -162,7 +186,6 @@
   @apply flex flex-col h-dvh w-full md:w-4/5 p-8;
 }
 
-
 .modal {
   @apply fixed inset-0 flex justify-center items-center bg-black bg-opacity-50;
 }
@@ -174,7 +197,6 @@
 .modal__close {
   @apply text-gray-500 float-right text-2xl cursor-pointer;
 }
-
 
 .button--export-current {
   @apply w-full bg-green-600 hover:bg-green-800 text-white rounded-lg p-2;
@@ -202,7 +224,8 @@
   margin-bottom: 0.5em;
 }
 
-.markdown-content ul, .markdown-content ol {
+.markdown-content ul,
+.markdown-content ol {
   margin-left: 1.5em;
   margin-top: 0.5em;
   margin-bottom: 0.5em;
@@ -246,7 +269,8 @@
   width: 100%;
 }
 
-.markdown-content th, .markdown-content td {
+.markdown-content th,
+.markdown-content td {
   border: 1px solid #ddd;
   padding: 0.5em;
 }

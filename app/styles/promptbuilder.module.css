@@ -76,7 +76,8 @@
 
 /* Chat panel container */
 .pb-chat-panel-container {
-  @apply w-1/2 flex flex-col bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-300;
+  @apply flex flex-col bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-300;
+  width: 100%;
 }
 
 /* Main chat layout */
@@ -107,7 +108,7 @@
 
 /* Text size controls */
 .pb-textsize-controls {
-  @apply flex items-center justify-between bg-gray-200 rounded-lg p-2 mr-3 border border-gray-300 shadow w-1/3;
+  @apply flex items-center justify-between bg-gray-200 rounded-lg p-2 m-3 border border-gray-300 shadow w-1/3;
 }
 .pb-textsize-btn {
   @apply p-3 rounded-lg hover:bg-gray-300 border border-gray-300 shadow;
@@ -129,10 +130,10 @@
 
 /* Toast notifications */
 .pb-toast-success {
-  @apply fixed z-50 top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-800 px-6 py-4 rounded-lg shadow-lg border border-green-200 text-lg;
+  @apply fixed z-50 bottom-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-800 px-6 py-4 rounded-lg shadow-lg border border-green-200 text-lg;
 }
 .pb-toast-error {
-  @apply fixed z-50 top-4 left-1/2 transform -translate-x-1/2 bg-red-100 text-red-800 px-6 py-4 rounded-lg shadow-lg border border-red-200 text-lg;
+  @apply fixed z-50 bottom-4 left-1/2 transform -translate-x-1/2 bg-red-100 text-red-800 px-6 py-4 rounded-lg shadow-lg border border-red-200 text-lg;
 }
 .pb-toast-dismiss {
   @apply ml-3 text-red-600 hover:text-red-800;
@@ -140,7 +141,7 @@
 
 /* Chat and prompt builder area */
 .pb-chat-area {
-  @apply flex flex-1 p-6 gap-6 overflow-hidden justify-center;
+  @apply flex flex-1 gap-6 p-6 overflow-hidden justify-center;
 }
 
 /* Prompt builder sidebar */
@@ -155,6 +156,13 @@
 }
 .pb-promptbuilder-sidebar-header {
   @apply p-4 border-b border-gray-200 bg-indigo-600 text-white;
+}
+.pb-promptbuilder-sidebar-header button {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  min-height: 0;
+  padding: 0;
 }
 .pb-promptbuilder-sidebar-title {
   @apply font-semibold text-nowrap;
@@ -301,4 +309,115 @@
 }
 .pb-sidebar-empty {
   @apply px-6 py-4 text-gray-400;
+}
+
+/* Add after .pb-chat-panel-container */
+.pb-chat-panel-centered {
+  width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pb-promptbuilder-sidebar-open {
+  position: static;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  height: auto;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 2px solid #d1d5db;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+  .pb-chat-panel-centered {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1535px) {
+  .pb-chat-panel-centered {
+    width: 75%;
+  }
+  .pb-promptbuilder-sidebar-open {
+    flex-basis: 50%;
+    max-width: 50%;
+  }
+}
+
+@media (min-width: 1536px) {
+  .pb-chat-panel-centered {
+    width: 50%;
+  }
+  .pb-promptbuilder-sidebar-open {
+    flex-basis: 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 600px) and (orientation: portrait) {
+  .pb-promptbuilder-sidebar-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 45vh;
+    max-height: 80vh;
+    z-index: 40;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+    border-width: 2px;
+    border-color: #e5e7eb;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 870px) {
+  .pb-chat-panel-container:not(.pb-chat-panel-centered) {
+    width: 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 600px) {
+  .pb-main-layout,
+  .pb-main-content,
+  .pb-chat-area {
+    /* Only mobile-specific width rules here */
+    width: 100vw !important;
+    min-width: 100vw !important;
+    gap: 0;
+  }
+  .pb-promptbuilder-sidebar-open {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: static;
+    height: auto;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 2px solid #d1d5db;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
 }

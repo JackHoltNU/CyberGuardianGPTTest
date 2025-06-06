@@ -33,6 +33,9 @@ interface ChatPanelProps {
   configColorMap: Map<string, string>;
   onOpenCustomisePanel: () => void;
   isCustomisePanelOpen: boolean;
+  centered?: boolean;
+  bottomOffset?: string;
+  fullWidth?: boolean;
 }
 
 const ChatPanel: React.FC<ChatPanelProps> = ({
@@ -57,6 +60,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   configColorMap,
   onOpenCustomisePanel,
   isCustomisePanelOpen,
+  centered = false,
+  bottomOffset = "0",
+  fullWidth = false,
 }) => {
   const chatStyle = {
     height:
@@ -64,6 +70,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         ? `calc(100vh - ${keyboardHeight}px - 180px)`
         : "auto",
     transition: "all 0.3s ease",
+    marginBottom: bottomOffset,
   };
 
   // Check if latest message has been rerun by looking for comparison messages
@@ -74,7 +81,13 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const shouldHideInput = comparisonMode && latestMessageHasBeenRerun;
 
   return (
-    <div className={styles["pb-chat-panel-container"]} style={chatStyle}>
+    <div
+      className={
+        styles["pb-chat-panel-container"] +
+        (centered ? " " + styles["pb-chat-panel-centered"] : "")
+      }
+      style={chatStyle}
+    >
       <ChatHeader title={title} fontSizes={fontSizes} />
 
       <MessageList

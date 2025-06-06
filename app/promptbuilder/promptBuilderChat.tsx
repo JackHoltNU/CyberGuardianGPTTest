@@ -9,6 +9,10 @@ import {
   MinusCircle,
   PlusCircle,
   Sliders,
+  ZoomIn,
+  ZoomOut,
+  LogOut,
+  X as CloseIcon,
 } from "lucide-react";
 import { debounce } from "../utils/debounce";
 import { useChatbot } from "../context/useChatbot";
@@ -127,6 +131,11 @@ const PromptBuilderChat = ({ session }: Props) => {
 
   // Track previous config for change detection
   const previousConfigRef = useRef<PromptConfiguration | null>(null);
+
+  // State to detect vertical tablet (portrait, width 600-1024px)
+  const [isTabletPortrait, setIsTabletPortrait] = useState(false);
+  // State to detect mobile (width <= 600px)
+  const [isMobile, setIsMobile] = useState(false);
 
   // Helper to get changed config fields
   const getConfigChanges = (
@@ -431,6 +440,38 @@ const PromptBuilderChat = ({ session }: Props) => {
     }
   }, [isFullScreen, keyboardVisible]);
 
+  useEffect(() => {
+    const checkTabletPortrait = () => {
+      const mq = window.matchMedia(
+        "(max-width: 1024px) and (min-width: 600px) and (orientation: portrait)"
+      );
+      setIsTabletPortrait(mq.matches);
+    };
+    checkTabletPortrait();
+    window.addEventListener("resize", checkTabletPortrait);
+    return () => window.removeEventListener("resize", checkTabletPortrait);
+  }, []);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia("(max-width: 600px)").matches);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile && promptBuilderOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobile, promptBuilderOpen]);
+
   return (
     <div className={styles["pb-main-layout"]}>
       {/* History Sidebar */}
@@ -451,7 +492,7 @@ const PromptBuilderChat = ({ session }: Props) => {
               : styles["pb-header-padding"]
           }`}
         >
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             {!historySidebarOpen && (
               <button
                 onClick={() => setHistorySidebarOpen(true)}
@@ -461,70 +502,105 @@ const PromptBuilderChat = ({ session }: Props) => {
                 <Menu size={28} />
               </button>
             )}
-            <h1 className="font-medium text-3xl">CyberGuardian Chat</h1>
+            {!isMobile && (
+              <h1 className="font-medium text-3xl">CyberGuardian Chat</h1>
+            )}
+            {/* Mobile font size controls */}
+            {isMobile && (
+              <>
+                <button
+                  onClick={decreaseFontSize}
+                  className={styles["pb-header-action-btn"]}
+                  aria-label="Decrease text size"
+                  disabled={fontSize === "small"}
+                >
+                  <ZoomOut size={22} />
+                </button>
+                <button
+                  onClick={increaseFontSize}
+                  className={styles["pb-header-action-btn"]}
+                  aria-label="Increase text size"
+                  disabled={fontSize === "largest"}
+                >
+                  <ZoomIn size={22} />
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Text size adjustment controls */}
-          <div className={styles["pb-textsize-controls"]}>
-            <button
-              onClick={decreaseFontSize}
-              className={`${styles["pb-textsize-btn"]} ${
-                fontSize === "small"
-                  ? styles["pb-textsize-btn-disabled"]
-                  : styles["pb-textsize-btn-enabled"]
-              }`}
-              disabled={fontSize === "small"}
-              aria-label="Decrease text size"
-            >
-              <MinusCircle size={24} />
-              <span className="sr-only">Smaller Text</span>
-            </button>
-            <div className={styles["pb-textsize-label"]}>
-              <Type size={24} />
-              <span className="font-medium">
-                Text Size:{" "}
-                {fontSize.charAt(0).toUpperCase() + fontSize.slice(1)}
-              </span>
+          {/* Text size adjustment controls (hide on mobile) */}
+          {!isMobile && (
+            <div className={styles["pb-textsize-controls"]}>
+              <button
+                onClick={decreaseFontSize}
+                className={`${styles["pb-textsize-btn"]} ${
+                  fontSize === "small"
+                    ? styles["pb-textsize-btn-disabled"]
+                    : styles["pb-textsize-btn-enabled"]
+                }`}
+                disabled={fontSize === "small"}
+                aria-label="Decrease text size"
+              >
+                <MinusCircle size={24} />
+                <span className="sr-only">Smaller Text</span>
+              </button>
+              <div className={styles["pb-textsize-label"]}>
+                <Type size={24} />
+                <span className="font-medium">
+                  Text Size:{" "}
+                  {fontSize.charAt(0).toUpperCase() + fontSize.slice(1)}
+                </span>
+              </div>
+              <button
+                onClick={increaseFontSize}
+                className={`${styles["pb-textsize-btn"]} ${
+                  fontSize === "largest"
+                    ? styles["pb-textsize-btn-disabled"]
+                    : styles["pb-textsize-btn-enabled"]
+                }`}
+                disabled={fontSize === "largest"}
+                aria-label="Increase text size"
+              >
+                <PlusCircle size={24} />
+                <span className="sr-only">Larger Text</span>
+              </button>
             </div>
-            <button
-              onClick={increaseFontSize}
-              className={`${styles["pb-textsize-btn"]} ${
-                fontSize === "largest"
-                  ? styles["pb-textsize-btn-disabled"]
-                  : styles["pb-textsize-btn-enabled"]
-              }`}
-              disabled={fontSize === "largest"}
-              aria-label="Increase text size"
-            >
-              <PlusCircle size={24} />
-              <span className="sr-only">Larger Text</span>
-            </button>
-          </div>
+          )}
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               className={styles["pb-header-action-btn"]}
               onClick={() => setPromptBuilderOpen(!promptBuilderOpen)}
+              aria-label={
+                promptBuilderOpen
+                  ? "Hide Customise Chat"
+                  : "Show Customise Chat"
+              }
             >
               <Sliders size={24} />
-              <span>
-                {promptBuilderOpen
-                  ? "Hide Customise Chat"
-                  : "Show Customise Chat"}
-              </span>
+              {!isMobile && (
+                <span>
+                  {promptBuilderOpen
+                    ? "Hide Customise Chat"
+                    : "Show Customise Chat"}
+                </span>
+              )}
             </button>
             <button
               className={styles["pb-header-action-btn"]}
               onClick={resetChat}
+              aria-label="Reset Chat"
             >
               <RotateCcw size={24} />
-              <span>Reset Chat</span>
+              {!isMobile && <span>Reset Chat</span>}
             </button>
             <button
               className={styles["pb-header-action-btn"]}
               onClick={() => signOut()}
+              aria-label="Log out"
             >
-              <span>Log out</span>
+              {isMobile ? <LogOut size={24} /> : <Settings size={24} />}
+              {!isMobile && <span>Log out</span>}
             </button>
           </div>
         </header>
@@ -549,42 +625,54 @@ const PromptBuilderChat = ({ session }: Props) => {
 
         {/* Chat and Prompt Builder content area */}
         <div className={styles["pb-chat-area"]}>
-          {/* Chat Panel */}
-          <ChatPanel
-            title={title}
-            messages={messages}
-            loading={loading}
-            userInput={userInput}
-            onInputChange={setUserInput}
-            onSendMessage={handleSendMessage}
-            fontSizes={fontSizes[fontSize]}
-            keyboardHeight={keyboardHeight}
-            keyboardVisible={keyboardVisible}
-            isFullScreen={isFullScreen}
-            comparisonMode={comparisonMode}
-            comparisonMessages={comparisonMessages}
-            comparisonCounter={comparisonCounter}
-            onComparisonCounterChange={setComparisonCounter}
-            onRefreshLatestMessage={refreshLatestMessage}
-            onExitComparisonMode={handleExitComparisonMode}
-            onConfigurationChange={handleConfigurationChange}
-            currentPanelConfig={getCurrentDisplayConfig()}
-            configColorMap={configColorMap}
-            onOpenCustomisePanel={() => setPromptBuilderOpen((open) => !open)}
-            isCustomisePanelOpen={promptBuilderOpen}
-          />
+          {/* Chat Panel (hide on mobile when prompt builder is open) */}
+          {!(isMobile && promptBuilderOpen) && (
+            <ChatPanel
+              title={title}
+              messages={messages}
+              loading={loading}
+              userInput={userInput}
+              onInputChange={setUserInput}
+              onSendMessage={handleSendMessage}
+              fontSizes={fontSizes[fontSize]}
+              keyboardHeight={keyboardHeight}
+              keyboardVisible={keyboardVisible}
+              isFullScreen={isFullScreen}
+              comparisonMode={comparisonMode}
+              comparisonMessages={comparisonMessages}
+              comparisonCounter={comparisonCounter}
+              onComparisonCounterChange={setComparisonCounter}
+              onRefreshLatestMessage={refreshLatestMessage}
+              onExitComparisonMode={handleExitComparisonMode}
+              onConfigurationChange={handleConfigurationChange}
+              currentPanelConfig={getCurrentDisplayConfig()}
+              configColorMap={configColorMap}
+              onOpenCustomisePanel={() => setPromptBuilderOpen((open) => !open)}
+              isCustomisePanelOpen={promptBuilderOpen}
+              centered={!promptBuilderOpen && !isTabletPortrait}
+              bottomOffset={
+                isTabletPortrait && promptBuilderOpen ? "45vh" : "0"
+              }
+              fullWidth={isTabletPortrait}
+            />
+          )}
 
           {/* Prompt Builder Sidebar */}
           <div
-            className={`${styles["pb-promptbuilder-sidebar"]} ${
-              promptBuilderOpen
+            className={
+              `${styles["pb-promptbuilder-sidebar"]} ` +
+              (isTabletPortrait && promptBuilderOpen
+                ? styles["pb-promptbuilder-sidebar-bottom"]
+                : promptBuilderOpen
                 ? styles["pb-promptbuilder-sidebar-open"]
-                : styles["pb-promptbuilder-sidebar-closed"]
-            }`}
+                : styles["pb-promptbuilder-sidebar-closed"])
+            }
             style={{
               height:
-                keyboardVisible && isFullScreen
+                keyboardVisible && isFullScreen && !isTabletPortrait
                   ? `calc(100vh - ${keyboardHeight}px - 180px)`
+                  : isTabletPortrait
+                  ? undefined
                   : "auto",
             }}
           >
@@ -595,6 +683,13 @@ const PromptBuilderChat = ({ session }: Props) => {
                 >
                   Customise Chat Style
                 </h2>
+                <button
+                  onClick={() => setPromptBuilderOpen(false)}
+                  className={styles["pb-header-action-btn"]}
+                  aria-label="Close Customise Chat"
+                >
+                  <CloseIcon size={24} />
+                </button>
               </div>
             </div>
 
