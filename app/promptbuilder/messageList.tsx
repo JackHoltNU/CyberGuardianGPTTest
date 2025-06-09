@@ -209,16 +209,16 @@ const MessageList: React.FC<MessageListProps> = ({
                 isSingleColumn ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"
               } gap-x-1 gap-y-2 flex-1`}
             >
-              <span className="break-words">
+              <span className="break-normal">
                 <strong>Personality:</strong> {config.personalityLabel}
               </span>
-              <span className="break-words">
+              <span className="break-normal">
                 <strong>Language:</strong> {config.languageDifficultyLabel}
               </span>
-              <span className="break-words">
+              <span className="break-normal">
                 <strong>Length:</strong> {config.answerLengthLabel}
               </span>
-              <span className="break-words">
+              <span className="break-normal">
                 <strong>Technical:</strong> {config.technicalDifficultyLabel}
               </span>
               <span
