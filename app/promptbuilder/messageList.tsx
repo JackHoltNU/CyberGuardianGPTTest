@@ -82,7 +82,6 @@ const MessageList: React.FC<MessageListProps> = ({
   // Helper to get color name for a config
   const getConfigColorName = (config: PromptConfiguration | undefined) => {
     const hash = getConfigHash(config);
-    console.log(`THIS ONE: ${configColorMap.entries().toArray()[0]}`);
 
     return configColorMap?.get(hash) || "gray";
   };
