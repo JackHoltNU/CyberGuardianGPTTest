@@ -125,14 +125,10 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
       {/* Header with comparison status */}
       {comparisonMode && totalComparisons > 0 && (
         <div className={styles["pb-comparison-status"]}>
-          <h3
-            className={`${styles["pb-comparison-status-title"]} ${fontSizes.header}`}
-          >
+          <h3 className={styles["pb-comparison-status-title"]}>
             Viewing: Configuration {comparisonCounter + 1} of {totalComparisons}
           </h3>
-          <p
-            className={`${styles["pb-comparison-status-desc"]} ${fontSizes.chat}`}
-          >
+          <p className={`${styles["pb-comparison-status-desc"]}`}>
             Settings below reflect the currently displayed message
           </p>
         </div>

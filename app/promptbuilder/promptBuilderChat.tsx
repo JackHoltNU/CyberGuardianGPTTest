@@ -104,24 +104,24 @@ const PromptBuilderChat = ({ session }: Props) => {
   // Font sizes
   const fontSizes: FontSizeMapping = {
     small: {
-      chat: "text-base",
-      input: "text-base",
-      header: "text-xl",
+      chat: "0.95rem",
+      input: "0.95rem",
+      header: "1.1rem",
     },
     medium: {
-      chat: "text-lg",
-      input: "text-lg",
-      header: "text-2xl",
+      chat: "1.05rem",
+      input: "1.05rem",
+      header: "1.25rem",
     },
     large: {
-      chat: "text-xl",
-      input: "text-xl",
-      header: "text-3xl",
+      chat: "1.15rem",
+      input: "1.15rem",
+      header: "1.4rem",
     },
     largest: {
-      chat: "text-2xl",
-      input: "text-2xl",
-      header: "text-4xl",
+      chat: "1.3rem",
+      input: "1.3rem",
+      header: "1.6rem",
     },
   };
 
@@ -136,6 +136,11 @@ const PromptBuilderChat = ({ session }: Props) => {
   const [isTabletPortrait, setIsTabletPortrait] = useState(false);
   // State to detect mobile (width <= 600px)
   const [isMobile, setIsMobile] = useState(false);
+  // State to detect compact header (width <= 1200px)
+  const [isCompactHeader, setIsCompactHeader] = useState(false);
+
+  // State to detect if title should be shown (width >= 900px)
+  const [isShowTitle, setIsShowTitle] = useState(true);
 
   // Helper to get changed config fields
   const getConfigChanges = (
@@ -462,6 +467,15 @@ const PromptBuilderChat = ({ session }: Props) => {
   }, []);
 
   useEffect(() => {
+    const checkCompactHeader = () => {
+      setIsCompactHeader(window.matchMedia("(max-width: 1200px)").matches);
+    };
+    checkCompactHeader();
+    window.addEventListener("resize", checkCompactHeader);
+    return () => window.removeEventListener("resize", checkCompactHeader);
+  }, []);
+
+  useEffect(() => {
     if (isMobile && promptBuilderOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -472,8 +486,25 @@ const PromptBuilderChat = ({ session }: Props) => {
     };
   }, [isMobile, promptBuilderOpen]);
 
+  useEffect(() => {
+    const checkShowTitle = () => {
+      setIsShowTitle(window.matchMedia("(min-width: 900px)").matches);
+    };
+    checkShowTitle();
+    window.addEventListener("resize", checkShowTitle);
+    return () => window.removeEventListener("resize", checkShowTitle);
+  }, []);
+
   return (
-    <div className={styles["pb-main-layout"]}>
+    <div
+      className={styles["pb-main-layout"]}
+      style={
+        {
+          // Set CSS variable for font size
+          "--pb-font-size": fontSizes[fontSize].chat,
+        } as React.CSSProperties
+      }
+    >
       {/* History Sidebar */}
       <ChatHistorySidebar
         isOpen={historySidebarOpen}
@@ -484,6 +515,61 @@ const PromptBuilderChat = ({ session }: Props) => {
 
       {/* Main content */}
       <div className={styles["pb-main-content"]}>
+        {/* Sidepanel header for mobile landscape */}
+        <div className={styles["pb-header-sidepanel"]}>
+          <button
+            onClick={() => setHistorySidebarOpen(true)}
+            className={styles["pb-sidebar-btn"]}
+            aria-label="Open menu"
+            style={{ marginBottom: "1rem" }}
+          >
+            <Menu size={28} />
+          </button>
+          <button
+            onClick={decreaseFontSize}
+            className={styles["pb-header-action-btn"]}
+            aria-label="Decrease text size"
+            disabled={fontSize === "small"}
+            style={{ marginBottom: "0.5rem" }}
+          >
+            <ZoomOut size={22} />
+          </button>
+          <button
+            onClick={increaseFontSize}
+            className={styles["pb-header-action-btn"]}
+            aria-label="Increase text size"
+            disabled={fontSize === "largest"}
+            style={{ marginBottom: "0.5rem" }}
+          >
+            <ZoomIn size={22} />
+          </button>
+          <button
+            className={styles["pb-header-action-btn"]}
+            onClick={() => setPromptBuilderOpen(!promptBuilderOpen)}
+            aria-label={
+              promptBuilderOpen ? "Hide Customise Chat" : "Show Customise Chat"
+            }
+            style={{ marginBottom: "0.5rem" }}
+          >
+            <Sliders size={24} />
+          </button>
+          <button
+            className={styles["pb-header-action-btn"]}
+            onClick={resetChat}
+            aria-label="Reset Chat"
+            style={{ marginBottom: "0.5rem" }}
+          >
+            <RotateCcw size={24} />
+          </button>
+          <button
+            className={styles["pb-header-action-btn"]}
+            onClick={() => signOut()}
+            aria-label="Log out"
+            style={{ marginBottom: "0.5rem" }}
+          >
+            <LogOut size={24} />
+          </button>
+        </div>
         {/* Header with title, text size controls, and other controls */}
         <header
           className={`${styles["pb-header"]} ${
@@ -502,8 +588,10 @@ const PromptBuilderChat = ({ session }: Props) => {
                 <Menu size={28} />
               </button>
             )}
-            {!isMobile && (
-              <h1 className="font-medium text-3xl">CyberGuardian Chat</h1>
+            {isShowTitle && (
+              <h1 style={{ fontSize: "1.2em", margin: 0 }}>
+                CyberGuardian Chat
+              </h1>
             )}
             {/* Mobile font size controls */}
             {isMobile && (
@@ -578,7 +666,7 @@ const PromptBuilderChat = ({ session }: Props) => {
               }
             >
               <Sliders size={24} />
-              {!isMobile && (
+              {!isCompactHeader && (
                 <span>
                   {promptBuilderOpen
                     ? "Hide Customise Chat"
@@ -592,15 +680,15 @@ const PromptBuilderChat = ({ session }: Props) => {
               aria-label="Reset Chat"
             >
               <RotateCcw size={24} />
-              {!isMobile && <span>Reset Chat</span>}
+              {!isCompactHeader && <span>Reset Chat</span>}
             </button>
             <button
               className={styles["pb-header-action-btn"]}
               onClick={() => signOut()}
               aria-label="Log out"
             >
-              {isMobile ? <LogOut size={24} /> : <Settings size={24} />}
-              {!isMobile && <span>Log out</span>}
+              {isCompactHeader ? <LogOut size={24} /> : <Settings size={24} />}
+              {!isCompactHeader && <span>Log out</span>}
             </button>
           </div>
         </header>
@@ -695,7 +783,7 @@ const PromptBuilderChat = ({ session }: Props) => {
 
             <div
               className={styles["pb-promptbuilder-sidebar-content"]}
-              style={{ maxHeight: "calc(100vh - 250px)" }}
+              // style={{ maxHeight: "calc(100vh - 250px)" }}
             >
               <PromptBuilder
                 comparisonConfigs={getComparisonMessageConfigs()}
