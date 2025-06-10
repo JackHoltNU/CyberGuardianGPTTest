@@ -14,6 +14,27 @@ const feedbackSchema = new mongoose.Schema({
   }
 })
 
+const promptConfigSchema = new mongoose.Schema({
+  id: String,
+  personality: String,
+  languageDifficulty: String,
+  answerLength: String,
+  technicalDifficulty: String,
+  instructionFormat: String,
+  personalityLabel: String,
+  languageDifficultyLabel: String,
+  answerLengthLabel: String,
+  technicalDifficultyLabel: String,
+  instructionFormatLabel: String,
+  specifyDevices: Boolean,
+  selectedDevices: [String],
+  computerType: String,
+  tabletType: String,
+  mobileType: String,
+  browser: String,
+  additionalInstructions: String
+});
+
 const messageSchema = new mongoose.Schema({
   id: {
     type: String,
@@ -47,6 +68,18 @@ const messageSchema = new mongoose.Schema({
   formatPrompt: {
     type: String,
     require: false
+  },
+  promptConfig: {
+    type: promptConfigSchema,
+    required: false
+  },
+  isSelected: {
+    type: Boolean,
+    default: false
+  },
+  selectionTimestamp: {
+    type: Date,
+    required: false
   }
 });
 

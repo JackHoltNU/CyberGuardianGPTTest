@@ -57,6 +57,7 @@ const CONFIG_COLOR_NAMES = [
 const PromptBuilderChat = ({ session }: Props) => {
   // Get states and functions from context
   const {
+    threadId,
     messages,
     sendMessage,
     title,
@@ -254,6 +255,55 @@ const PromptBuilderChat = ({ session }: Props) => {
       }
     }
     previousConfigRef.current = { ...currentConfig };
+
+    // Record selection: find assistant message that matches current config
+    const matchingMessage = messages
+      .filter(msg => msg.sender === "assistant" && msg.promptConfig)
+      .reverse() // Check most recent first
+      .find(msg => {
+        const msgConfig = msg.promptConfig;
+        if (!msgConfig) return false;
+        
+        // Compare main configuration fields
+        const coreMatch = 
+          msgConfig.personality === currentConfig.personality &&
+          msgConfig.languageDifficulty === currentConfig.languageDifficulty &&
+          msgConfig.answerLength === currentConfig.answerLength &&
+          msgConfig.technicalDifficulty === currentConfig.technicalDifficulty &&
+          msgConfig.instructionFormat === currentConfig.instructionFormat;
+        
+        // Compare device-specific fields if specified
+        if (currentConfig.specifyDevices) {
+          const deviceMatch =
+            msgConfig.specifyDevices === currentConfig.specifyDevices &&
+            JSON.stringify(msgConfig.selectedDevices) === JSON.stringify(currentConfig.selectedDevices) &&
+            msgConfig.computerType === currentConfig.computerType &&
+            msgConfig.tabletType === currentConfig.tabletType &&
+            msgConfig.mobileType === currentConfig.mobileType &&
+            msgConfig.browser === currentConfig.browser;
+          return coreMatch && deviceMatch && msgConfig.additionalInstructions === currentConfig.additionalInstructions;
+        }
+        
+        return coreMatch && msgConfig.additionalInstructions === currentConfig.additionalInstructions;
+      });
+
+    if (matchingMessage && matchingMessage.id && threadId) {
+      try {
+        await fetch("/api/recordSelection", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user,
+            threadID: threadId,
+            selectedMessageId: matchingMessage.id,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to record selection:", error);
+      }
+    }
 
     setUserInput("");
     setLoading(true);

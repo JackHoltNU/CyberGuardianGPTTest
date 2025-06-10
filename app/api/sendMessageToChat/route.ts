@@ -1,4 +1,4 @@
-import { AIConfigType, MessageHistory, MessageRating } from "../../types/types";
+import { AIConfigType, MessageHistory, MessageRating, PromptConfiguration } from "../../types/types";
 import Chat from "@/app/models/Chat";
 import connectToDatabase from "@/app/lib/mongodb";
 import OpenAI from "openai";
@@ -17,6 +17,7 @@ interface Props {
   formatPrompt?: string;
   saveUserMsgToDB?: Boolean;
   saveResponseToDB?: Boolean;
+  promptConfig?: PromptConfiguration;
 }
 
 interface ChatCompletionRequestMessage {
@@ -27,7 +28,7 @@ interface ChatCompletionRequestMessage {
 export const POST = async (req: Request) => {
   const body = await req.json();
   const session = await getServerSession(options);
-  let { messageHistory, user, threadID, model, mainPrompt, userPrompt, formatPrompt, saveResponseToDB, saveUserMsgToDB } = body as Props;
+  let { messageHistory, user, threadID, model, mainPrompt, userPrompt, formatPrompt, saveResponseToDB, saveUserMsgToDB, promptConfig } = body as Props;
 
   
 
@@ -183,6 +184,7 @@ export const POST = async (req: Request) => {
           model,
           mainPrompt,
           formatPrompt,
+          promptConfig,
         },
         messageHistory,
         tags

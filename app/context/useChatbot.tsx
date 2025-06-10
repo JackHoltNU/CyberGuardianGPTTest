@@ -215,7 +215,8 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
           model: "primary",
           userPrompt: prompt,
           saveUserMsgToDB: refreshLatest ? false : true,
-          saveResponseToDB: true
+          saveResponseToDB: true,
+          promptConfig
         }),
       });
       if (!responseString.ok) {
