@@ -1,5 +1,5 @@
 import React from "react";
-import { Menu, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ChatCollection, ChatInstance } from "../types/types";
 import styles from "../styles/promptbuilder.module.css";
 
@@ -16,6 +16,7 @@ const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
   chatCollection,
   onChatSelect,
 }) => {
+  console.log("ChatHistorySidebar render - chatCollection:", chatCollection);
   return (
     <div
       className={`${styles["pb-sidebar-container"]} ${
@@ -38,7 +39,7 @@ const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
             className={styles["pb-sidebar-toggle-btn"]}
             aria-label={isOpen ? "Close menu" : "Open menu"}
           >
-            {isOpen ? <ChevronRight size={28} /> : <Menu size={28} />}
+            {isOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
           </button>
         </div>
 
@@ -50,6 +51,13 @@ const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                   key={chat.threadID}
                   className={styles["pb-sidebar-chat-item"]}
                   onClick={() => onChatSelect(chat)}
+                  title={`${chat.title || "Untitled Chat"}${
+                    chat.messages && chat.messages.length > 0
+                      ? ` - ${typeof chat.messages[chat.messages.length - 1].text === "string" 
+                          ? chat.messages[chat.messages.length - 1].text as string
+                          : "Loading..."}`
+                      : " - No messages"
+                  }`}
                 >
                   <div className={styles["pb-sidebar-chat-title"]}>
                     {chat.title || "Untitled Chat"}
@@ -58,10 +66,7 @@ const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                     {chat.messages && chat.messages.length > 0
                       ? typeof chat.messages[chat.messages.length - 1].text ===
                         "string"
-                        ? (
-                            chat.messages[chat.messages.length - 1]
-                              .text as string
-                          ).substring(0, 30) + "..."
+                        ? (chat.messages[chat.messages.length - 1].text as string)
                         : "Loading..."
                       : "No messages"}
                   </div>

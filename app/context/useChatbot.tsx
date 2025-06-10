@@ -69,16 +69,31 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
 
   const loadUserChats = debounce(async () => {
     if (user) {
-      const responseString = await fetch("/api/loadChats", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user: user }),
-      });
-      const response: ChatCollection = await responseString.json();
-      const sortedResponse = await sortChatCollectionByDate(response);
-      setChatCollection(sortedResponse);
+      console.log("Loading chats for user:", user);
+      try {
+        const responseString = await fetch("/api/loadChats", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ user: user }),
+        });
+        
+        if (!responseString.ok) {
+          console.error("Failed to load chats:", responseString.status, responseString.statusText);
+          return;
+        }
+        
+        const response: ChatCollection = await responseString.json();
+        console.log("Loaded chats response:", response);
+        const sortedResponse = await sortChatCollectionByDate(response);
+        console.log("Setting chat collection:", sortedResponse);
+        setChatCollection(sortedResponse);
+      } catch (error) {
+        console.error("Error loading user chats:", error);
+      }
+    } else {
+      console.log("No user set, skipping chat load");
     }
   }, 200);
 

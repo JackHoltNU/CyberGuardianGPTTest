@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import {
-  Menu,
+  ChevronRight,
   Settings,
   RotateCcw,
   Type,
@@ -60,6 +60,7 @@ const PromptBuilderChat = ({ session }: Props) => {
     messages,
     sendMessage,
     title,
+    user,
     setUser,
     showError,
     setShowError,
@@ -181,8 +182,14 @@ const PromptBuilderChat = ({ session }: Props) => {
     if (session.user?.name) {
       setUser(session.user.name);
     }
-    loadUserChats();
   }, [session]);
+
+  // Load chats after user is set
+  useEffect(() => {
+    if (user) {
+      loadUserChats();
+    }
+  }, [user]);
 
   // Get all unique configurations from comparisonMessages only
   const getComparisonMessageConfigs = (): PromptConfiguration[] => {
@@ -523,7 +530,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             aria-label="Open menu"
             style={{ marginBottom: "1rem" }}
           >
-            <Menu size={28} />
+            <ChevronRight size={24} />
           </button>
           <button
             onClick={decreaseFontSize}
@@ -585,7 +592,7 @@ const PromptBuilderChat = ({ session }: Props) => {
                 className={styles["pb-sidebar-btn"]}
                 aria-label="Open menu"
               >
-                <Menu size={28} />
+                <ChevronRight size={24} />
               </button>
             )}
             {isShowTitle && (
