@@ -92,6 +92,15 @@ const MessageList: React.FC<MessageListProps> = ({
   const isLastMessage = (index: number) => index === messages.length - 1;
   const isAssistantMessage = (message: MessageHistory) =>
     message.sender === "assistant";
+  const isLastAssistantMessage = (index: number) => {
+    // Check if this is the last assistant message in the conversation
+    for (let i = messages.length - 1; i > index; i--) {
+      if (messages[i].sender === "assistant") {
+        return false; // Found a later assistant message
+      }
+    }
+    return isAssistantMessage(messages[index]);
+  };
 
   const renderMessageContent = (message: MessageHistory, index: number) => {
     if (
@@ -172,11 +181,12 @@ const MessageList: React.FC<MessageListProps> = ({
 
 
   // Helper to render config summary
-  const renderConfigSummary = (config: PromptConfiguration | undefined, messageId: string) => {
+  const renderConfigSummary = (config: PromptConfiguration | undefined, messageId: string, messageIndex: number) => {
     if (!config) return null;
 
     // Get the current state for this message, default to true (expanded)
     const isExpanded = configSummaryStates[messageId] ?? true;
+    const showCustomiseButton = isLastAssistantMessage(messageIndex);
 
     const toggleConfigSummary = () => {
       setConfigSummaryStates(prev => ({
@@ -278,23 +288,25 @@ const MessageList: React.FC<MessageListProps> = ({
             </div>
           </div>
           
-          {/* Settings cog button moved to bottom right */}
-          <div className={styles["pb-config-summary-button"]}>
-            <button
-              className={`${styles["pb-cog-btn"]} ${
-                isCustomisePanelOpen
-                  ? styles["pb-cog-btn-active"]
-                  : styles["pb-cog-btn-inactive"]
-              }`}
-              title={
-                isCustomisePanelOpen ? "Hide Customise Chat" : "Show Customise Chat"
-              }
-              onClick={onOpenCustomisePanel}
-            >
-              <Sliders size={16} />
-              <span className="ml-1">Customise</span>
-            </button>
-          </div>
+          {/* Settings cog button moved to bottom right - only show on last assistant message */}
+          {showCustomiseButton && (
+            <div className={styles["pb-config-summary-button"]}>
+              <button
+                className={`${styles["pb-cog-btn"]} ${
+                  isCustomisePanelOpen
+                    ? styles["pb-cog-btn-active"]
+                    : styles["pb-cog-btn-inactive"]
+                }`}
+                title={
+                  isCustomisePanelOpen ? "Hide Customise Chat" : "Show Customise Chat"
+                }
+                onClick={onOpenCustomisePanel}
+              >
+                <Sliders size={16} />
+                <span className="ml-1">Customise</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -399,7 +411,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 {/* Show config summary and continue button for assistant messages */}
                 {isAssistantMessage(message) && (
                   <div className="px-4 pb-4">
-                    {renderConfigSummary(getCurrentConfig(message, index), message.id)}
+                    {renderConfigSummary(getCurrentConfig(message, index), message.id || "", index)}
 
                     {/* Continue with this configuration button */}
                     {showContinueButton(message, index) && (

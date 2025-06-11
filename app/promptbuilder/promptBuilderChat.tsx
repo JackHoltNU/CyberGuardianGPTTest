@@ -22,7 +22,7 @@ import PromptBuilder from "./promptBuilder";
 import { signOut } from "next-auth/react";
 import ChatHistorySidebar from "./chatHistorySidebar";
 import ChatPanel from "./chatPanel";
-import { PromptConfiguration } from "../types/types";
+import { PromptConfiguration, ChatInstance } from "../types/types";
 import styles from "../styles/promptbuilder.module.css";
 
 // Define font size options
@@ -191,6 +191,91 @@ const PromptBuilderChat = ({ session }: Props) => {
       loadUserChats();
     }
   }, [user]);
+
+  // Filtered openChat function for promptBuilder - only shows selected messages from comparisons
+  const handleChatSelect = (chat: ChatInstance) => {
+    // Group messages to identify comparison sets
+    const filteredMessages: typeof chat.messages = [];
+    
+    for (let i = 0; i < chat.messages.length; i++) {
+      const message = chat.messages[i];
+      
+      // Always include user and system messages
+      if (message.sender === "user" || message.sender === "system") {
+        filteredMessages.push(message);
+        continue;
+      }
+      
+      // For assistant messages, check if this is part of a comparison set
+      if (message.sender === "assistant") {
+        // Find all assistant messages that come after the same user message
+        // (indicating they might be comparison alternatives)
+        let userMessageIndex = -1;
+        for (let j = i - 1; j >= 0; j--) {
+          if (chat.messages[j].sender === "user") {
+            userMessageIndex = j;
+            break;
+          }
+        }
+        
+        if (userMessageIndex !== -1) {
+          // Find all assistant messages after this user message and before the next user message
+          const assistantMessagesInGroup: typeof chat.messages = [];
+          for (let k = userMessageIndex + 1; k < chat.messages.length; k++) {
+            if (chat.messages[k].sender === "user") break;
+            if (chat.messages[k].sender === "assistant") {
+              assistantMessagesInGroup.push(chat.messages[k]);
+            }
+          }
+          
+          // If there are multiple assistant messages in this group, it's a comparison set
+          if (assistantMessagesInGroup.length > 1) {
+            // Only include this message if it's selected
+            if (message.isSelected === true) {
+              filteredMessages.push(message);
+            }
+            // Skip unselected messages in comparison sets
+          } else {
+            // Single assistant message (no comparison), always include
+            filteredMessages.push(message);
+          }
+        } else {
+          // No preceding user message found, include it
+          filteredMessages.push(message);
+        }
+      }
+    }
+
+    // Find the latest prompt configuration from the filtered messages
+    let latestPromptConfig: PromptConfiguration | undefined;
+    
+    // Look through filtered messages from newest to oldest to find latest promptConfig
+    for (let i = filteredMessages.length - 1; i >= 0; i--) {
+      const message = filteredMessages[i];
+      if (message.sender === "assistant" && message.promptConfig) {
+        latestPromptConfig = message.promptConfig;
+        break;
+      }
+    }
+
+    // Create a new chat instance with filtered messages
+    const filteredChat: ChatInstance = {
+      ...chat,
+      messages: filteredMessages
+    };
+
+    // Clear comparison messages from previous conversation
+    setComparisonMessages([]);
+
+    // Use the original openChat function with filtered messages
+    openChat(filteredChat);
+
+    // Apply the latest prompt configuration if found
+    if (latestPromptConfig) {
+      console.log("Applying latest prompt config from loaded chat:", latestPromptConfig);
+      applyConfiguration(latestPromptConfig);
+    }
+  };
 
   // Get all unique configurations from comparisonMessages only
   const getComparisonMessageConfigs = (): PromptConfiguration[] => {
@@ -567,7 +652,7 @@ const PromptBuilderChat = ({ session }: Props) => {
         isOpen={historySidebarOpen}
         onToggle={() => setHistorySidebarOpen(!historySidebarOpen)}
         chatCollection={chatCollection}
-        onChatSelect={openChat}
+        onChatSelect={handleChatSelect}
       />
 
       {/* Main content */}

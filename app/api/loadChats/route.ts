@@ -36,7 +36,10 @@ export async function POST(req: Request) {
         sender: message.sender,
         text: message.text,
         timestamp: message.timestamp,
-        messageRating: message.feedback
+        messageRating: message.feedback,
+        isSelected: message.isSelected,
+        selectionTimestamp: message.selectionTimestamp,
+        promptConfig: message.promptConfig
       }
       return messageHistory
     })

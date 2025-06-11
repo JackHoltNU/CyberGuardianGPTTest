@@ -27,6 +27,8 @@ export type MessageHistory = {
   mainPrompt?: string;
   formatPrompt?: string;
   promptConfig?: PromptConfiguration;
+  isSelected?: boolean;
+  selectionTimestamp?: Date;
 };
 
 export interface ChatResponses {
