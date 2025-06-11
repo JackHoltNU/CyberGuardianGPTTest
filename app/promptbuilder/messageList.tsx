@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight, RefreshCcw, Sliders } from "lucide-react";
+import React, { useRef, useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, RefreshCcw, Sliders, ChevronDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import LoadingDots from "../components/loadingdots";
@@ -47,6 +47,9 @@ const MessageList: React.FC<MessageListProps> = ({
   isCustomisePanelOpen,
 }): React.ReactElement => {
   const chatRef = useRef<HTMLDivElement>(null);
+  
+  // State for config summary collapse/expand per message - default to expanded (true)
+  const [configSummaryStates, setConfigSummaryStates] = useState<Record<string, boolean>>({});
 
   // Scroll to the bottom of chat when new message arrives
   const scrollToBottom = (): void => {
@@ -169,21 +172,55 @@ const MessageList: React.FC<MessageListProps> = ({
 
 
   // Helper to render config summary
-  const renderConfigSummary = (config: PromptConfiguration | undefined) => {
+  const renderConfigSummary = (config: PromptConfiguration | undefined, messageId: string) => {
     if (!config) return null;
+
+    // Get the current state for this message, default to true (expanded)
+    const isExpanded = configSummaryStates[messageId] ?? true;
+
+    const toggleConfigSummary = () => {
+      setConfigSummaryStates(prev => ({
+        ...prev,
+        [messageId]: !isExpanded
+      }));
+    };
 
     return (
       <div className={styles["pb-config-summary"]}>
-        {/** Determine if we are in single column mode */}
-        {/** Single column on mobile/narrow screens or largest font size */}
-        {/** Used to conditionally apply col-span-2 */}
-        {/** This ensures no col-span-2 in single column mode */}
-        {/** and keeps two-column layout on larger screens/font sizes */}
-        {/** for better readability */}
-        {(() => {
-          return (
+        {/* Header with toggle button */}
+        <div className={styles["pb-config-summary-header"]}>
+          <button
+            className={styles["pb-config-summary-toggle"]}
+            onClick={toggleConfigSummary}
+            title={isExpanded ? "Collapse configuration" : "Expand configuration"}
+            aria-label={isExpanded ? "Collapse configuration" : "Expand configuration"}
+          >
+            <ChevronDown
+              size={24}
+              className={`${styles["pb-config-summary-chevron"]} ${
+                isExpanded ? styles["pb-config-summary-chevron-expanded"] : ""
+              }`}
+            />
+          </button>
+        </div>
+        
+        {/* Collapsible content */}
+        <div
+          className={`${styles["pb-config-summary-content"]} ${
+            isExpanded
+              ? styles["pb-config-summary-content-expanded"]
+              : styles["pb-config-summary-content-collapsed"]
+          }`}
+        >
+          {/** Determine if we are in single column mode */}
+          {/** Single column on mobile/narrow screens or largest font size */}
+          {/** Used to conditionally apply col-span-2 */}
+          {/** This ensures no col-span-2 in single column mode */}
+          {/** and keeps two-column layout on larger screens/font sizes */}
+          {/** for better readability */}
+          <div className={styles["pb-config-summary-details"]}>
             <div
-              className={`grid grid-cols-1 md:grid-cols-2 gap-x-1 gap-y-2 flex-1`}
+              className={`grid grid-cols-1 md:grid-cols-2 gap-x-1 gap-y-2`}
             >
               <span className="break-normal">
                 <strong>Personality:</strong> {config.personalityLabel}
@@ -239,23 +276,26 @@ const MessageList: React.FC<MessageListProps> = ({
                 </span>
               )}
             </div>
-          );
-        })()}
-        {/* Settings cog button */}
-        <button
-          className={`${styles["pb-cog-btn"]} ${
-            isCustomisePanelOpen
-              ? styles["pb-cog-btn-active"]
-              : styles["pb-cog-btn-inactive"]
-          }`}
-          title={
-            isCustomisePanelOpen ? "Hide Customise Chat" : "Show Customise Chat"
-          }
-          onClick={onOpenCustomisePanel}
-        >
-          <Sliders size={16} />
-          <span className="ml-1">Customise</span>
-        </button>
+          </div>
+          
+          {/* Settings cog button moved to bottom right */}
+          <div className={styles["pb-config-summary-button"]}>
+            <button
+              className={`${styles["pb-cog-btn"]} ${
+                isCustomisePanelOpen
+                  ? styles["pb-cog-btn-active"]
+                  : styles["pb-cog-btn-inactive"]
+              }`}
+              title={
+                isCustomisePanelOpen ? "Hide Customise Chat" : "Show Customise Chat"
+              }
+              onClick={onOpenCustomisePanel}
+            >
+              <Sliders size={16} />
+              <span className="ml-1">Customise</span>
+            </button>
+          </div>
+        </div>
       </div>
     );
   };
@@ -359,7 +399,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 {/* Show config summary and continue button for assistant messages */}
                 {isAssistantMessage(message) && (
                   <div className="px-4 pb-4">
-                    {renderConfigSummary(getCurrentConfig(message, index))}
+                    {renderConfigSummary(getCurrentConfig(message, index), message.id)}
 
                     {/* Continue with this configuration button */}
                     {showContinueButton(message, index) && (

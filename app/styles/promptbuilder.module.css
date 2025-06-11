@@ -50,8 +50,44 @@
 
 /* Config summary */
 .pb-config-summary {
-  @apply mt-2 text-gray-600 border-t pt-2 flex items-start justify-between;
+  @apply mt-2 text-gray-600 border-t pt-2 flex flex-col;
   font-size: 0.85em;
+}
+
+.pb-config-summary-header {
+  @apply flex items-center justify-center mb-2;
+}
+
+.pb-config-summary-toggle {
+  @apply p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200 cursor-pointer min-w-10 min-h-10 flex items-center justify-center;
+}
+
+.pb-config-summary-chevron {
+  @apply transition-transform duration-200;
+}
+
+.pb-config-summary-chevron-expanded {
+  @apply rotate-180;
+}
+
+.pb-config-summary-content {
+  @apply overflow-hidden transition-all duration-300 ease-in-out;
+}
+
+.pb-config-summary-content-expanded {
+  @apply max-h-96 opacity-100;
+}
+
+.pb-config-summary-content-collapsed {
+  @apply max-h-0 opacity-0;
+}
+
+.pb-config-summary-details {
+  @apply flex-1;
+}
+
+.pb-config-summary-button {
+  @apply mt-2 flex justify-end;
 }
 
 /* Settings cog button */
