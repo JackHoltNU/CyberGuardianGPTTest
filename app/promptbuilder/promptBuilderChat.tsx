@@ -613,7 +613,7 @@ const PromptBuilderChat = ({ session }: Props) => {
           <button
             className={styles["pb-header-action-btn"]}
             onClick={resetChat}
-            aria-label="Reset Chat"
+            aria-label="New Chat"
             style={{ marginBottom: "0.5rem" }}
           >
             <RotateCcw size={24} />
@@ -734,17 +734,17 @@ const PromptBuilderChat = ({ session }: Props) => {
             <button
               className={styles["pb-header-action-btn"]}
               onClick={resetChat}
-              aria-label="Reset Chat"
+              aria-label="New Chat"
             >
               <RotateCcw size={24} />
-              {!isCompactHeader && <span>Reset Chat</span>}
+              {!isCompactHeader && <span>New Chat</span>}
             </button>
             <button
               className={styles["pb-header-action-btn"]}
               onClick={() => signOut()}
               aria-label="Log out"
             >
-              {isCompactHeader ? <LogOut size={24} /> : <Settings size={24} />}
+              <LogOut size={24} />
               {!isCompactHeader && <span>Log out</span>}
             </button>
           </div>

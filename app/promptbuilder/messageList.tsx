@@ -167,47 +167,23 @@ const MessageList: React.FC<MessageListProps> = ({
     return message.promptConfig;
   };
 
-  // Helper to get a smaller font size class for config summary
-  const getSmallerFontSize = (chatFontSize: string) => {
-    switch (chatFontSize) {
-      case "text-2xl":
-        return "text-lg";
-      case "text-xl":
-        return "text-base";
-      case "text-lg":
-        return "text-sm";
-      case "text-base":
-        return "text-xs";
-      case "text-sm":
-        return "text-2xs";
-      default:
-        return "text-2xs";
-    }
-  };
 
   // Helper to render config summary
   const renderConfigSummary = (config: PromptConfiguration | undefined) => {
     if (!config) return null;
 
     return (
-      <div
-        className={`${styles["pb-config-summary"]} ${getSmallerFontSize(
-          fontSizes.chat
-        )}`}
-      >
+      <div className={styles["pb-config-summary"]}>
         {/** Determine if we are in single column mode */}
-        {/** Single column if fontSizes.chat === 'text-2xl' */}
+        {/** Single column on mobile/narrow screens or largest font size */}
         {/** Used to conditionally apply col-span-2 */}
         {/** This ensures no col-span-2 in single column mode */}
         {/** and keeps two-column layout on larger screens/font sizes */}
         {/** for better readability */}
         {(() => {
-          const isSingleColumn = fontSizes.chat === "text-2xl";
           return (
             <div
-              className={`grid ${
-                isSingleColumn ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"
-              } gap-x-1 gap-y-2 flex-1`}
+              className={`grid grid-cols-1 md:grid-cols-2 gap-x-1 gap-y-2 flex-1`}
             >
               <span className="break-normal">
                 <strong>Personality:</strong> {config.personalityLabel}
@@ -222,7 +198,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 <strong>Technical:</strong> {config.technicalDifficultyLabel}
               </span>
               <span
-                className={`${isSingleColumn ? "" : "col-span-2"} break-words`}
+                className="md:col-span-2 break-words"
               >
                 <strong>Format:</strong> {config.instructionFormatLabel}
               </span>
@@ -230,9 +206,7 @@ const MessageList: React.FC<MessageListProps> = ({
               {config.specifyDevices &&
                 (config.selectedDevices?.length || 0) > 0 && (
                   <span
-                    className={`${
-                      isSingleColumn ? "" : "col-span-2"
-                    } break-words`}
+                    className="md:col-span-2 break-words"
                   >
                     <strong>Devices:</strong>{" "}
                     {config.selectedDevices?.join(", ")}
@@ -252,18 +226,14 @@ const MessageList: React.FC<MessageListProps> = ({
                 )}
               {config.browser && (
                 <span
-                  className={`${
-                    isSingleColumn ? "" : "col-span-2"
-                  } break-words`}
+                  className="md:col-span-2 break-words"
                 >
                   <strong>Browser:</strong> {config.browser}
                 </span>
               )}
               {config.additionalInstructions && (
                 <span
-                  className={`${
-                    isSingleColumn ? "" : "col-span-2"
-                  } break-words`}
+                  className="md:col-span-2 break-words"
                 >
                   <strong>Additional:</strong> {config.additionalInstructions}
                 </span>
@@ -283,7 +253,8 @@ const MessageList: React.FC<MessageListProps> = ({
           }
           onClick={onOpenCustomisePanel}
         >
-          <Sliders size={18} />
+          <Sliders size={16} />
+          <span className="ml-1">Customise</span>
         </button>
       </div>
     );

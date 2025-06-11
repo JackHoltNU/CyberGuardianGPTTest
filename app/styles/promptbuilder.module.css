@@ -50,12 +50,13 @@
 
 /* Config summary */
 .pb-config-summary {
-  @apply mt-2 text-gray-600 border-t pt-2 flex items-center justify-between;
+  @apply mt-2 text-gray-600 border-t pt-2 flex items-start justify-between;
+  font-size: 0.85em;
 }
 
 /* Settings cog button */
 .pb-cog-btn {
-  @apply ml-2 p-2 rounded-full border flex items-center justify-center transition-colors duration-200;
+  @apply ml-2 px-3 py-2 rounded-lg border flex items-center justify-center transition-colors duration-200 min-w-10 min-h-8;
 }
 .pb-cog-btn-active {
   @apply bg-indigo-600 text-white border-indigo-700;
