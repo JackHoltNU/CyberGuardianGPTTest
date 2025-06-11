@@ -25,7 +25,7 @@ const Users = () => {
             // todo feedback
             return
         }
-        if(newRole !== "admin" && newRole !== "user" && newRole !== "comparison"){
+        if(newRole !== "admin" && newRole !== "user" && newRole !== "comparison" && newRole !== "promptbuilder"){
             // todo feedback
             return
         }
@@ -37,48 +37,73 @@ const Users = () => {
 
     return (
       <main className="users">
-        <h1 className="text-lg font-bold mb-4">Users</h1>
-        <ul>
-          <li className="flex w-full border-b-4">
-            <div className="w-1/5">Username</div>
-            <div className="w-1/5">Role</div>
-            <div className="w-3/5"></div>
-          </li>
-          {users.users.map((user) => {
-            return (
-                <User username={user.username} role={user.role} key={`${user.username}_user`}/>
-            )
-          })}
-        </ul>
-        <h2 className="mt-10 text-md font-bold">Add New User</h2>
-        <div className="w-80 lg:w-full lg:flex md:items-center mt-2">
-            <div className="flex w-full lg:w-1/4 justify-end my-2">
-                <label htmlFor="username">Username</label>
-                <input
-                    type="text"
-                    className="border-2 ml-2 w-2/3"
-                    value={newUsername}
-                    onChange={(e) => setNewUsername(e.target.value)}
-                />
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">Users</h1>
+        
+        {/* Users list with scrolling */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+          {/* Header */}
+          <div className="flex w-full border-b border-gray-200 bg-gray-50 px-6 py-3 rounded-t-lg">
+            <div className="w-1/5 font-semibold text-gray-700">Username</div>
+            <div className="w-1/5 font-semibold text-gray-700">Role</div>
+            <div className="w-3/5 font-semibold text-gray-700">Actions</div>
+          </div>
+          
+          {/* Scrollable user list */}
+          <div className="max-h-96 overflow-y-auto">
+            <ul>
+              {users.users.map((user) => {
+                return (
+                    <User username={user.username} role={user.role} key={`${user.username}_user`}/>
+                )
+              })}
+            </ul>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">Add New User</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
+            <div className="flex flex-col">
+              <label htmlFor="username" className="text-sm font-medium text-gray-700 mb-2">Username</label>
+              <input
+                type="text"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+                placeholder="Enter username"
+              />
             </div>
-            <div className="flex w-full lg:w-1/4 justify-end lg:ml-2 lg:my-2">
-                <label htmlFor="password">Password</label>
-                <input
-                    type="password"
-                    className="border-2 ml-2 w-2/3"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                />
+            <div className="flex flex-col">
+              <label htmlFor="password" className="text-sm font-medium text-gray-700 mb-2">Password</label>
+              <input
+                type="password"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter password"
+              />
             </div>
-            <div className="flex w-full lg:w-1/4  justify-end mt-2 md:my-2">
-                <label htmlFor="role">Role</label>
-                <select name="role" className="w-2/3 ml-2 pl-2" onChange={(e) => setNewRole(e.target.value)}>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                    <option value="comparison">Comparison</option>
-                </select>
+            <div className="flex flex-col">
+              <label htmlFor="role" className="text-sm font-medium text-gray-700 mb-2">Role</label>
+              <select 
+                name="role" 
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value)}
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="comparison">Comparison</option>
+                <option value="promptbuilder">Prompt Builder</option>
+              </select>
             </div>
-            <button className="w-full lg:w-1/6 h-8 lg:h-6 bg-blue-200 mt-6 md:my-2 lg:ml-4 rounded-md" onClick={() => submitNewUser()}>Add</button>
+            <button 
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              onClick={() => submitNewUser()}
+            >
+              Add User
+            </button>
+          </div>
         </div>
         
         
