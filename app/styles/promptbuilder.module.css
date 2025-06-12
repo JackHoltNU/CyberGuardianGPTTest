@@ -460,7 +460,7 @@
 
 @media (min-width: 1026px) {
   .pb-chat-panel-container:not(.pb-chat-panel-centered) {
-    width: 50%;
+    /* width: 50%; */
     max-width: 50%;
   }
 }
