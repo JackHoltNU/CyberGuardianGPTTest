@@ -250,9 +250,7 @@ const CardSelector: React.FC<CardSelectorProps> = ({
             className={`${styles["pb-cardselector-textarea"]} ${
               fontSizes.input
             } ${
-              isCustomSelected
-                ? styles["pb-cardselector-textarea-active"]
-                : styles["pb-cardselector-textarea-inactive"]
+              styles["pb-cardselector-textarea-active"]
             }`}
             rows={5}
             placeholder={isCustomSelected ? "Enter custom instruction..." : ""}
