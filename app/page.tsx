@@ -6,6 +6,7 @@ import User from "./models/User";
 import ComparisonSidebar from "./components/comparisonSidebar";
 import ComparisonChat from "./components/comparisonchat";
 import PromptBuilderChat from "./promptbuilder/promptBuilderChat";
+import UserProfile from "./userProfile/userProfile";
 
 const Home = async () => {
   const session = await getServerSession(options);
@@ -30,7 +31,7 @@ const Home = async () => {
           </div>
         )}
         {session && (session.user.role == "promptbuilder" || session.user.role == "admin") && (
-          <PromptBuilderChat session={session} />
+          <UserProfile session={session} />
         )}
       </>
   );

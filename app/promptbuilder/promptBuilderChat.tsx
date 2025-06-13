@@ -24,6 +24,7 @@ import ChatHistorySidebar from "./chatHistorySidebar";
 import ChatPanel from "./chatPanel";
 import { PromptConfiguration, ChatInstance } from "../types/types";
 import styles from "../styles/promptbuilder.module.css";
+import { useSearchParams } from "next/navigation";
 
 // Define font size options
 type FontSizeOption = "small" | "medium" | "large" | "largest";
@@ -55,6 +56,9 @@ const CONFIG_COLOR_NAMES = [
 ];
 
 const PromptBuilderChat = ({ session }: Props) => {
+  // Get URL search parameters
+  const searchParams = useSearchParams();
+  
   // Get states and functions from context
   const {
     threadId,
@@ -191,6 +195,28 @@ const PromptBuilderChat = ({ session }: Props) => {
       loadUserChats();
     }
   }, [user]);
+
+  // Handle initial prompt from URL parameters
+  useEffect(() => {
+    const initialPrompt = searchParams.get('initialPrompt');
+    if (initialPrompt && user && messages.length === 0) {
+      setUserInput(initialPrompt);
+      // Auto-send the initial prompt
+      const sendInitialPrompt = async () => {
+        const currentConfig = getCurrentConfiguration();
+        setLoading(true);
+        try {
+          await sendMessage(initialPrompt, systemPrompt, currentConfig);
+        } catch (error) {
+          console.error("Failed to send initial message:", error);
+          setShowError(true);
+        } finally {
+          setLoading(false);
+        }
+      };
+      sendInitialPrompt();
+    }
+  }, [searchParams, user, messages.length, getCurrentConfiguration, sendMessage, systemPrompt, setShowError]);
 
   // Filtered openChat function for promptBuilder - only shows selected messages from comparisons
   const handleChatSelect = (chat: ChatInstance) => {
