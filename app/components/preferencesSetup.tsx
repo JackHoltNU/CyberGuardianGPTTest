@@ -56,7 +56,7 @@ const PreferencesSetup: React.FC<Props> = ({ session }) => {
     };
 
     loadExistingPreferences();
-  }, [isFirstTime, session.user?.name, applyConfiguration]);
+  }, [isFirstTime, session.user?.name]); // Removed applyConfiguration from dependencies
 
   // Font sizes for the prompt builder
   const fontSizes = {

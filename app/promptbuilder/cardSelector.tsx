@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageHistory, PromptConfiguration } from "../types/types";
 import { ActivitySquareIcon } from "lucide-react";
 import { usePromptBuilder } from "../context/usePromptBuilder";
@@ -70,6 +70,8 @@ const CardSelector: React.FC<CardSelectorProps> = ({
     defaultSelected || allOptions[0].id
   );
   const [customInstruction, setCustomInstruction] = useState<string>("");
+  const [isNarrowLayout, setIsNarrowLayout] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const isCustomSelected = selectedOption === "define-new-instruction";
 
   // Update selection when defaultSelected changes (e.g., when navigating comparisons)
@@ -78,6 +80,26 @@ const CardSelector: React.FC<CardSelectorProps> = ({
       setSelectedOption(defaultSelected);
     }
   }, [defaultSelected]);
+
+  // Container width detection for responsive layout
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width } = entry.contentRect;
+        // Switch to narrow layout when container width is less than 500px
+        setIsNarrowLayout(width < 500);
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   // Get which configs use this specific option
   const getConfigsUsingOption = (optionId: string): PromptConfiguration[] => {
@@ -205,7 +227,7 @@ const CardSelector: React.FC<CardSelectorProps> = ({
   };
 
   return (
-    <>
+    <div ref={containerRef}>
       {title && (
         <h2
           className={`${styles["pb-cardselector-title"]} ${fontSizes.header}`}
@@ -214,8 +236,8 @@ const CardSelector: React.FC<CardSelectorProps> = ({
         </h2>
       )}
 
-      <div className={styles["pb-cardselector-layout"]}>
-        <div className={styles["pb-cardselector-options-col"]}>
+      <div className={isNarrowLayout ? styles["pb-cardselector-layout-narrow"] : styles["pb-cardselector-layout"]}>
+        <div className={isNarrowLayout ? styles["pb-cardselector-options-col-narrow"] : styles["pb-cardselector-options-col"]}>
           <div className={styles["pb-cardselector-options-grid"]}>
             {allOptions.map((option) => (
               <div
@@ -240,24 +262,24 @@ const CardSelector: React.FC<CardSelectorProps> = ({
           </div>
         </div>
 
-        <div className={styles["pb-cardselector-textarea-col"]}>
+        <div className={isNarrowLayout ? styles["pb-cardselector-textarea-col-narrow"] : styles["pb-cardselector-textarea-col"]}>
           <textarea
             value={
               isCustomSelected ? customInstruction : getDetailedInstruction()
             }
             onChange={handleCustomInstructionChange}
             disabled={!isCustomSelected}
-            className={`${styles["pb-cardselector-textarea"]} ${
+            className={`${isNarrowLayout ? styles["pb-cardselector-textarea-narrow"] : styles["pb-cardselector-textarea"]} ${
               fontSizes.input
             } ${
               styles["pb-cardselector-textarea-active"]
             }`}
-            rows={5}
+            rows={isNarrowLayout ? 4 : 5}
             placeholder={isCustomSelected ? "Enter custom instruction..." : ""}
           />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

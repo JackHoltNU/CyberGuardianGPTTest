@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Session } from "next-auth";
 import { useRouter } from "next/navigation";
 import styles from "../styles/promptbuilder.module.css";
+import DailyProgressTracker from "../components/dailyProgressTracker";
 
 interface Props {
   session: Session;
@@ -13,6 +14,10 @@ const UserProfile: React.FC<Props> = ({ session }) => {
   const router = useRouter();
   const [hasPreferences, setHasPreferences] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Progress tracking state
+  const [userProgress, setUserProgress] = useState<any>(null);
+  const [progressLoading, setProgressLoading] = useState(true);
 
   // Questions for the initial prompts
   const suggestedQuestions = [
@@ -59,7 +64,45 @@ const UserProfile: React.FC<Props> = ({ session }) => {
     };
 
     checkUserPreferences();
+    loadUserProgress();
   }, [session.user?.name]);
+
+  // Load or initialize user progress
+  const loadUserProgress = async () => {
+    if (!session.user?.name) {
+      setProgressLoading(false);
+      return;
+    }
+    
+    setProgressLoading(true);
+    try {
+      // Try to get existing progress
+      const response = await fetch(`/api/getUserProgress?username=${encodeURIComponent(session.user.name)}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUserProgress(data.userProgress);
+      } else if (response.status === 404) {
+        // User progress doesn't exist, initialize it
+        const initResponse = await fetch('/api/initializeUserProgress', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username: session.user.name }),
+        });
+        
+        if (initResponse.ok) {
+          const initData = await initResponse.json();
+          setUserProgress(initData.userProgress);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user progress:', error);
+    } finally {
+      setProgressLoading(false);
+    }
+  };
 
   const handleOptionClick = (prompt: string | null) => {
     // Check if running on localhost
@@ -120,6 +163,12 @@ const UserProfile: React.FC<Props> = ({ session }) => {
         {/* Main content area */}
         <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
           <div className="max-w-4xl w-full">
+
+            {/* Daily Progress Tracker */}
+            <DailyProgressTracker 
+              userProgress={userProgress}
+              loading={progressLoading}
+            />
 
             {/* Start with empty chat button */}
             <div className="mb-8">

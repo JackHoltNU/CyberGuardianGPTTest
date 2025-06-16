@@ -24,7 +24,7 @@ import ChatHistorySidebar from "./chatHistorySidebar";
 import ChatPanel from "./chatPanel";
 import { PromptConfiguration, ChatInstance } from "../types/types";
 import styles from "../styles/promptbuilder.module.css";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 // Define font size options
 type FontSizeOption = "small" | "medium" | "large" | "largest";
@@ -56,8 +56,9 @@ const CONFIG_COLOR_NAMES = [
 ];
 
 const PromptBuilderChat = ({ session }: Props) => {
-  // Get URL search parameters
+  // Get URL search parameters and router
   const searchParams = useSearchParams();
+  const router = useRouter();
   
   // Get states and functions from context
   const {
@@ -98,6 +99,8 @@ const PromptBuilderChat = ({ session }: Props) => {
   const [promptBuilderOpen, setPromptBuilderOpen] = useState<boolean>(false);
   const [comparisonMode, setComparisonMode] = useState<boolean>(false);
   const [comparisonCounter, setComparisonCounter] = useState(0);
+  const [initialPromptProcessed, setInitialPromptProcessed] = useState(false);
+
 
   // History sidebar state
   const [historySidebarOpen, setHistorySidebarOpen] = useState<boolean>(false);
@@ -196,10 +199,11 @@ const PromptBuilderChat = ({ session }: Props) => {
     }
   }, [user]);
 
-  // Handle initial prompt from URL parameters
+  // Handle initial prompt from URL parameters (only once per page load)
   useEffect(() => {
     const initialPrompt = searchParams.get('initialPrompt');
-    if (initialPrompt && user && messages.length === 0) {
+    if (initialPrompt && user && messages.length === 0 && !initialPromptProcessed) {
+      setInitialPromptProcessed(true);
       setUserInput(initialPrompt);
       // Auto-send the initial prompt
       const sendInitialPrompt = async () => {
@@ -216,7 +220,7 @@ const PromptBuilderChat = ({ session }: Props) => {
       };
       sendInitialPrompt();
     }
-  }, [searchParams, user, messages.length, getCurrentConfiguration, sendMessage, systemPrompt, setShowError]);
+  }, [searchParams, user, messages.length, initialPromptProcessed, getCurrentConfiguration, sendMessage, systemPrompt, setShowError]);
 
   // Filtered openChat function for promptBuilder - only shows selected messages from comparisons
   const handleChatSelect = (chat: ChatInstance) => {
@@ -419,6 +423,26 @@ const PromptBuilderChat = ({ session }: Props) => {
     setUserInput("");
     setLoading(true);
 
+    // Record daily interaction for progress tracking
+    try {
+      const progressResponse = await fetch('/api/recordDailyInteraction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: user }),
+      });
+      
+      if (progressResponse.ok) {
+        const progressData = await progressResponse.json();
+        // Note: We don't update progress here since it's handled in userProfile
+        // This just records the interaction in the database
+      }
+    } catch (error) {
+      console.error('Failed to record daily interaction:', error);
+      // Don't block the chat if progress tracking fails
+    }
+
     try {
       setComparisonMessages([]);
       setComparisonMode(false);
@@ -502,6 +526,13 @@ const PromptBuilderChat = ({ session }: Props) => {
       setComparisonCounter(0);
     }
     setComparisonMode(false);
+  };
+
+  const handleNewChat = () => {
+    setUserInput(""); // Clear the input field
+    // Clear URL parameters to prevent initial prompt from re-triggering
+    router.replace("/promptbuilder", { scroll: false });
+    resetChat(); // Reset the chat
   };
 
   const handlePositiveFeedback = () => {
@@ -723,7 +754,7 @@ const PromptBuilderChat = ({ session }: Props) => {
           </button>
           <button
             className={styles["pb-header-action-btn"]}
-            onClick={resetChat}
+            onClick={handleNewChat}
             aria-label="New Chat"
             style={{ marginBottom: "0.5rem" }}
           >
