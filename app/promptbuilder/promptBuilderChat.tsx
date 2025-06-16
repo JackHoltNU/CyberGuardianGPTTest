@@ -13,6 +13,7 @@ import {
   ZoomOut,
   LogOut,
   X as CloseIcon,
+  Home,
 } from "lucide-react";
 import { debounce } from "../utils/debounce";
 import { useChatbot } from "../context/useChatbot";
@@ -788,9 +789,25 @@ const PromptBuilderChat = ({ session }: Props) => {
               </button>
             )}
             {isShowTitle && (
-              <h1 style={{ fontSize: "1.2em", margin: 0 }}>
-                CyberGuardian Chat
-              </h1>
+              <button
+                onClick={() => router.push("/")}
+                className="
+                  flex items-center gap-2
+                  px-3 py-2
+                  text-gray-700 hover:text-gray-900
+                  hover:bg-gray-100
+                  rounded-lg
+                  transition-colors
+                  duration-200
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-gray-300
+                "
+                aria-label="Go to home"
+              >
+                <Home size={20} />
+                <span style={{ fontSize: "1.2em", fontWeight: "600" }}>Home</span>
+              </button>
             )}
             {/* Mobile font size controls */}
             {isMobile && (

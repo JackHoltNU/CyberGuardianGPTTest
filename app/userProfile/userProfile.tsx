@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { Session } from "next-auth";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
 import styles from "../styles/promptbuilder.module.css";
 import DailyProgressTracker from "../components/dailyProgressTracker";
 
@@ -160,8 +162,31 @@ const UserProfile: React.FC<Props> = ({ session }) => {
   return (
     <div className={styles["pb-main-layout"]}>
       <div className={styles["pb-main-content"]}>
+        {/* Header with logout button */}
+        <div className="flex justify-end p-4">
+          <button
+            onClick={() => signOut()}
+            className="
+              flex items-center gap-2
+              px-4 py-2
+              text-gray-600 hover:text-gray-800
+              hover:bg-gray-100
+              rounded-lg
+              transition-colors
+              duration-200
+              focus:outline-none
+              focus:ring-2
+              focus:ring-gray-300
+            "
+            aria-label="Log out"
+          >
+            <LogOut size={20} />
+            <span>Log out</span>
+          </button>
+        </div>
+
         {/* Main content area */}
-        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 pt-0">
           <div className="max-w-4xl w-full">
 
             {/* Daily Progress Tracker */}
