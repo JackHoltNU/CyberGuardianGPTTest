@@ -186,8 +186,8 @@ const UserProfile: React.FC<Props> = ({ session }) => {
         </div>
 
         {/* Main content area */}
-        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 pt-0">
-          <div className="max-w-4xl w-full">
+        <div className="flex-1 flex flex-col items-center p-4 sm:p-6 lg:p-8 pt-0 overflow-y-auto min-h-0">
+          <div className="max-w-4xl w-full py-4">
 
             {/* Daily Progress Tracker */}
             <DailyProgressTracker 
