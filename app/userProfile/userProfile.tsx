@@ -20,6 +20,7 @@ const UserProfile: React.FC<Props> = ({ session }) => {
   // Progress tracking state
   const [userProgress, setUserProgress] = useState<any>(null);
   const [progressLoading, setProgressLoading] = useState(true);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Questions for the initial prompts
   const suggestedQuestions = [
@@ -145,6 +146,19 @@ const UserProfile: React.FC<Props> = ({ session }) => {
     }
   };
 
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutModal(false);
+    signOut();
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
+  };
+
   if (loading) {
     return (
       <div className={styles["pb-main-layout"]}>
@@ -165,7 +179,7 @@ const UserProfile: React.FC<Props> = ({ session }) => {
         {/* Header with logout button */}
         <div className="flex justify-end p-4">
           <button
-            onClick={() => signOut()}
+            onClick={handleLogoutClick}
             className="
               flex items-center gap-2
               px-4 py-2
@@ -275,6 +289,29 @@ const UserProfile: React.FC<Props> = ({ session }) => {
             </div>
           </div>
         </div>
+
+        {/* Logout Confirmation Modal */}
+        {showLogoutModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <h3 className="text-lg font-bold text-gray-900 mb-6">Confirm Logout</h3>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={cancelLogout}
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                >
+                  Log Out
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

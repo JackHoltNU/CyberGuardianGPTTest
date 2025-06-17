@@ -101,6 +101,7 @@ const PromptBuilderChat = ({ session }: Props) => {
   const [comparisonMode, setComparisonMode] = useState<boolean>(false);
   const [comparisonCounter, setComparisonCounter] = useState(0);
   const [initialPromptProcessed, setInitialPromptProcessed] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
 
   // History sidebar state
@@ -551,6 +552,19 @@ const PromptBuilderChat = ({ session }: Props) => {
     setShowFeedbackInput(false);
   };
 
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutModal(false);
+    signOut();
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
+  };
+
   // Show confirmation message and automatically hide it
   const showConfirmation = (message: string): void => {
     setConfirmMessage(message);
@@ -726,6 +740,14 @@ const PromptBuilderChat = ({ session }: Props) => {
             <ChevronRight size={24} />
           </button>
           <button
+            onClick={() => router.push("/")}
+            className={styles["pb-header-action-btn"]}
+            aria-label="Go to home"
+            style={{ marginBottom: "0.5rem" }}
+          >
+            <Home size={22} />
+          </button>
+          <button
             onClick={decreaseFontSize}
             className={styles["pb-header-action-btn"]}
             aria-label="Decrease text size"
@@ -763,7 +785,7 @@ const PromptBuilderChat = ({ session }: Props) => {
           </button>
           <button
             className={styles["pb-header-action-btn"]}
-            onClick={() => signOut()}
+            onClick={handleLogoutClick}
             aria-label="Log out"
             style={{ marginBottom: "0.5rem" }}
           >
@@ -809,9 +831,16 @@ const PromptBuilderChat = ({ session }: Props) => {
                 <span style={{ fontSize: "1.2em", fontWeight: "600" }}>Home</span>
               </button>
             )}
-            {/* Mobile font size controls */}
+            {/* Mobile controls */}
             {isMobile && (
               <>
+                <button
+                  onClick={() => router.push("/")}
+                  className={styles["pb-header-action-btn"]}
+                  aria-label="Go to home"
+                >
+                  <Home size={22} />
+                </button>
                 <button
                   onClick={decreaseFontSize}
                   className={styles["pb-header-action-btn"]}
@@ -900,7 +929,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             </button>
             <button
               className={styles["pb-header-action-btn"]}
-              onClick={() => signOut()}
+              onClick={handleLogoutClick}
               aria-label="Log out"
             >
               <LogOut size={24} />
@@ -1015,6 +1044,29 @@ const PromptBuilderChat = ({ session }: Props) => {
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Confirm Logout</h3>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={cancelLogout}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
