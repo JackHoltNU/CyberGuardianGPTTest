@@ -43,6 +43,11 @@ const AdminSidebar = ({ selected }: Props) => {
               Dual Chat
             </Link>
           </li>
+          <li className={`item ${selected == 6 && "item--selected"}`}>
+            <Link href="/manageStudy" className="item__button">
+              Study Management
+            </Link>
+          </li>
           <li className={`item ${selected == 4 && "item--selected"}`}>
             <Link href="/" className="item__button">
               Go To Chat

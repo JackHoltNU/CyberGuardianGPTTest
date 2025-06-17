@@ -83,13 +83,13 @@ const DailyProgressTracker: React.FC<DailyProgressTrackerProps> = ({
     
     if (isCompleted && isToday) {
       // Completed today - green background with blue border
-      baseClasses += " bg-green-500 border-blue-500 text-white shadow-md ring-2 ring-blue-200";
+      baseClasses += " bg-green-500 border-blue-600 text-white shadow-lg ring-4 ring-blue-300 border-4";
     } else if (isCompleted) {
       // Completed on previous day
       baseClasses += " bg-green-500 border-green-500 text-white shadow-md";
     } else if (isCurrent) {
       // Not completed but is current day
-      baseClasses += " bg-blue-50 border-blue-500 text-blue-700 shadow-md ring-2 ring-blue-200";
+      baseClasses += " bg-blue-50 border-blue-600 text-blue-800 shadow-lg ring-4 ring-blue-300 border-4";
     } else if (isFuture) {
       baseClasses += " bg-gray-50 border-gray-300 text-gray-400";
     } else {
