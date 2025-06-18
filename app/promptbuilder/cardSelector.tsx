@@ -154,6 +154,14 @@ const CardSelector: React.FC<CardSelectorProps> = ({
     return fullText || "";
   };
 
+  // Get just the instruction text for the textarea
+  const getInstructionText = () => {
+    if (!selectedOption) return "";
+
+    const selectedOpt = allOptions.find((opt) => opt.id === selectedOption);
+    return selectedOpt?.detailedInstruction || "";
+  };
+
   // Get color for a specific configuration using shared mapping
   const getConfigColor = (config: PromptConfiguration): string => {
     const configHash = getPromptConfigHash(config);
@@ -228,16 +236,15 @@ const CardSelector: React.FC<CardSelectorProps> = ({
 
   return (
     <div ref={containerRef}>
-      {title && (
-        <h2
-          className={`${styles["pb-cardselector-title"]} ${fontSizes.header}`}
-        >
-          {title}
-        </h2>
-      )}
-
       <div className={isNarrowLayout ? styles["pb-cardselector-layout-narrow"] : styles["pb-cardselector-layout"]}>
         <div className={isNarrowLayout ? styles["pb-cardselector-options-col-narrow"] : styles["pb-cardselector-options-col"]}>
+          {title && (
+            <h2
+              className={`${styles["pb-cardselector-title"]} ${fontSizes.header}`}
+            >
+              {title}
+            </h2>
+          )}
           <div className={styles["pb-cardselector-options-grid"]}>
             {allOptions.map((option) => (
               <div
@@ -263,9 +270,16 @@ const CardSelector: React.FC<CardSelectorProps> = ({
         </div>
 
         <div className={isNarrowLayout ? styles["pb-cardselector-textarea-col-narrow"] : styles["pb-cardselector-textarea-col"]}>
+          {selectedOption && (
+            <h2
+              className={`${styles["pb-cardselector-title"]} ${fontSizes.header}`}
+            >
+              Instructions to chatbot
+            </h2>
+          )}
           <textarea
             value={
-              isCustomSelected ? customInstruction : getDetailedInstruction()
+              isCustomSelected ? customInstruction : getInstructionText()
             }
             onChange={handleCustomInstructionChange}
             disabled={!isCustomSelected}

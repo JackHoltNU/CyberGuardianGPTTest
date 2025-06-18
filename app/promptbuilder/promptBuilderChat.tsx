@@ -1010,20 +1010,18 @@ const PromptBuilderChat = ({ session }: Props) => {
             }}
           >
             <div className={styles["pb-promptbuilder-sidebar-header"]}>
-              <div className="flex items-center justify-between">
-                <h2
-                  className={`${styles["pb-promptbuilder-sidebar-title"]} ${fontSizes[fontSize].header}`}
-                >
-                  Customise Chat Style
-                </h2>
-                <button
-                  onClick={() => setPromptBuilderOpen(false)}
-                  className={styles["pb-header-action-btn"]}
-                  aria-label="Close Customise Chat"
-                >
-                  <CloseIcon size={24} />
-                </button>
-              </div>
+              <h2
+                className={`${styles["pb-promptbuilder-sidebar-title"]} ${fontSizes[fontSize].header}`}
+              >
+                Customise Chat Style
+              </h2>
+              <button
+                onClick={() => setPromptBuilderOpen(false)}
+                className={styles["pb-header-action-btn"]}
+                aria-label="Close Customise Chat"
+              >
+                <CloseIcon size={28} />
+              </button>
             </div>
 
             <div
