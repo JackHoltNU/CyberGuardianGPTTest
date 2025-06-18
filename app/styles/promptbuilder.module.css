@@ -621,3 +621,36 @@
     max-height: 5rem;
   }
 }
+
+/* Small mobile portrait screens - prevent header icon overflow */
+@media (max-width: 480px) and (orientation: portrait) {
+  .pb-header {
+    flex-wrap: wrap;
+    gap: 0.2rem !important;
+    padding: 0.4rem !important;
+  }
+  .pb-header-action-btn {
+    padding: 0.2rem 0.4rem !important;
+    min-width: 2.5rem !important;
+    min-height: 2.5rem !important;
+    font-size: 0.9rem !important;
+    gap: 0.2rem !important;
+  }
+  .pb-header-action-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .pb-sidebar-btn {
+    min-width: 2.5rem !important;
+    min-height: 2.5rem !important;
+    padding: 0.2rem !important;
+  }
+  .pb-sidebar-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  /* Hide text labels on very small screens to save space */
+  .pb-header-action-btn span {
+    display: none !important;
+  }
+}
