@@ -810,7 +810,7 @@ const PromptBuilderChat = ({ session }: Props) => {
                 <ChevronRight size={24} />
               </button>
             )}
-            {isShowTitle && (
+            {isShowTitle ? (
               <button
                 onClick={() => router.push("/")}
                 className="
@@ -829,6 +829,14 @@ const PromptBuilderChat = ({ session }: Props) => {
               >
                 <Home size={20} />
                 <span style={{ fontSize: "1.2em", fontWeight: "600" }}>Home</span>
+              </button>
+            ) : !isMobile && (
+              <button
+                onClick={() => router.push("/")}
+                className={styles["pb-header-action-btn"]}
+                aria-label="Go to home"
+              >
+                <Home size={24} />
               </button>
             )}
             {/* Mobile controls */}
