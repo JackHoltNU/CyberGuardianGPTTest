@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from 'react';
-import SortingTask from '../components/sortingTask';
+import ButtonSortingTask from '../components/buttonSortingTask';
 import SurveyContainer from '../components/surveyContainer';
 import { cybersecurityPrioritiesSurvey } from '../config/surveys';
 
 const TestSurveyPage = () => {
   const [completed, setCompleted] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<any[]>([]);
 
   const handleComplete = (sortedItems: any) => {
     setResult(sortedItems);
@@ -37,7 +37,7 @@ const TestSurveyPage = () => {
             <button
               onClick={() => {
                 setCompleted(false);
-                setResult(null);
+                setResult([]);
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
             >
@@ -56,8 +56,8 @@ const TestSurveyPage = () => {
       title="Test Survey"
       showProgress={false}
     >
-      <SortingTask
-        {...cybersecurityPrioritiesSurvey.config}
+      <ButtonSortingTask
+        {...(cybersecurityPrioritiesSurvey.config as any)}
         onComplete={handleComplete}
       />
     </SurveyContainer>

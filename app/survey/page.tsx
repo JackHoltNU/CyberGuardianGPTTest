@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getServerSession } from "next-auth";
-import SortingTask from '../components/sortingTask';
+import ButtonSortingTask from '../components/buttonSortingTask';
 import SurveyContainer from '../components/surveyContainer';
 import { SurveyDefinition, SurveySession } from '../types/survey';
 import { getSurveysForUser } from '../config/surveys';
@@ -211,8 +211,8 @@ const SurveyPage = () => {
       )}
 
       {currentSurvey.type === 'sorting' && (
-        <SortingTask
-          {...currentSurvey.config}
+        <ButtonSortingTask
+          {...(currentSurvey.config as any)}
           onComplete={(result) => handleSurveyComplete(currentSurvey.id, result)}
         />
       )}

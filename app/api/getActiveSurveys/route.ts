@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
       // Check study day (if specified)
       if (template.studyDays) {
         const surveyDays = template.studyDays.split(',')
-          .map(day => parseInt(day.trim()))
-          .filter(day => !isNaN(day));
+          .map((day: string) => parseInt(day.trim()))
+          .filter((day: number) => !isNaN(day));
         
         if (surveyDays.length > 0 && !surveyDays.includes(studyDay)) return false;
       }
@@ -35,9 +35,9 @@ export async function GET(request: NextRequest) {
     const formattedSurveys = filteredSurveys.map((template) => {
       // Parse items from string format
       const items = template.items.split('\n')
-        .filter(line => line.trim())
-        .map((line, index) => {
-          const parts = line.split('|').map(part => part.trim());
+        .filter((line: string) => line.trim())
+        .map((line: string, index: number) => {
+          const parts = line.split('|').map((part: string) => part.trim());
           return {
             id: `item_${index + 1}`,
             text: parts[0],
