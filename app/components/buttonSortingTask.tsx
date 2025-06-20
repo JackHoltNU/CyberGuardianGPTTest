@@ -119,16 +119,11 @@ const ButtonSortingTask: React.FC<ButtonSortingTaskProps> = ({
         {/* Instructions */}
         <div className="mb-6 text-sm text-gray-600">
           <p>• Use the green up arrow to move items higher in ranking</p>
-          <p>• Use the red down arrow to move items lower in ranking</p>
-          <p>• Place the most important item at the top (rank 1)</p>
-          <p>• The numbers will update automatically as you reorder items</p>
+          <p>• Use the red down arrow to move items lower in ranking</p>          
         </div>
 
         {/* Sortable List */}
-        <div className="mb-6">
-          <h3 className="font-semibold text-gray-900 mb-4">
-            Rank these items (1 = highest priority):
-          </h3>
+        <div className="mb-6">          
           
           <div className="space-y-3">
             {sortedItems.map((item, index) => {
