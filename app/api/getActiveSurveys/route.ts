@@ -1,0 +1,69 @@
+import { NextRequest, NextResponse } from "next/server";
+import connectToDatabase from "../../lib/mongodb";
+import SurveyTemplate from "../../models/SurveyTemplate";
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const studyDay = parseInt(searchParams.get('studyDay') || '1');
+    const isLocalhost = searchParams.get('isLocalhost') === 'true';
+
+    await connectToDatabase();
+    
+    // Get all active surveys
+    const surveys = await SurveyTemplate.find({ isActive: true });
+
+    // Filter surveys based on conditions
+    const filteredSurveys = surveys.filter((template) => {
+      // Check environment
+      if (isLocalhost && !template.isLocalhost) return false;
+      if (!isLocalhost && template.isLocalhost) return false;
+      
+      // Check study day (if specified)
+      if (template.studyDays) {
+        const surveyDays = template.studyDays.split(',')
+          .map(day => parseInt(day.trim()))
+          .filter(day => !isNaN(day));
+        
+        if (surveyDays.length > 0 && !surveyDays.includes(studyDay)) return false;
+      }
+      
+      return true;
+    });
+
+    // Convert to the format expected by the frontend
+    const formattedSurveys = filteredSurveys.map((template) => {
+      // Parse items from string format
+      const items = template.items.split('\n')
+        .filter(line => line.trim())
+        .map((line, index) => {
+          const parts = line.split('|').map(part => part.trim());
+          return {
+            id: `item_${index + 1}`,
+            text: parts[0],
+            description: parts[1] || undefined
+          };
+        });
+
+      return {
+        id: template._id.toString(),
+        type: 'sorting',
+        config: {
+          id: template.name,
+          title: template.title,
+          instructions: template.instructions,
+          criteria: template.criteria,
+          items: items
+        }
+      };
+    });
+
+    return NextResponse.json({ surveys: formattedSurveys });
+  } catch (error) {
+    console.error("Error fetching active surveys:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

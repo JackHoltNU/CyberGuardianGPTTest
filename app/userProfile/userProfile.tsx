@@ -113,31 +113,28 @@ const UserProfile: React.FC<Props> = ({ session }) => {
       (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
     if (isLocalhost) {
-      // Development mode - use preferences flow
+      // Development mode - go through survey flow first
+      const surveyParams = new URLSearchParams();
+      
       if (hasPreferences === false) {
-        // First time user - go to preferences setup
-        if (prompt) {
-          router.push(`/preferences?initialPrompt=${encodeURIComponent(prompt)}&firstTime=true`);
-        } else {
-          router.push("/preferences?firstTime=true");
-        }
+        // First time user - survey -> preferences setup
+        surveyParams.set('redirectTo', '/preferences');
+        surveyParams.set('firstTime', 'true');
       } else if (hasPreferences === true) {
-        // Existing user - go to preferences confirmation
-        if (prompt) {
-          router.push(`/preferences?initialPrompt=${encodeURIComponent(prompt)}`);
-        } else {
-          router.push("/preferences");
-        }
+        // Existing user - survey -> preferences confirmation
+        surveyParams.set('redirectTo', '/preferences');
       } else {
-        // Fallback - go directly to chat
-        if (prompt) {
-          router.push(`/promptbuilder?initialPrompt=${encodeURIComponent(prompt)}`);
-        } else {
-          router.push("/promptbuilder");
-        }
+        // Fallback - survey -> directly to chat
+        surveyParams.set('redirectTo', '/promptbuilder');
       }
+      
+      if (prompt) {
+        surveyParams.set('initialPrompt', prompt);
+      }
+      
+      router.push(`/survey?${surveyParams.toString()}`);
     } else {
-      // Production mode - go directly to promptbuilder chat
+      // Production mode - go directly to promptbuilder chat (no surveys yet)
       if (prompt) {
         router.push(`/promptbuilder?initialPrompt=${encodeURIComponent(prompt)}`);
       } else {
