@@ -268,7 +268,7 @@
 
 /* Demo/personalise instructions box */
 .pb-personalise-box {
-  @apply mt-10 p-4 bg-gray-50 rounded-lg border border-gray-200;
+  @apply mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200;
 }
 .pb-personalise-title {
   @apply font-bold mb-4;
@@ -313,7 +313,7 @@
   @apply bg-gray-200 hover:bg-gray-300 text-gray-800;
 }
 .pb-cardselector-title {
-  @apply mb-3 text-gray-800;
+  @apply mb-3 text-gray-800 font-bold;
 }
 .pb-cardselector-option-title {
   @apply flex-1 text-left;

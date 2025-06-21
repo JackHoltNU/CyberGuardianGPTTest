@@ -77,12 +77,12 @@ export const PromptBuilderProvider = ({
   children,
 }: PromptBuilderProviderProps) => {
   // Prompt builder state
-  const [tone, setTone] = useState("professional");
-  const [languageDifficulty, setLanguageDifficulty] = useState("unrestricted");
-  const [answerLength, setAnswerLength] = useState("conversational");
+  const [tone, setTone] = useState("casual");
+  const [languageDifficulty, setLanguageDifficulty] = useState("basic");
+  const [answerLength, setAnswerLength] = useState("single-paragraphs");
   const [personalization, setPersonalization] = useState("");
-  const [technicalDifficulty, setTechnicalDifficulty] = useState("technical");
-  const [instructionFormat, setInstructionFormat] = useState("full-lists");
+  const [technicalDifficulty, setTechnicalDifficulty] = useState("basic");
+  const [instructionFormat, setInstructionFormat] = useState("step-by-step");
   const [asksQuestions, setAsksQuestions] = useState(false);
   const [includesFollowup, setIncludesFollowup] = useState(false);
   const [promptBuilderOpen, setPromptBuilderOpen] = useState(true);
@@ -347,16 +347,18 @@ export const PromptBuilderProvider = ({
     prompt += `The user was offered to select step-by-step preferences of "give full lists" or "one step at a time". They chose "${getDisplayLabel("instruction-style", instructionFormat)}" - as such ${getDetailedInstructionById("instruction-style", instructionFormat).toLowerCase()}`;
 
     // --- New device/browser/instructions logic ---
-    if (specifyDevices && selectedDevices.length > 0) {
-      prompt += `\n\nThe user has indicated that they are using the following devices:`;
-      if (selectedDevices.includes("computer") && computerType) {
-        prompt += `\n- A Computer: (${computerType})`;
-      }
-      if (selectedDevices.includes("tablet") && tabletType) {
-        prompt += `\n- A tablet: (${tabletType})`;
-      }
-      if (selectedDevices.includes("mobile") && mobileType) {
-        prompt += `\n- A mobile phone: (${mobileType})`;
+    if (specifyDevices) {
+      if (selectedDevices.length > 0) {
+        prompt += `\n\nThe user has indicated that they are using the following devices:`;
+        if (selectedDevices.includes("computer") && computerType) {
+          prompt += `\n- A Computer: (${computerType})`;
+        }
+        if (selectedDevices.includes("tablet") && tabletType) {
+          prompt += `\n- A tablet: (${tabletType})`;
+        }
+        if (selectedDevices.includes("mobile") && mobileType) {
+          prompt += `\n- A mobile phone: (${mobileType})`;
+        }
       }
       if (browser) {
         prompt += `\n\nThe user has specified that they are using the following browser: ${browser}`;

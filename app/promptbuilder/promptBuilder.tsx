@@ -134,34 +134,13 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
         </div>
       )}
 
-      <div className={styles["pb-section-spacing"]}>
-        {promptSections?.map((section) => (
-          <CardSelector
-            key={section.id}
-            title={section.title}
-            options={section.options}
-            defaultSelected={getCurrentValue(section.id)}
-            onSelectionChange={section.callback}
-            includeCustomOption={section.canDefine}
-            customOptionLabel="Define new"
-            comparisonConfigs={comparisonConfigs}
-            currentConfig={currentConfig}
-            settingKey={sectionKeyMapping[section.id]}
-            fontSizes={fontSizes}
-            configColorMap={configColorMap}
-            comparisonMessages={comparisonMessages}
-            comparisonCounter={comparisonCounter}
-          />
-        ))}
-      </div>
-
-      {/* --- DEMO OF NEW COMPONENTS --- */}
+      {/* Personalise Instructions - moved to top */}
       <div className={styles["pb-personalise-box"]}>
         <h2 className={`${styles["pb-personalise-title"]} ${fontSizes.header}`}>
-          Personalise Instructions
+          Specify Devices
         </h2>
         <ToggleSwitch
-          label="Specify instructions for particular devices or browser?"
+          label="Should the chatbot tailor its responses to particular devices?"
           checked={specifyDevices}
           onChange={setSpecifyDevices}
         />
@@ -212,6 +191,27 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
             />
           </>
         )}
+      </div>
+
+      <div className={styles["pb-section-spacing"]}>
+        {promptSections?.map((section) => (
+          <CardSelector
+            key={section.id}
+            title={section.title}
+            options={section.options}
+            defaultSelected={getCurrentValue(section.id)}
+            onSelectionChange={section.callback}
+            includeCustomOption={section.canDefine}
+            customOptionLabel="Define new"
+            comparisonConfigs={comparisonConfigs}
+            currentConfig={currentConfig}
+            settingKey={sectionKeyMapping[section.id]}
+            fontSizes={fontSizes}
+            configColorMap={configColorMap}
+            comparisonMessages={comparisonMessages}
+            comparisonCounter={comparisonCounter}
+          />
+        ))}
       </div>
     </>
   );
