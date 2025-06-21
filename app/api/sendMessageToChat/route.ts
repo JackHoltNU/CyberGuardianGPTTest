@@ -72,7 +72,7 @@ export const POST = async (req: Request) => {
 
   if(!model || !mainPrompt == undefined || formatPrompt == undefined){
     if(userPrompt){
-      config = await getAIConfig("BuilderPhase1");
+      config = await getAIConfig("Phase3PB");
     } else {
       config = await getAIConfig();
       console.log("no user prompt")

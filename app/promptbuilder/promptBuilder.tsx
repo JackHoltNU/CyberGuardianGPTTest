@@ -35,7 +35,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
 }) => {
   const {
     promptSections,
-    personality,
+    tone,
     languageDifficulty,
     answerLength,
     technicalDifficulty,
@@ -58,7 +58,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
 
   // Mapping of section IDs to PromptConfiguration keys and current values
   const sectionKeyMapping: { [key: string]: keyof PromptConfiguration } = {
-    personality: "personality",
+    tone: "tone",
     "language-difficulty": "languageDifficulty",
     "answer-length": "answerLength",
     "technical-difficulty": "technicalDifficulty",
@@ -74,8 +74,8 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
 
     // Fall back to context values when not in comparison mode
     switch (sectionId) {
-      case "personality":
-        return personality;
+      case "tone":
+        return tone;
       case "language-difficulty":
         return languageDifficulty;
       case "answer-length":

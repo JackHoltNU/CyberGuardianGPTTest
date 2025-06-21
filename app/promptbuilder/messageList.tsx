@@ -67,7 +67,7 @@ const MessageList: React.FC<MessageListProps> = ({
   const getConfigHash = (config: PromptConfiguration | undefined) => {
     if (!config) return "";
     return [
-      config.personality,
+      config.tone,
       config.languageDifficulty,
       config.answerLength,
       config.technicalDifficulty,
@@ -233,7 +233,7 @@ const MessageList: React.FC<MessageListProps> = ({
               className={`grid grid-cols-1 md:grid-cols-2 gap-x-1 gap-y-2`}
             >
               <span className="break-normal">
-                <strong>Personality:</strong> {config.personalityLabel}
+                <strong>Tone:</strong> {config.toneLabel}
               </span>
               <span className="break-normal">
                 <strong>Language:</strong> {config.languageDifficultyLabel}
@@ -320,7 +320,7 @@ const MessageList: React.FC<MessageListProps> = ({
     if (!config1) return true;
 
     return (
-      config1.personality !== config2.personality ||
+      config1.tone !== config2.tone ||
       config1.languageDifficulty !== config2.languageDifficulty ||
       config1.answerLength !== config2.answerLength ||
       config1.technicalDifficulty !== config2.technicalDifficulty ||

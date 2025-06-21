@@ -105,12 +105,12 @@ export type AIConfigCollection = {
 
 export type PromptConfiguration = {
   id: string;
-  personality: string;
+  tone: string;
   languageDifficulty: string;
   answerLength: string;
   technicalDifficulty: string;
   instructionFormat: string;
-  personalityLabel: string;
+  toneLabel: string;
   languageDifficultyLabel: string;
   answerLengthLabel: string;
   technicalDifficultyLabel: string;

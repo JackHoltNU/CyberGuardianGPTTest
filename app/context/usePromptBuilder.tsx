@@ -12,8 +12,8 @@ import { PromptConfiguration } from "../types/types";
 
 interface PromptBuilderContextType {
   promptSections: PromptSection[] | undefined;
-  personality: string;
-  setPersonality: (value: string) => void;
+  tone: string;
+  setTone: (value: string) => void;
   languageDifficulty: string;
   setLanguageDifficulty: (value: string) => void;
   answerLength: string;
@@ -77,7 +77,7 @@ export const PromptBuilderProvider = ({
   children,
 }: PromptBuilderProviderProps) => {
   // Prompt builder state
-  const [personality, setPersonality] = useState("professional");
+  const [tone, setTone] = useState("professional");
   const [languageDifficulty, setLanguageDifficulty] = useState("unrestricted");
   const [answerLength, setAnswerLength] = useState("conversational");
   const [personalization, setPersonalization] = useState("");
@@ -100,7 +100,7 @@ export const PromptBuilderProvider = ({
 
   const getPromptConfigHash = (config: PromptConfiguration): string => {
     return [
-      config.personality,
+      config.tone,
       config.languageDifficulty,
       config.answerLength,
       config.technicalDifficulty,
@@ -124,12 +124,12 @@ export const PromptBuilderProvider = ({
 
     let promptConfig: PromptConfiguration = {
       id: "",
-      personality,
+      tone,
       languageDifficulty,
       answerLength,
       technicalDifficulty,
       instructionFormat,
-      personalityLabel: getDisplayLabel("personality", personality),
+      toneLabel: getDisplayLabel("tone", tone),
       languageDifficultyLabel: getDisplayLabel(
         "language-difficulty",
         languageDifficulty
@@ -160,7 +160,7 @@ export const PromptBuilderProvider = ({
   };
 
   const applyConfiguration = (config: PromptConfiguration) => {
-    setPersonality(config.personality);
+    setTone(config.tone);
     setLanguageDifficulty(config.languageDifficulty);
     setAnswerLength(config.answerLength);
     setTechnicalDifficulty(config.technicalDifficulty);
@@ -171,32 +171,6 @@ export const PromptBuilderProvider = ({
   // Define the prompt sections and their options
   useEffect(() => {
     setPromptSections([
-      {
-        id: "personality",
-        title: "Personality",
-        options: [
-          {
-            id: "professional",
-            title: "Professional",
-            detailedInstruction:
-              "You will adopt a professional, respectful tone. You will communicate clearly and concisely, providing accurate information while maintaining a helpful, service-oriented approach.",
-          },
-          {
-            id: "friend",
-            title: "Friend",
-            detailedInstruction:
-              "You will communicate in a warm, friendly manner as if speaking with a long-time friend. Feel free to use casual language, show empathy, and occasionally add light humor when appropriate. Do not act like you are providing a service; you are just two people having a conversation.",
-          },
-          {
-            id: "factual",
-            title: "Robot",
-            detailedInstruction:
-              "You will provide purely factual, objective information without emotional colouring or subjective assessment. You are an AI assistant and should not give the impression that you are a human.",
-          },
-        ],
-        canDefine: false,
-        callback: (id: string) => setPersonality(id),
-      },
       {
         id: "technical-difficulty",
         title: "Technical Difficulty",
@@ -231,23 +205,49 @@ export const PromptBuilderProvider = ({
             id: "unrestricted",
             title: "Unrestricted",
             detailedInstruction:
-              "You will use your full vocabulary range without restrictions, including complex or uncommon words when they most precisely express the intended meaning, except where these conflict with preferences around technical jargon.",
+              "You will use your full vocabulary range without restrictions, including complex or uncommon words when they most precisely express the intended meaning, except where these conflict with preferences around technical jargon."
           },
           {
             id: "basic",
             title: "Basic",
             detailedInstruction:
-              "You will restrict your vocabulary to commonly understood words and phrases, avoiding obscure terminology. Language will be straightforward, avoiding complex sentence structures.",
+              "You will restrict your vocabulary to commonly understood words and phrases, avoiding obscure terminology. Language will be straightforward, avoiding complex sentence structures."
           },
           {
             id: "simple",
             title: "As simple as possible",
             detailedInstruction:
-              "You will use only the most common and easily understood words, keeping sentences short and direct. You will use only very simple sentence structures and write in a way that is understandable to those of all reading levels.",
+              "You will use only the most common and easily understood words, keeping sentences short and direct. You will use only very simple sentence structures and write in a way that is understandable to those of all reading levels."
           },
         ],
         canDefine: false,
         callback: (id: string) => setLanguageDifficulty(id),
+      },
+      {
+        id: "tone",
+        title: "Tone",
+        options: [
+          {
+            id: "professional",
+            title: "Professional",
+            detailedInstruction:
+              "You will adopt a professional, respectful tone. You will communicate clearly and concisely, providing accurate information while maintaining a helpful, service-oriented approach."
+          },
+          {
+            id: "casual",
+            title: "Casual",
+            detailedInstruction:
+              "You will communicate in a warm, friendly manner as if speaking with a long-time friend. Feel free to use casual language, show empathy, and occasionally add light humor when appropriate. Do not act like you are providing a service; you are just two people having a conversation."
+          },
+          {
+            id: "robotic",
+            title: "Robotic",
+            detailedInstruction:
+              "You will provide purely factual, objective information without emotional colouring or subjective assessment. You are an AI assistant and should not give the impression that you are a human."
+          },
+        ],
+        canDefine: false,
+        callback: (id: string) => setTone(id),
       },
       {
         id: "answer-length",
@@ -257,19 +257,19 @@ export const PromptBuilderProvider = ({
             id: "conversational",
             title: "Conversational",
             detailedInstruction:
-              "You will respond to the user using short, conversational responses that are one or two sentences long.",
+              "You will respond to the user using short, conversational responses that are one or two sentences long."
           },
           {
             id: "single-paragraphs",
             title: "Single paragraphs",
             detailedInstruction:
-              "You will respond to the user using a single, focused paragraph that concisely addresses their query.",
+              "You will respond to the user using a single, focused paragraph that concisely addresses their query."
           },
           {
             id: "as-long-as-necessary",
             title: "As long as necessary",
             detailedInstruction:
-              "You will provide comprehensive responses of whatever length is required to fully address the user's query.",
+              "You will provide comprehensive responses of whatever length is required to fully address the user's query."
           },
         ],
         canDefine: false,
@@ -277,19 +277,19 @@ export const PromptBuilderProvider = ({
       },
       {
         id: "instruction-style",
-        title: "Instruction Style",
+        title: "Step-by-step Preferences",
         options: [
           {
             id: "full-lists",
             title: "Give full lists",
             detailedInstruction:
-              "When providing instructions or steps, you will present the complete list all at once in a clear, numbered format so the user can see the entire process.",
+              "When providing instructions or steps, you will present the complete list all at once in a clear, numbered format so the user can see the entire process."
           },
           {
             id: "step-by-step",
             title: "One step at a time",
             detailedInstruction:
-              "When providing instructions, you will focus on one step at a time, checking for understanding or completion before moving to the next step.",
+              "When providing instructions, you will focus on one step at a time, checking for understanding or completion before moving to the next step."
           },
         ],
         canDefine: false,
@@ -303,7 +303,7 @@ export const PromptBuilderProvider = ({
     setSystemPrompt(prompt);
   }, [
     promptSections,
-    personality,
+    tone,
     technicalDifficulty,
     languageDifficulty,
     answerLength,
@@ -319,24 +319,32 @@ export const PromptBuilderProvider = ({
     if (!promptSections) {
       return "";
     }
-    prompt += getDetailedInstructionById("personality", personality);
+    
+    // Helper function to get display label
+    const getDisplayLabel = (sectionId: string, optionId: string): string => {
+      const section = promptSections?.find((s) => s.id === sectionId);
+      const option = section?.options.find((o) => o.id === optionId);
+      return option?.title || optionId;
+    };
+    
+    // Technical Difficulty
+    prompt += `The user was offered to select a technical difficulty of "technical", "basic" or "as simple as possible". They chose "${getDisplayLabel("technical-difficulty", technicalDifficulty)}" - as such ${getDetailedInstructionById("technical-difficulty", technicalDifficulty).toLowerCase()}`;
     prompt += "\n\n";
-    prompt += getDetailedInstructionById(
-      "technical-difficulty",
-      technicalDifficulty
-    );
+    
+    // Language Difficulty  
+    prompt += `The user was offered to select a language difficulty of "unrestricted", "basic" or "as simple as possible". They chose "${getDisplayLabel("language-difficulty", languageDifficulty)}" - as such ${getDetailedInstructionById("language-difficulty", languageDifficulty).toLowerCase()}`;
     prompt += "\n\n";
-    prompt += getDetailedInstructionById(
-      "language-difficulty",
-      languageDifficulty
-    );
+    
+    // Tone
+    prompt += `The user was offered to select a tone of "professional", "casual" or "robotic". They chose "${getDisplayLabel("tone", tone)}" - as such ${getDetailedInstructionById("tone", tone).toLowerCase()}`;
     prompt += "\n\n";
-    prompt += getDetailedInstructionById("answer-length", answerLength);
+    
+    // Answer Length
+    prompt += `The user was offered to select an answer length of "conversational", "single paragraphs" or "as long as necessary". They chose "${getDisplayLabel("answer-length", answerLength)}" - as such ${getDetailedInstructionById("answer-length", answerLength).toLowerCase()}`;
     prompt += "\n\n";
-    prompt += getDetailedInstructionById(
-      "instruction-style",
-      instructionFormat
-    );
+    
+    // Step-by-step Preferences
+    prompt += `The user was offered to select step-by-step preferences of "give full lists" or "one step at a time". They chose "${getDisplayLabel("instruction-style", instructionFormat)}" - as such ${getDetailedInstructionById("instruction-style", instructionFormat).toLowerCase()}`;
 
     // --- New device/browser/instructions logic ---
     if (specifyDevices && selectedDevices.length > 0) {
@@ -376,8 +384,8 @@ export const PromptBuilderProvider = ({
     <PromptBuilderContext.Provider
       value={{
         promptSections,
-        personality,
-        setPersonality,
+        tone,
+        setTone,
         languageDifficulty,
         setLanguageDifficulty,
         answerLength,

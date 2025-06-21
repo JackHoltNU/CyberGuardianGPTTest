@@ -159,9 +159,9 @@ const PromptBuilderChat = ({ session }: Props) => {
     curr: PromptConfiguration
   ) => {
     const changes: string[] = [];
-    if (prev.personality !== curr.personality) {
+    if (prev.tone !== curr.tone) {
       changes.push(
-        `personality from "${prev.personalityLabel}" to "${curr.personalityLabel}"`
+        `tone from "${prev.toneLabel}" to "${curr.toneLabel}"`
       );
     }
     if (prev.languageDifficulty !== curr.languageDifficulty) {
@@ -383,7 +383,7 @@ const PromptBuilderChat = ({ session }: Props) => {
         
         // Compare main configuration fields
         const coreMatch = 
-          msgConfig.personality === currentConfig.personality &&
+          msgConfig.tone === currentConfig.tone &&
           msgConfig.languageDifficulty === currentConfig.languageDifficulty &&
           msgConfig.answerLength === currentConfig.answerLength &&
           msgConfig.technicalDifficulty === currentConfig.technicalDifficulty &&
