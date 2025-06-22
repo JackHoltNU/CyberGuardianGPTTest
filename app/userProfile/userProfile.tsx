@@ -120,39 +120,26 @@ const UserProfile: React.FC<Props> = ({ session }) => {
   };
 
   const handleOptionClick = (prompt: string | null) => {
-    // Check if running on localhost
-    const isLocalhost = typeof window !== 'undefined' && 
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-    if (isLocalhost) {
-      // Development mode - go through survey flow first
-      const surveyParams = new URLSearchParams();
-      
-      if (hasPreferences === false) {
-        // First time user - survey -> preferences setup
-        surveyParams.set('redirectTo', '/preferences');
-        surveyParams.set('firstTime', 'true');
-      } else if (hasPreferences === true) {
-        // Existing user - survey -> preferences confirmation
-        surveyParams.set('redirectTo', '/preferences');
-      } else {
-        // Fallback - survey -> directly to chat
-        surveyParams.set('redirectTo', '/promptbuilder');
-      }
-      
-      if (prompt) {
-        surveyParams.set('initialPrompt', prompt);
-      }
-      
-      router.push(`/survey?${surveyParams.toString()}`);
+    // Study participants get full survey and preference flow regardless of environment
+    const surveyParams = new URLSearchParams();
+    
+    if (hasPreferences === false) {
+      // First time user - survey -> preferences setup
+      surveyParams.set('redirectTo', '/preferences');
+      surveyParams.set('firstTime', 'true');
+    } else if (hasPreferences === true) {
+      // Existing user - survey -> preferences confirmation
+      surveyParams.set('redirectTo', '/preferences');
     } else {
-      // Production mode - go directly to promptbuilder chat (no surveys yet)
-      if (prompt) {
-        router.push(`/promptbuilder?initialPrompt=${encodeURIComponent(prompt)}`);
-      } else {
-        router.push("/promptbuilder");
-      }
+      // Fallback - survey -> directly to chat
+      surveyParams.set('redirectTo', '/promptbuilder');
     }
+    
+    if (prompt) {
+      surveyParams.set('initialPrompt', prompt);
+    }
+    
+    router.push(`/survey?${surveyParams.toString()}`);
   };
 
   const handleLogoutClick = () => {
