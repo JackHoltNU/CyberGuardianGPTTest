@@ -22,12 +22,12 @@ const UserProfile: React.FC<Props> = ({ session }) => {
   const [progressLoading, setProgressLoading] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  // Questions for the initial prompts
-  const suggestedQuestions = [
+  // State for random conversation starters
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([
     "What is phishing?",
-    "What makes a strong password?",
+    "What makes a strong password?", 
     "How safe is online shopping?",
-  ];
+  ]);
 
   // Check if user has existing preferences (only on localhost)
   useEffect(() => {
@@ -68,7 +68,29 @@ const UserProfile: React.FC<Props> = ({ session }) => {
 
     checkUserPreferences();
     loadUserProgress();
+    loadRandomConversationStarters();
   }, [session.user?.name]);
+
+  // Load random conversation starters
+  const loadRandomConversationStarters = async () => {
+    try {
+      const response = await fetch('/api/conversationStarters?random=true&limit=3&activeOnly=true');
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.starters && data.starters.length > 0) {
+          setSuggestedQuestions(data.starters.map((starter: any) => starter.text));
+        }
+        // If no starters found, keep the default questions
+      } else {
+        console.error("Failed to load conversation starters:", await response.text());
+        // Keep default questions on error
+      }
+    } catch (error) {
+      console.error("Error loading conversation starters:", error);
+      // Keep default questions on error
+    }
+  };
 
   // Load or initialize user progress
   const loadUserProgress = async () => {

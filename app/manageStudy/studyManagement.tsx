@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from "react";
+import ConversationStartersManagement from "../components/conversationStartersManagement";
 
 interface User {
   username: string;
@@ -202,6 +203,9 @@ const StudyManagement = () => {
           </button>
         </div>
       </div>
+
+      {/* Conversation Starters Management */}
+      <ConversationStartersManagement />
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
