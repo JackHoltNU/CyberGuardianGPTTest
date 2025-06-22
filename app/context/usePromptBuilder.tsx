@@ -106,12 +106,12 @@ export const PromptBuilderProvider = ({
       config.technicalDifficulty,
       config.instructionFormat,
       config.specifyDevices ? "1" : "0",
-      config.specifyDevices ? (config.selectedDevices || []).join(",") : [],
+      config.specifyDevices ? (config.selectedDevices || []).join(",") : "",
       config.specifyDevices ? config.computerType || "" : "",
       config.specifyDevices ? config.tabletType || "" : "",
       config.specifyDevices ? config.mobileType || "" : "",
-      config.browser || "",
-      config.additionalInstructions || "",
+      config.specifyDevices ? config.browser || "" : "",
+      config.specifyDevices ? config.additionalInstructions || "" : "",
     ].join("|");
   };
 
@@ -308,6 +308,7 @@ export const PromptBuilderProvider = ({
     languageDifficulty,
     answerLength,
     instructionFormat,
+    specifyDevices,
     selectedDevices,
     browser,
     additionalInstructions,

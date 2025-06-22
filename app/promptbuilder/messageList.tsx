@@ -271,14 +271,14 @@ const MessageList: React.FC<MessageListProps> = ({
                       )}
                   </span>
                 )}
-              {config.browser && (
+              {config.specifyDevices && config.browser && (
                 <span
                   className="md:col-span-2 break-words"
                 >
                   <strong>Browser:</strong> {config.browser}
                 </span>
               )}
-              {config.additionalInstructions && (
+              {config.specifyDevices && config.additionalInstructions && (
                 <span
                   className="md:col-span-2 break-words"
                 >

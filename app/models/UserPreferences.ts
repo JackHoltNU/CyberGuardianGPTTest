@@ -8,10 +8,10 @@ const userPreferencesSchema = new mongoose.Schema({
     index: true
   },
   promptConfiguration: {
-    personality: {
+    tone: {
       type: String,
       required: true,
-      default: "helpful"
+      default: "casual"
     },
     languageDifficulty: {
       type: String,
@@ -33,10 +33,10 @@ const userPreferencesSchema = new mongoose.Schema({
       required: true,
       default: "step-by-step"
     },
-    personalityLabel: {
+    toneLabel: {
       type: String,
       required: true,
-      default: "Helpful"
+      default: "Casual"
     },
     languageDifficultyLabel: {
       type: String,

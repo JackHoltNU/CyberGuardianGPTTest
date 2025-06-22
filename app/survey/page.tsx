@@ -150,6 +150,8 @@ const SurveyPage = () => {
     // Check if there are more surveys
     if (currentSurveyIndex < surveys.length - 1) {
       setCurrentSurveyIndex(prev => prev + 1);
+      // Scroll to top when moving to next survey
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       // All surveys complete, redirect to next page
       let redirectUrl = redirectTo;
@@ -212,6 +214,7 @@ const SurveyPage = () => {
 
       {currentSurvey.type === 'sorting' && (
         <ButtonSortingTask
+          key={currentSurvey.id}
           {...(currentSurvey.config as any)}
           onComplete={(result) => handleSurveyComplete(currentSurvey.id, result)}
         />
