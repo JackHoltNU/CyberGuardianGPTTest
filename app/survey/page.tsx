@@ -24,6 +24,7 @@ const SurveyPage = () => {
   // Get redirect destination from URL params
   const redirectTo = searchParams.get('redirectTo') || '/preferences';
   const initialPrompt = searchParams.get('initialPrompt');
+  const firstTime = searchParams.get('firstTime');
 
   useEffect(() => {
     const initializeSurvey = async () => {
@@ -153,10 +154,20 @@ const SurveyPage = () => {
     } else {
       // All surveys complete, redirect to next page
       let redirectUrl = redirectTo;
+      const params = new URLSearchParams();
+      
       if (initialPrompt) {
-        const separator = redirectUrl.includes('?') ? '&' : '?';
-        redirectUrl += `${separator}initialPrompt=${encodeURIComponent(initialPrompt)}`;
+        params.set('initialPrompt', initialPrompt);
       }
+      if (firstTime) {
+        params.set('firstTime', firstTime);
+      }
+      
+      if (params.toString()) {
+        const separator = redirectUrl.includes('?') ? '&' : '?';
+        redirectUrl += `${separator}${params.toString()}`;
+      }
+      
       router.push(redirectUrl);
     }
   };
