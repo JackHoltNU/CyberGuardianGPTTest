@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../lib/mongodb";
 import SurveyTemplate from "../../models/SurveyTemplate";
+import SurveyResponse from "../../models/SurveyResponse";
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,14 +9,33 @@ export async function GET(request: NextRequest) {
     const studyDay = parseInt(searchParams.get('studyDay') || '1');
     const isLocalhost = searchParams.get('isLocalhost') === 'true';
     const isStudyParticipant = searchParams.get('isStudyParticipant') === 'true';
+    const username = searchParams.get('username');
+
+    if (!username) {
+      return NextResponse.json(
+        { error: "Username is required" },
+        { status: 400 }
+      );
+    }
 
     await connectToDatabase();
     
     // Get all active surveys
     const surveys = await SurveyTemplate.find({ isActive: true });
 
+    // Get completed surveys for this user and study day
+    const completedSurveys = await SurveyResponse.find({
+      username,
+      studyDay
+    }).select('surveyId');
+    
+    const completedSurveyIds = new Set(completedSurveys.map(response => response.surveyId));
+
     // Filter surveys based on conditions
     const filteredSurveys = surveys.filter((template) => {
+      // Skip if already completed
+      if (completedSurveyIds.has(template.name)) return false;
+      
       // Check environment
       if (isStudyParticipant) {
         // Study participants can access all surveys (both localhost and production)

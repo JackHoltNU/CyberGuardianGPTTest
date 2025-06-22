@@ -62,7 +62,7 @@ const SurveyPage = () => {
         console.log(`Fetching surveys for studyDay=${currentStudyDay}`);
         let fetchedSurveys = [];
         try {
-          const surveyResponse = await fetch(`/api/getActiveSurveys?studyDay=${currentStudyDay}&isStudyParticipant=true`);
+          const surveyResponse = await fetch(`/api/getActiveSurveys?studyDay=${currentStudyDay}&isStudyParticipant=true&username=${encodeURIComponent(username)}`);
           console.log('Survey response status:', surveyResponse.status);
           if (surveyResponse.ok) {
             const surveyData = await surveyResponse.json();

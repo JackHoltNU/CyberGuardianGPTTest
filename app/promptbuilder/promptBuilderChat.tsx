@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   ChevronRight,
   Settings,
-  RotateCcw,
+  Plus,
   Type,
   MinusCircle,
   PlusCircle,
@@ -781,7 +781,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             aria-label="New Chat"
             style={{ marginBottom: "0.5rem" }}
           >
-            <RotateCcw size={24} />
+            <Plus size={24} />
           </button>
           <button
             className={styles["pb-header-action-btn"]}
@@ -932,7 +932,7 @@ const PromptBuilderChat = ({ session }: Props) => {
               onClick={resetChat}
               aria-label="New Chat"
             >
-              <RotateCcw size={24} />
+              <Plus size={24} />
               {!isCompactHeader && <span>New Chat</span>}
             </button>
             <button
