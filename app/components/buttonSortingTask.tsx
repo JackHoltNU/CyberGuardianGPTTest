@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 export interface SortingItem {
@@ -30,7 +30,20 @@ const ButtonSortingTask: React.FC<ButtonSortingTaskProps> = ({
   minItems = 1,
   maxItems,
 }) => {
-  const [sortedItems, setSortedItems] = useState<SortingItem[]>(items);
+  // Fisher-Yates shuffle algorithm to randomize item order
+  const shuffleArray = (array: SortingItem[]): SortingItem[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Randomize items once when component mounts
+  const randomizedItems = useMemo(() => shuffleArray(items), [items]);
+  
+  const [sortedItems, setSortedItems] = useState<SortingItem[]>(randomizedItems);
   const [isCompleted, setIsCompleted] = useState(false);
   const [fadingItems, setFadingItems] = useState<Set<string>>(new Set());
   const [highlightedItems, setHighlightedItems] = useState<Record<string, 'up' | 'down'>>({});

@@ -42,10 +42,6 @@ const SurveyPage = () => {
           }
         }
 
-        // Check if running on localhost
-        const isLocalhost = typeof window !== 'undefined' && 
-          (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
         // Get user's current study day
         let currentStudyDay = 1;
         if (username) {
@@ -62,10 +58,10 @@ const SurveyPage = () => {
         setStudyDay(currentStudyDay);
 
         // Get surveys for this user and study day
-        console.log(`Fetching surveys for studyDay=${currentStudyDay}, isLocalhost=${isLocalhost}`);
+        console.log(`Fetching surveys for studyDay=${currentStudyDay}`);
         let fetchedSurveys = [];
         try {
-          const surveyResponse = await fetch(`/api/getActiveSurveys?studyDay=${currentStudyDay}&isLocalhost=${isLocalhost}`);
+          const surveyResponse = await fetch(`/api/getActiveSurveys?studyDay=${currentStudyDay}&isStudyParticipant=true`);
           console.log('Survey response status:', surveyResponse.status);
           if (surveyResponse.ok) {
             const surveyData = await surveyResponse.json();
@@ -150,8 +146,10 @@ const SurveyPage = () => {
     // Check if there are more surveys
     if (currentSurveyIndex < surveys.length - 1) {
       setCurrentSurveyIndex(prev => prev + 1);
-      // Scroll to top when moving to next survey
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to top when moving to next survey (with small delay to ensure rendering)
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
     } else {
       // All surveys complete, redirect to next page
       let redirectUrl = redirectTo;

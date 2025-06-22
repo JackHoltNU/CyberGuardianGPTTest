@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const studyDay = parseInt(searchParams.get('studyDay') || '1');
     const isLocalhost = searchParams.get('isLocalhost') === 'true';
+    const isStudyParticipant = searchParams.get('isStudyParticipant') === 'true';
 
     await connectToDatabase();
     
@@ -16,8 +17,14 @@ export async function GET(request: NextRequest) {
     // Filter surveys based on conditions
     const filteredSurveys = surveys.filter((template) => {
       // Check environment
-      if (isLocalhost && !template.isLocalhost) return false;
-      if (!isLocalhost && template.isLocalhost) return false;
+      if (isStudyParticipant) {
+        // Study participants can access all surveys (both localhost and production)
+        // No environment filtering needed
+      } else {
+        // Non-study participants use original localhost logic
+        if (isLocalhost && !template.isLocalhost) return false;
+        if (!isLocalhost && template.isLocalhost) return false;
+      }
       
       // Check study day (if specified)
       if (template.studyDays) {

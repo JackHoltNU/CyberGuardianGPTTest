@@ -29,20 +29,10 @@ const UserProfile: React.FC<Props> = ({ session }) => {
     "How safe is online shopping?",
   ]);
 
-  // Check if user has existing preferences (only on localhost)
+  // Check if user has existing preferences (only for study participants)
   useEffect(() => {
     const checkUserPreferences = async () => {
       if (!session.user?.name) {
-        setLoading(false);
-        return;
-      }
-
-      // Check if running on localhost
-      const isLocalhost = typeof window !== 'undefined' && 
-        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-      if (!isLocalhost) {
-        // Production mode - skip preferences check
         setLoading(false);
         return;
       }

@@ -10,17 +10,40 @@ interface Props {
 }
 
 const HomeWrapper: React.FC<Props> = ({ session }) => {
-  const [isLocalhost, setIsLocalhost] = useState(false);
+  const [isStudyParticipant, setIsStudyParticipant] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if running on localhost
-    const localhost = typeof window !== 'undefined' && 
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    
-    setIsLocalhost(localhost);
-    setIsLoading(false);
-  }, []);
+    const checkStudyParticipation = async () => {
+      if (!session.user?.name) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        // Check if user has study progress (indicates they're a study participant)
+        const response = await fetch(`/api/getUserProgress?username=${encodeURIComponent(session.user.name)}`);
+        
+        if (response.ok) {
+          // User has progress = study participant
+          setIsStudyParticipant(true);
+        } else if (response.status === 404) {
+          // No progress found = not a study participant
+          setIsStudyParticipant(false);
+        } else {
+          console.error("Error checking study participation:", await response.text());
+          setIsStudyParticipant(false);
+        }
+      } catch (error) {
+        console.error("Error checking study participation:", error);
+        setIsStudyParticipant(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkStudyParticipation();
+  }, [session.user?.name]);
 
   if (isLoading) {
     return (
@@ -30,11 +53,11 @@ const HomeWrapper: React.FC<Props> = ({ session }) => {
     );
   }
 
-  if (isLocalhost) {
-    // Development mode - show user profile with buttons
+  if (isStudyParticipant) {
+    // Study participant - show user profile with progress tracker, conversation starters, etc.
     return <UserProfile session={session} />;
   } else {
-    // Production mode - go directly to promptbuilder chat
+    // Non-study participant - go directly to promptbuilder chat
     return <PromptBuilderChat session={session} />;
   }
 };
