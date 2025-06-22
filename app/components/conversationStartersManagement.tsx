@@ -62,7 +62,7 @@ const ConversationStartersManagement = () => {
 
       if (data.success) {
         setStarters([data.starter, ...starters]);
-        setFormData({ text: "", category: "general", isActive: true });
+        setFormData({ text: "", isActive: true });
         setShowAddForm(false);
         setError("");
       } else {
