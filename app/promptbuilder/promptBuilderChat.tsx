@@ -102,6 +102,7 @@ const PromptBuilderChat = ({ session }: Props) => {
   const [comparisonCounter, setComparisonCounter] = useState(0);
   const [initialPromptProcessed, setInitialPromptProcessed] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [checkingSurveys, setCheckingSurveys] = useState(true);
 
 
   // History sidebar state
@@ -187,12 +188,52 @@ const PromptBuilderChat = ({ session }: Props) => {
     return changes;
   };
 
-  // Set the user when session is available
+  // Set user from session and check for pending surveys
   useEffect(() => {
-    if (session.user?.name) {
-      setUser(session.user.name);
-    }
-  }, [session]);
+    const checkSurveysAndSetUser = async () => {
+      if (session?.user?.name) {
+        setUser(session.user.name);
+        
+        // Check for pending surveys before allowing chat access
+        try {
+          const currentUsername = session.user.name;
+          
+          // Get user's current study day
+          let currentStudyDay = 1;
+          try {
+            const progressResponse = await fetch(`/api/getUserProgress?username=${encodeURIComponent(currentUsername)}`);
+            if (progressResponse.ok) {
+              const progressData = await progressResponse.json();
+              currentStudyDay = progressData.userProgress?.currentDay || 1;
+            }
+          } catch (error) {
+            console.warn('Could not fetch user progress, using day 1');
+          }
+
+          // Check for active surveys
+          const surveyResponse = await fetch(`/api/getActiveSurveys?studyDay=${currentStudyDay}&isStudyParticipant=true&username=${encodeURIComponent(currentUsername)}`);
+          if (surveyResponse.ok) {
+            const surveyData = await surveyResponse.json();
+            const pendingSurveys = surveyData.surveys || [];
+            
+            if (pendingSurveys.length > 0) {
+              // User has pending surveys, redirect to home page
+              console.log('Pending surveys found, redirecting to home page');
+              router.push('/userProfile');
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error checking for surveys:', error);
+          // On error, allow access to chat (fail open)
+        }
+      }
+      
+      setCheckingSurveys(false);
+    };
+
+    checkSurveysAndSetUser();
+  }, [session, setUser, router]);
 
   // Load chats after user is set
   useEffect(() => {
@@ -708,6 +749,15 @@ const PromptBuilderChat = ({ session }: Props) => {
     window.addEventListener("resize", checkShowTitle);
     return () => window.removeEventListener("resize", checkShowTitle);
   }, []);
+
+  // Show loading state while checking for surveys
+  if (checkingSurveys) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl text-gray-600">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div
