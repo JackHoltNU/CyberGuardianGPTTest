@@ -50,6 +50,7 @@ interface PromptBuilderContextType {
   additionalInstructions: string;
   setAdditionalInstructions: (value: string) => void;
   getPromptConfigHash: (config: PromptConfiguration) => string;
+  setCurrentUser: (user: string | null) => void;
 }
 
 const PromptBuilderContext = createContext<
@@ -98,6 +99,7 @@ export const PromptBuilderProvider = ({
   const [mobileType, setMobileType] = useState("");
   const [browser, setBrowser] = useState("");
   const [additionalInstructions, setAdditionalInstructions] = useState("");
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
 
   const getPromptConfigHash = (config: PromptConfiguration): string => {
     return [
@@ -175,7 +177,7 @@ export const PromptBuilderProvider = ({
     getPromptConfigHash
   ]);
 
-  const applyConfiguration = (config: PromptConfiguration) => {
+  const applyConfiguration = useCallback((config: PromptConfiguration) => {
     setTone(config.tone);
     setLanguageDifficulty(config.languageDifficulty);
     setAnswerLength(config.answerLength);
@@ -188,7 +190,7 @@ export const PromptBuilderProvider = ({
     setMobileType(config.mobileType || "");
     setBrowser(config.browser || "");
     setAdditionalInstructions(config.additionalInstructions || "");
-  };
+  }, []);
 
   // Define the prompt sections and their options
   useEffect(() => {
@@ -336,6 +338,50 @@ export const PromptBuilderProvider = ({
     additionalInstructions,
   ]);
 
+  // Auto-save preferences when they change (debounced)
+  useEffect(() => {
+    if (!currentUser || !promptSections) return; // Don't save if no user or sections not loaded
+
+    const savePreferences = async () => {
+      try {
+        const currentConfig = getCurrentConfiguration();
+        await fetch("/api/saveUserPreferences", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: currentUser,
+            promptConfiguration: currentConfig,
+          }),
+        });
+        console.log("Preferences auto-saved");
+      } catch (error) {
+        console.error("Failed to auto-save preferences:", error);
+      }
+    };
+
+    // Debounce the save to avoid too many API calls
+    const timeoutId = setTimeout(savePreferences, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [
+    currentUser,
+    promptSections,
+    tone,
+    technicalDifficulty,
+    languageDifficulty,
+    answerLength,
+    instructionFormat,
+    specifyDevices,
+    selectedDevices,
+    computerType,
+    tabletType,
+    mobileType,
+    browser,
+    additionalInstructions,
+    getCurrentConfiguration,
+  ]);
+
   // Generate system prompt based on settings
   const generateSystemPrompt = (): string => {
     let prompt = "";
@@ -446,6 +492,7 @@ export const PromptBuilderProvider = ({
         additionalInstructions,
         setAdditionalInstructions,
         getPromptConfigHash,
+        setCurrentUser,
       }}
     >
       {children}

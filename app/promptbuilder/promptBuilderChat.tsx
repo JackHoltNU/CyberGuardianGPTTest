@@ -86,6 +86,7 @@ const PromptBuilderChat = ({ session }: Props) => {
     getCurrentConfiguration,
     applyConfiguration,
     getPromptConfigHash,
+    setCurrentUser,
   } = usePromptBuilder();
 
   // Local state for chat UI
@@ -103,6 +104,7 @@ const PromptBuilderChat = ({ session }: Props) => {
   const [initialPromptProcessed, setInitialPromptProcessed] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [checkingSurveys, setCheckingSurveys] = useState(true);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
 
   // History sidebar state
@@ -193,6 +195,28 @@ const PromptBuilderChat = ({ session }: Props) => {
     const checkSurveysAndSetUser = async () => {
       if (session?.user?.name) {
         setUser(session.user.name);
+        setCurrentUser(session.user.name); // Set user for auto-save
+        
+        // Load existing user preferences (only once)
+        if (!preferencesLoaded) {
+          try {
+            const prefsResponse = await fetch(`/api/getUserPreferences?username=${encodeURIComponent(session.user.name)}`);
+            if (prefsResponse.ok) {
+              const prefsData = await prefsResponse.json();
+              if (prefsData.preferences) {
+                applyConfiguration({
+                  ...prefsData.preferences,
+                  id: "loaded-preferences"
+                });
+                console.log("User preferences loaded");
+              }
+            }
+            setPreferencesLoaded(true);
+          } catch (error) {
+            console.warn('Could not load user preferences:', error);
+            setPreferencesLoaded(true);
+          }
+        }
         
         // Check for pending surveys before allowing chat access
         try {
@@ -233,7 +257,7 @@ const PromptBuilderChat = ({ session }: Props) => {
     };
 
     checkSurveysAndSetUser();
-  }, [session, setUser, router]);
+  }, [session, setUser, setCurrentUser, router, preferencesLoaded]);
 
   // Load chats after user is set
   useEffect(() => {
