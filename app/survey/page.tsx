@@ -35,58 +35,57 @@ const SurveyPage = () => {
         if (sessionResponse.ok) {
           const sessionData = await sessionResponse.json();
           if (sessionData?.user?.name) {
-            setUsername(sessionData.user.name);
+            const currentUsername = sessionData.user.name;
+            setUsername(currentUsername);
+
+            // Get user's current study day
+            let currentStudyDay = 1;
+            try {
+              const progressResponse = await fetch(`/api/getUserProgress?username=${encodeURIComponent(currentUsername)}`);
+              if (progressResponse.ok) {
+                const progressData = await progressResponse.json();
+                currentStudyDay = progressData.userProgress?.currentDay || 1;
+              }
+            } catch (error) {
+              console.warn('Could not fetch user progress, using day 1');
+            }
+            setStudyDay(currentStudyDay);
+
+            // Get surveys for this user and study day
+            console.log(`Fetching surveys for studyDay=${currentStudyDay}`);
+            let fetchedSurveys = [];
+            try {
+              const surveyResponse = await fetch(`/api/getActiveSurveys?studyDay=${currentStudyDay}&isStudyParticipant=true&username=${encodeURIComponent(currentUsername)}`);
+              console.log('Survey response status:', surveyResponse.status);
+              if (surveyResponse.ok) {
+                const surveyData = await surveyResponse.json();
+                fetchedSurveys = surveyData.surveys || [];
+                console.log('Fetched surveys:', fetchedSurveys);
+              } else {
+                console.error('Failed to fetch surveys, status:', surveyResponse.status);
+                const errorText = await surveyResponse.text();
+                console.error('Error response:', errorText);
+              }
+            } catch (error) {
+              console.error('Error fetching surveys:', error);
+            }
+
+            setSurveys(fetchedSurveys);
+
+            // If no surveys, redirect immediately
+            if (fetchedSurveys.length === 0) {
+              console.log('No surveys found, redirecting...');
+              handleSurveyComplete();
+              return;
+            }
+
+            setLoading(false);
           } else {
             // Redirect to login if no session
             router.push('/api/auth/signin');
             return;
           }
         }
-
-        // Get user's current study day
-        let currentStudyDay = 1;
-        if (username) {
-          try {
-            const progressResponse = await fetch(`/api/getUserProgress?username=${encodeURIComponent(username)}`);
-            if (progressResponse.ok) {
-              const progressData = await progressResponse.json();
-              currentStudyDay = progressData.userProgress?.currentDay || 1;
-            }
-          } catch (error) {
-            console.warn('Could not fetch user progress, using day 1');
-          }
-        }
-        setStudyDay(currentStudyDay);
-
-        // Get surveys for this user and study day
-        console.log(`Fetching surveys for studyDay=${currentStudyDay}`);
-        let fetchedSurveys = [];
-        try {
-          const surveyResponse = await fetch(`/api/getActiveSurveys?studyDay=${currentStudyDay}&isStudyParticipant=true&username=${encodeURIComponent(username)}`);
-          console.log('Survey response status:', surveyResponse.status);
-          if (surveyResponse.ok) {
-            const surveyData = await surveyResponse.json();
-            fetchedSurveys = surveyData.surveys || [];
-            console.log('Fetched surveys:', fetchedSurveys);
-          } else {
-            console.error('Failed to fetch surveys, status:', surveyResponse.status);
-            const errorText = await surveyResponse.text();
-            console.error('Error response:', errorText);
-          }
-        } catch (error) {
-          console.error('Error fetching surveys:', error);
-        }
-
-        setSurveys(fetchedSurveys);
-
-        // If no surveys, redirect immediately
-        if (fetchedSurveys.length === 0) {
-          console.log('No surveys found, redirecting...');
-          handleSurveyComplete();
-          return;
-        }
-
-        setLoading(false);
       } catch (error) {
         console.error('Error initializing survey:', error);
         // On error, skip surveys and continue
