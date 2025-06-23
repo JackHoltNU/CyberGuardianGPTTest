@@ -979,7 +979,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             </button>
             <button
               className={styles["pb-header-action-btn"]}
-              onClick={resetChat}
+              onClick={handleNewChat}
               aria-label="New Chat"
             >
               <Plus size={24} />
