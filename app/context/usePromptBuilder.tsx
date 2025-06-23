@@ -166,6 +166,12 @@ export const PromptBuilderProvider = ({
     setTechnicalDifficulty(config.technicalDifficulty);
     setInstructionFormat(config.instructionFormat);
     setSpecifyDevices(config.specifyDevices);
+    setSelectedDevices(config.selectedDevices || []);
+    setComputerType(config.computerType || "");
+    setTabletType(config.tabletType || "");
+    setMobileType(config.mobileType || "");
+    setBrowser(config.browser || "");
+    setAdditionalInstructions(config.additionalInstructions || "");
   };
 
   // Define the prompt sections and their options

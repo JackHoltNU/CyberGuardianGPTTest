@@ -16,12 +16,12 @@ const feedbackSchema = new mongoose.Schema({
 
 const promptConfigSchema = new mongoose.Schema({
   id: String,
-  personality: String,
+  tone: String,
   languageDifficulty: String,
   answerLength: String,
   technicalDifficulty: String,
   instructionFormat: String,
-  personalityLabel: String,
+  toneLabel: String,
   languageDifficultyLabel: String,
   answerLengthLabel: String,
   technicalDifficultyLabel: String,
