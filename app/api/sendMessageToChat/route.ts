@@ -130,31 +130,53 @@ export const POST = async (req: Request) => {
       let iterations = 0;
       let jsonResponse: any;
 
+      // Initial attempt
       try {
-        jsonResponse = JSON.parse(responseMessage);
-        if (jsonResponse.response) {
-          successfulResponse = true;
+        // Check if it's an OpenAI error message
+        if (responseMessage.startsWith('An error') || responseMessage.startsWith('Error:')) {
+          console.error(`OpenAI returned error: ${responseMessage}`);
+          successfulResponse = false;
+        } else {
+          jsonResponse = JSON.parse(responseMessage);
+          if (jsonResponse.response) {
+            successfulResponse = true;
+          }
         }
       } catch (error) {
         console.error(`Failed to parse JSON message`);
         successfulResponse = false;
       }
 
-      // while(!successfulResponse && iterations < 3){
-      //   try {
-      //     completion = await getCompletion(messagesParam, config.primary);
-      //     responseMessage = completion.choices[0].message.content ?? "";
-      //     jsonResponse = JSON.parse(responseMessage);
-      //     if(jsonResponse.response){
-      //       successfulResponse = true;
-      //     } else {
-      //       iterations ++;
-      //     }
-      //   } catch (error) {
-      //     console.error(`Failed to parse JSON message`);
-      //     iterations ++;
-      //   }
-      // }
+      // Retry logic for failed attempts
+      while(!successfulResponse && iterations < 3){
+        iterations++;
+        console.log(`Retrying OpenAI request, attempt ${iterations}/3`);
+        
+        try {
+          completion = await getCompletion(messagesParam, model);
+          responseMessage = completion.choices[0].message.content ?? "";
+          
+          // Check if it's an OpenAI error message
+          if (responseMessage.startsWith('An error') || responseMessage.startsWith('Error:')) {
+            console.error(`OpenAI returned error on retry ${iterations}: ${responseMessage}`);
+            continue; // Try again
+          }
+          
+          jsonResponse = JSON.parse(responseMessage);
+          if(jsonResponse.response){
+            successfulResponse = true;
+          }
+        } catch (error) {
+          console.error(`Failed to parse JSON message on retry ${iterations}`);
+          // Continue to next iteration or fail if max retries reached
+        }
+      }
+
+      // If still not successful after retries, throw error
+      if (!successfulResponse) {
+        console.error("Failed to get valid response after 3 retries");
+        throw new Error("OpenAI service temporarily unavailable - please try again");
+      }
 
       title = jsonResponse.title;
       response = jsonResponse.response;
@@ -164,8 +186,8 @@ export const POST = async (req: Request) => {
         tags = tagsRaw.split(",");
       }
     } catch (error: any) {
-      console.error("Failed to parse JSON message, returning raw response");
-      return new Response("Could not create chat completion", {
+      console.error("Failed to get valid response from OpenAI:", error.message);
+      return new Response(error.message || "Could not create chat completion", {
         status: 500,
       });
     }
