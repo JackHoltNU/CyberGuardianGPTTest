@@ -7,6 +7,7 @@ import React, {
   useState,
   ReactNode,
   useEffect,
+  useCallback,
 } from "react";
 import { PromptConfiguration } from "../types/types";
 
@@ -115,7 +116,7 @@ export const PromptBuilderProvider = ({
     ].join("|");
   };
 
-  const getCurrentConfiguration = (): PromptConfiguration => {
+  const getCurrentConfiguration = useCallback((): PromptConfiguration => {
     const getDisplayLabel = (sectionId: string, optionId: string): string => {
       const section = promptSections?.find((s) => s.id === sectionId);
       const option = section?.options.find((o) => o.id === optionId);
@@ -157,7 +158,22 @@ export const PromptBuilderProvider = ({
     promptConfig.id = id;
 
     return promptConfig;
-  };
+  }, [
+    promptSections,
+    tone,
+    languageDifficulty,
+    answerLength,
+    technicalDifficulty,
+    instructionFormat,
+    specifyDevices,
+    selectedDevices,
+    computerType,
+    tabletType,
+    mobileType,
+    browser,
+    additionalInstructions,
+    getPromptConfigHash
+  ]);
 
   const applyConfiguration = (config: PromptConfiguration) => {
     setTone(config.tone);

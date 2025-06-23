@@ -578,6 +578,11 @@ const PromptBuilderChat = ({ session }: Props) => {
     resetChat(); // Reset the chat
   };
 
+  const handleGoHome = () => {
+    resetChat(); // Clear chat state before going home
+    router.push("/");
+  };
+
   const handlePositiveFeedback = () => {
     setBreakpoint(false);
   };
@@ -790,7 +795,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             <ChevronRight size={24} />
           </button>
           <button
-            onClick={() => router.push("/")}
+            onClick={handleGoHome}
             className={styles["pb-header-action-btn"]}
             aria-label="Go to home"
             style={{ marginBottom: "0.5rem" }}
@@ -862,7 +867,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             )}
             {isShowTitle ? (
               <button
-                onClick={() => router.push("/")}
+                onClick={handleGoHome}
                 className="
                   flex items-center gap-2
                   px-3 py-2
@@ -882,7 +887,7 @@ const PromptBuilderChat = ({ session }: Props) => {
               </button>
             ) : !isMobile && (
               <button
-                onClick={() => router.push("/")}
+                onClick={handleGoHome}
                 className={styles["pb-header-action-btn"]}
                 aria-label="Go to home"
               >
@@ -893,7 +898,7 @@ const PromptBuilderChat = ({ session }: Props) => {
             {isMobile && (
               <>
                 <button
-                  onClick={() => router.push("/")}
+                  onClick={handleGoHome}
                   className={styles["pb-header-action-btn"]}
                   aria-label="Go to home"
                 >
