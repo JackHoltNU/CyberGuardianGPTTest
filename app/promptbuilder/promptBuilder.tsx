@@ -96,19 +96,19 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
   ];
 
   const computerOptions = [
-    { id: "windows", label: "Windows" },
-    { id: "apple", label: "Apple" },
-    { id: "chromebook", label: "Chromebook" },
+    { id: "windows", label: "Microsoft Windows" },
+    { id: "apple", label: "Apple macOS" },
+    { id: "chromebook", label: "Google Chromebook" },
     { id: "other", label: "Other" },
   ];
   const tabletOptions = [
-    { id: "ios", label: "iOS" },
-    { id: "android", label: "Android" },
+    { id: "ios", label: "Apple iOS" },
+    { id: "android", label: "Google Android" },
     { id: "other", label: "Other" },
   ];
   const mobileOptions = [
-    { id: "ios", label: "iOS" },
-    { id: "android", label: "Android" },
+    { id: "ios", label: "Apple iOS" },
+    { id: "android", label: "Google Android" },
     { id: "other", label: "Other" },
   ];
   const browserOptions = [
@@ -183,7 +183,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({
               onChange={setBrowser}
             />
             <TextInputBox
-              label="Additional Instructions"
+              label="Additional Details"
               value={additionalInstructions}
               onChange={setAdditionalInstructions}
               placeholder="Enter any extra details here..."
