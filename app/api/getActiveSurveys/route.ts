@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
         });
 
       return {
-        id: template._id.toString(),
+        id: template.name,
         type: 'sorting',
         config: {
           id: template.name,
