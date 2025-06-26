@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     // Add survey details manually
     const responsesWithSurveyInfo = await Promise.all(
       responses.map(async (response) => {
-        const surveyTemplate = await SurveyTemplate.findOne({ name: response.surveyId }).lean();
+        const surveyTemplate = await SurveyTemplate.findOne({ name: response.surveyId }, 'name title').lean() as { name: string; title: string } | null;
         return {
           ...response,
           surveyInfo: surveyTemplate ? { name: surveyTemplate.name, title: surveyTemplate.title } : null
