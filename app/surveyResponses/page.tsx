@@ -60,7 +60,8 @@ export default function SurveyResponsesPage() {
       setData(result);
       
       // Extract unique users and select all by default
-      const users = [...new Set(result.responses.map((r: SurveyResponse) => r.username))];
+      const userSet = new Set(result.responses.map((r: SurveyResponse) => r.username));
+      const users = Array.from(userSet);
       setAllUsers(users);
       if (selectedUsers.size === 0) {
         setSelectedUsers(new Set(users));
@@ -134,7 +135,7 @@ export default function SurveyResponsesPage() {
   ).length : 0;
 
   // Count users who have responses for the current filters (not just all users)
-  const usersWithResponses = data ? [...new Set(data.responses.map(r => r.username))] : [];
+  const usersWithResponses = data ? Array.from(new Set(data.responses.map(r => r.username))) : [];
   const selectedUsersWithResponses = usersWithResponses.filter(user => selectedUsers.has(user));
 
   return (
