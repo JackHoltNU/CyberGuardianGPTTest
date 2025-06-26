@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
     if (surveyId) {
       // surveyId in responses contains the survey name, not _id
       // So we need to find the survey name from the _id
-      const survey = await SurveyTemplate.findById(surveyId).lean();
-      if (survey) {
+      const survey = await SurveyTemplate.findById(surveyId, 'name').lean();
+      if (survey && survey.name) {
         query.surveyId = survey.name;
       } else {
         // If survey not found, return empty results
