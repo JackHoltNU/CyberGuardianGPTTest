@@ -143,7 +143,8 @@ export const POST = async (req: Request) => {
           }
         }
       } catch (error) {
-        console.error(`Failed to parse JSON message`);
+        console.error(`Failed to parse JSON message. OpenAI response was:`, responseMessage);
+        console.error('JSON parse error:', error);
         successfulResponse = false;
       }
 
@@ -167,7 +168,8 @@ export const POST = async (req: Request) => {
             successfulResponse = true;
           }
         } catch (error) {
-          console.error(`Failed to parse JSON message on retry ${iterations}`);
+          console.error(`Failed to parse JSON message on retry ${iterations}. OpenAI response was:`, responseMessage);
+          console.error('JSON parse error on retry:', error);
           // Continue to next iteration or fail if max retries reached
         }
       }

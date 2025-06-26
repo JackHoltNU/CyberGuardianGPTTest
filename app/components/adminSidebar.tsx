@@ -53,6 +53,11 @@ const AdminSidebar = ({ selected }: Props) => {
               Survey Management
             </Link>
           </li>
+          <li className={`item ${selected == 8 && "item--selected"}`}>
+            <Link href="/surveyResponses" className="item__button">
+              Survey Responses
+            </Link>
+          </li>
           <li className={`item ${selected == 4 && "item--selected"}`}>
             <Link href="/" className="item__button">
               Go To Chat
