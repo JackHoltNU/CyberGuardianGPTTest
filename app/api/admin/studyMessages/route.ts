@@ -21,8 +21,8 @@ export async function GET(request: NextRequest) {
     const date = searchParams.get('date'); // YYYY-MM-DD format
     
     // Get study participants
-    const studyParticipants = await UserProgress.find({}, { username: 1, _id: 0 }).lean() as { username: string }[];
-    const studyUsernames = studyParticipants.map((p: { username: string }) => p.username);
+    const studyParticipants = await UserProgress.find({}, { username: 1, _id: 0 }).lean();
+    const studyUsernames = studyParticipants.map((p: any) => p.username as string);
     
     if (threadID) {
       // Return specific conversation
