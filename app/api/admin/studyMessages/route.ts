@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     
     // Get study participants
     const studyParticipants = await UserProgress.find({}, { username: 1, _id: 0 }).lean() as { username: string }[];
-    const studyUsernames = studyParticipants.map(p => p.username);
+    const studyUsernames = studyParticipants.map((p: { username: string }) => p.username);
     
     if (threadID) {
       // Return specific conversation
