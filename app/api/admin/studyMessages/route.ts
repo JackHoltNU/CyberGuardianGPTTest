@@ -68,11 +68,11 @@ export async function GET(request: NextRequest) {
     })
     .sort({ latestTimestamp: -1 })
     .limit(100)
-    .lean() as { threadID: string; title: string; user: string; latestTimestamp: Date }[];
+    .lean();
     
     // Enhance with initial user question
     const enhancedConversations = await Promise.all(
-      conversations.map(async (conv) => {
+      conversations.map(async (conv: any) => {
         // Get the first user message (initial question)
         const fullConv = await Chat.findOne(
           { threadID: conv.threadID },
