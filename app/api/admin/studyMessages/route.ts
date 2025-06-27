@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     
     if (threadID) {
       // Return specific conversation
-      const conversation = await Chat.findOne({ threadID }).lean();
+      const conversation = await Chat.findOne({ threadID }).lean() as any;
       if (!conversation) {
         return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
       }
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     })
     .sort({ latestTimestamp: -1 })
     .limit(100)
-    .lean();
+    .lean() as { threadID: string; title: string; user: string; latestTimestamp: Date }[];
     
     // Enhance with initial user question
     const enhancedConversations = await Promise.all(
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         const fullConv = await Chat.findOne(
           { threadID: conv.threadID },
           { 'messages': 1 }
-        ).lean();
+        ).lean() as { messages: { sender: string; text: string }[] } | null;
         
         const firstUserMessage = fullConv?.messages?.find(msg => msg.sender === 'user');
         
