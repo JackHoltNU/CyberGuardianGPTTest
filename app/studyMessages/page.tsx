@@ -41,6 +41,7 @@ export default function StudyMessagesPage() {
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [messageLoading, setMessageLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   
   // Filters
   const [selectedDate, setSelectedDate] = useState<string>('');
@@ -70,9 +71,10 @@ export default function StudyMessagesPage() {
         setConversations(filteredConversations);
         setStudyParticipants(allParticipants);
         
-        // Initialize selected users to all participants if none selected
-        if (selectedUsers.size === 0) {
+        // Only auto-select all participants on initial load
+        if (initialLoad && selectedUsers.size === 0) {
           setSelectedUsers(new Set(allParticipants));
+          setInitialLoad(false);
         }
       } else {
         console.error('Error fetching conversations:', result.error);
