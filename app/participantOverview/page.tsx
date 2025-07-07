@@ -514,9 +514,9 @@ export default function ParticipantOverviewPage() {
                                 <span>user changed </span>
                                 <span className="font-medium">{change.field}</span>
                                 <span> from </span>
-                                <span className="font-medium text-red-600">"{change.oldLabel}"</span>
+                                <span className="font-medium text-red-600">&quot;{change.oldLabel}&quot;</span>
                                 <span> to </span>
-                                <span className="font-medium text-green-600">"{change.newLabel}"</span>
+                                <span className="font-medium text-green-600">&quot;{change.newLabel}&quot;</span>
                               </div>
                               <div className="text-xs text-gray-500 mt-1">
                                 {change.date.toLocaleTimeString()}
