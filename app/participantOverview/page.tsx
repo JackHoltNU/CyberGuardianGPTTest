@@ -34,6 +34,21 @@ interface ConversationDetails {
   messages: Message[];
 }
 
+interface SurveyComparison {
+  surveyId: string;
+  surveyTitle: string;
+  day2: {
+    response: Array<{id: string; text: string}>;
+    completedAt: string;
+    timeSpent?: number;
+  } | null;
+  day14: {
+    response: Array<{id: string; text: string}>;
+    completedAt: string;
+    timeSpent?: number;
+  } | null;
+}
+
 interface PromptConfiguration {
   tone: string;
   languageDifficulty: string;
@@ -75,6 +90,9 @@ export default function ParticipantOverviewPage() {
     }>;
   }>({ firstConfig: null, changes: [] });
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [surveyComparisons, setSurveyComparisons] = useState<SurveyComparison[]>([]);
+  const [selectedSurvey, setSelectedSurvey] = useState<string>('');
+  const [surveyLoading, setSurveyLoading] = useState(false);
 
   useEffect(() => {
     fetchStudyParticipants();
@@ -85,11 +103,14 @@ export default function ParticipantOverviewPage() {
       fetchConversations();
       fetchUserSettings();
       fetchConfigurationHistory();
+      fetchSurveyComparisons();
     } else {
       setConversations([]);
       setSelectedConversation(null);
       setUserSettings(null);
       setConfigHistory({ firstConfig: null, changes: [] });
+      setSurveyComparisons([]);
+      setSelectedSurvey('');
     }
   }, [selectedUser]);
 
@@ -287,6 +308,32 @@ export default function ParticipantOverviewPage() {
     }
   };
 
+  const fetchSurveyComparisons = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      setSurveyLoading(true);
+      const response = await fetch(`/api/getParticipantSurveyComparison?username=${encodeURIComponent(selectedUser)}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSurveyComparisons(data.surveys || []);
+        // Auto-select first survey if available
+        if (data.surveys && data.surveys.length > 0) {
+          setSelectedSurvey(data.surveys[0].surveyId);
+        }
+      } else {
+        console.error('Error fetching survey comparisons:', data.error);
+        setSurveyComparisons([]);
+      }
+    } catch (error) {
+      console.error('Error fetching survey comparisons:', error);
+      setSurveyComparisons([]);
+    } finally {
+      setSurveyLoading(false);
+    }
+  };
+
   const fetchConversationDetails = async (threadID: string) => {
     try {
       setMessageLoading(true);
@@ -313,6 +360,19 @@ export default function ParticipantOverviewPage() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const calculatePositionChange = (day2Ranking: Array<{id: string; text: string}>, day14Ranking: Array<{id: string; text: string}>, itemId: string) => {
+    const day2Position = day2Ranking.findIndex(item => item.id === itemId);
+    const day14Position = day14Ranking.findIndex(item => item.id === itemId);
+    
+    if (day2Position === -1 || day14Position === -1) {
+      return null; // Item not found in one of the rankings
+    }
+    
+    // Position change: positive means moved up (lower position number = higher rank)
+    const change = day2Position - day14Position;
+    return change;
   };
 
 
@@ -352,6 +412,152 @@ export default function ParticipantOverviewPage() {
               )}
             </div>
           </div>
+
+          {/* Survey Comparison */}
+          {selectedUser && (
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h2 className="text-lg font-semibold mb-4 text-gray-800">Survey Comparison (Day 2 vs Day 14)</h2>
+              
+              {surveyLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-gray-600">Loading survey data...</div>
+                </div>
+              ) : surveyComparisons.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">
+                  No surveys found for this participant.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Survey Selection Dropdown */}
+                  <div className="flex items-center gap-4">
+                    <label htmlFor="survey-select" className="text-sm font-medium text-gray-700">
+                      Select Survey:
+                    </label>
+                    <select
+                      id="survey-select"
+                      className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[300px]"
+                      value={selectedSurvey}
+                      onChange={(e) => setSelectedSurvey(e.target.value)}
+                    >
+                      <option value="">Choose a survey...</option>
+                      {surveyComparisons.map((survey) => (
+                        <option key={survey.surveyId} value={survey.surveyId}>
+                          {survey.surveyTitle}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Survey Comparison Display */}
+                  {selectedSurvey && (() => {
+                    const comparison = surveyComparisons.find(s => s.surveyId === selectedSurvey);
+                    if (!comparison) return null;
+
+                    const hasDay2 = comparison.day2 !== null;
+                    const hasDay14 = comparison.day14 !== null;
+
+                    if (!hasDay2 && !hasDay14) {
+                      return (
+                        <div className="text-center text-gray-500 py-8">
+                          No responses found for this survey on days 2 or 14.
+                        </div>
+                      );
+                    }
+
+                    // Check if items match between days (only if both exist)
+                    let itemsMatch = true;
+                    if (hasDay2 && hasDay14) {
+                      const day2Items = [...comparison.day2!.response].map(item => item.id).sort();
+                      const day14Items = [...comparison.day14!.response].map(item => item.id).sort();
+                      itemsMatch = JSON.stringify(day2Items) === JSON.stringify(day14Items);
+                    }
+
+                    if (!itemsMatch) {
+                      return (
+                        <div className="text-center text-red-500 py-8">
+                          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <h3 className="font-medium text-red-800 mb-2">Error: Survey Items Don't Match</h3>
+                            <p className="text-red-700">
+                              The survey items are different between day 2 and day 14 responses. 
+                              This may indicate a survey configuration change or data inconsistency.
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Day 2 Results */}
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h3 className="font-medium text-gray-800 mb-3">Day 2 Results</h3>
+                          {hasDay2 ? (
+                            <div className="space-y-2">
+                              {comparison.day2!.response.map((item, index) => (
+                                <div key={item.id} className="flex items-center gap-2 p-2 bg-white rounded border">
+                                  <span className="font-medium text-gray-600 min-w-[24px]">{index + 1}.</span>
+                                  <span className="text-gray-900">{item.text}</span>
+                                </div>
+                              ))}
+                              <div className="text-xs text-gray-500 mt-2">
+                                Completed: {formatDate(comparison.day2!.completedAt)}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-gray-500 italic">Survey not taken</div>
+                          )}
+                        </div>
+
+                        {/* Day 14 Results */}
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h3 className="font-medium text-gray-800 mb-3">Day 14 Results</h3>
+                          {hasDay14 ? (
+                            <div className="space-y-2">
+                              {comparison.day14!.response.map((item, index) => {
+                                let changeIndicator = null;
+                                if (hasDay2 && hasDay14) {
+                                  const change = calculatePositionChange(
+                                    comparison.day2!.response,
+                                    comparison.day14!.response,
+                                    item.id
+                                  );
+                                  if (change !== null && change !== 0) {
+                                    const isImprovement = change > 0;
+                                    changeIndicator = (
+                                      <span className={`text-xs font-medium px-2 py-1 rounded ${
+                                        isImprovement 
+                                          ? 'bg-green-100 text-green-800' 
+                                          : 'bg-red-100 text-red-800'
+                                      }`}>
+                                        {isImprovement ? '+' : ''}{change}
+                                      </span>
+                                    );
+                                  }
+                                }
+                                
+                                return (
+                                  <div key={item.id} className="flex items-center gap-2 p-2 bg-white rounded border">
+                                    <span className="font-medium text-gray-600 min-w-[24px]">{index + 1}.</span>
+                                    <span className="text-gray-900 flex-1">{item.text}</span>
+                                    {changeIndicator}
+                                  </div>
+                                );
+                              })}
+                              <div className="text-xs text-gray-500 mt-2">
+                                Completed: {formatDate(comparison.day14!.completedAt)}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-gray-500 italic">Survey not taken</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Prompt Builder Settings */}
           {selectedUser && (
