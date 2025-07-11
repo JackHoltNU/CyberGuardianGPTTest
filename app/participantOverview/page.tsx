@@ -476,7 +476,7 @@ export default function ParticipantOverviewPage() {
                       return (
                         <div className="text-center text-red-500 py-8">
                           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <h3 className="font-medium text-red-800 mb-2">Error: Survey Items Don't Match</h3>
+                            <h3 className="font-medium text-red-800 mb-2">Error: Survey Items Do Not Match</h3>
                             <p className="text-red-700">
                               The survey items are different between day 2 and day 14 responses. 
                               This may indicate a survey configuration change or data inconsistency.
