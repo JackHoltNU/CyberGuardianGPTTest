@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminSidebar from '@/app/components/adminSidebar';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import styles from '../styles/promptbuilder.module.css';
+import MessageFrequencyChart from '@/app/components/messageFrequencyChart';
 
 interface StudyParticipant {
   username: string;
@@ -47,6 +48,20 @@ interface SurveyComparison {
     completedAt: string;
     timeSpent?: number;
   } | null;
+}
+
+interface ConversationStarter {
+  _id: string;
+  text: string;
+  isActive: boolean;
+}
+
+interface DailyMessageData {
+  date: string;
+  organicMessages: number;
+  suggestedMessages: number;
+  organicConversations: number;
+  suggestedConversations: number;
 }
 
 interface PromptConfiguration {
@@ -93,13 +108,23 @@ export default function ParticipantOverviewPage() {
   const [surveyComparisons, setSurveyComparisons] = useState<SurveyComparison[]>([]);
   const [selectedSurvey, setSelectedSurvey] = useState<string>('');
   const [surveyLoading, setSurveyLoading] = useState(false);
+  const [conversationStarters, setConversationStarters] = useState<ConversationStarter[]>([]);
+  const [dailyMessageData, setDailyMessageData] = useState<DailyMessageData[]>([]);
+  const [chartLoading, setChartLoading] = useState(false);
 
   useEffect(() => {
     fetchStudyParticipants();
+    fetchConversationStarters();
   }, []);
 
   useEffect(() => {
     if (selectedUser) {
+      // Clear all data immediately when switching users
+      setConversations([]);
+      setSelectedConversation(null);
+      setDailyMessageData([]);
+      setChartLoading(true);
+      
       fetchConversations();
       fetchUserSettings();
       fetchConfigurationHistory();
@@ -111,8 +136,10 @@ export default function ParticipantOverviewPage() {
       setConfigHistory({ firstConfig: null, changes: [] });
       setSurveyComparisons([]);
       setSelectedSurvey('');
+      setDailyMessageData([]);
+      setChartLoading(false);
     }
-  }, [selectedUser]);
+  }, [selectedUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchStudyParticipants = async () => {
     try {
@@ -124,6 +151,18 @@ export default function ParticipantOverviewPage() {
       console.error('Error fetching study participants:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchConversationStarters = async () => {
+    try {
+      const response = await fetch('/api/conversationStarters?activeOnly=false');
+      const data = await response.json();
+      if (data.success) {
+        setConversationStarters(data.starters || []);
+      }
+    } catch (error) {
+      console.error('Error fetching conversation starters:', error);
     }
   };
 
@@ -146,6 +185,130 @@ export default function ParticipantOverviewPage() {
       setLoading(false);
     }
   };
+
+  // Process daily message data when conversations change
+  useEffect(() => {
+    const abortController = new AbortController();
+    
+    const processData = async () => {
+      if (!selectedUser) {
+        setDailyMessageData([]);
+        setChartLoading(false);
+        return;
+      }
+
+      if (conversations.length === 0) {
+        setDailyMessageData([]);
+        setChartLoading(false);
+        return;
+      }
+
+      setChartLoading(true);
+      try {
+        // Fetch detailed messages for all conversations
+        const conversationDetails: ConversationDetails[] = [];
+        
+        for (const conv of conversations) {
+          // Check if aborted before each fetch
+          if (abortController.signal.aborted) {
+            console.log('Chart processing aborted');
+            return;
+          }
+          
+          const response = await fetch(`/api/admin/studyMessages?threadID=${conv.threadID}`, {
+            signal: abortController.signal
+          });
+          const data = await response.json();
+          
+          if (response.ok && data.conversation) {
+            conversationDetails.push(data.conversation);
+          }
+        }
+
+        // Check if aborted before processing
+        if (abortController.signal.aborted) {
+          console.log('Chart processing aborted');
+          return;
+        }
+
+        // Group data by date
+        const dailyData: { [date: string]: DailyMessageData } = {};
+
+        conversationDetails.forEach(conv => {
+          const isFromSuggested = isFromSuggestedPrompt(conv.messages[0]?.text || '');
+          
+          conv.messages.forEach(message => {
+            const messageDate = new Date(message.timestamp).toISOString().split('T')[0];
+            
+            if (!dailyData[messageDate]) {
+              dailyData[messageDate] = {
+                date: messageDate,
+                organicMessages: 0,
+                suggestedMessages: 0,
+                organicConversations: 0,
+                suggestedConversations: 0
+              };
+            }
+
+            // Count messages
+            if (isFromSuggested) {
+              dailyData[messageDate].suggestedMessages++;
+            } else {
+              dailyData[messageDate].organicMessages++;
+            }
+          });
+
+          // Count conversations (only once per conversation)
+          if (conv.messages.length > 0) {
+            const firstMessageDate = new Date(conv.messages[0].timestamp).toISOString().split('T')[0];
+            if (dailyData[firstMessageDate]) {
+              if (isFromSuggested) {
+                dailyData[firstMessageDate].suggestedConversations++;
+              } else {
+                dailyData[firstMessageDate].organicConversations++;
+              }
+            }
+          }
+        });
+
+        // Final abort check before setting data
+        if (abortController.signal.aborted) {
+          console.log('Chart processing aborted');
+          return;
+        }
+
+        // Convert to array and sort by date
+        const sortedData = Object.values(dailyData).sort((a, b) => 
+          new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+
+        setDailyMessageData(sortedData);
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.log('Chart processing aborted');
+          return;
+        }
+        console.error('Error processing daily message data:', error);
+        setDailyMessageData([]);
+      } finally {
+        if (!abortController.signal.aborted) {
+          setChartLoading(false);
+        }
+      }
+    };
+
+    if (conversationStarters.length > 0) {
+      // Clear chart data immediately when processing starts
+      setDailyMessageData([]);
+      setChartLoading(true);
+      processData();
+    }
+
+    // Cleanup function to abort ongoing operations
+    return () => {
+      abortController.abort();
+    };
+  }, [conversations, conversationStarters, selectedUser, isFromSuggestedPrompt]);
 
   const fetchUserSettings = async () => {
     if (!selectedUser) return;
@@ -375,6 +538,11 @@ export default function ParticipantOverviewPage() {
     return change;
   };
 
+  const isFromSuggestedPrompt = useCallback((initialQuestion: string) => {
+    return conversationStarters.some(starter => starter.text === initialQuestion);
+  }, [conversationStarters]);
+
+
 
   return (
     <div className="flex flex-col w-screen h-screen items-center">
@@ -476,7 +644,7 @@ export default function ParticipantOverviewPage() {
                       return (
                         <div className="text-center text-red-500 py-8">
                           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <h3 className="font-medium text-red-800 mb-2">Error: Survey Items Don't Match</h3>
+                            <h3 className="font-medium text-red-800 mb-2">Error: Survey Items Don&apos;t Match</h3>
                             <p className="text-red-700">
                               The survey items are different between day 2 and day 14 responses. 
                               This may indicate a survey configuration change or data inconsistency.
@@ -556,6 +724,16 @@ export default function ParticipantOverviewPage() {
                   })()}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Message Frequency Chart */}
+          {selectedUser && (
+            <div className="mb-6">
+              <MessageFrequencyChart 
+                data={dailyMessageData} 
+                loading={chartLoading}
+              />
             </div>
           )}
 
@@ -775,7 +953,14 @@ export default function ParticipantOverviewPage() {
                         selectedConversation?.threadID === conv.threadID ? 'bg-blue-50 border-blue-200' : ''
                       }`}
                     >
-                      <div className="font-medium text-gray-900 mb-1">{conv.title}</div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="font-medium text-gray-900">{conv.title}</div>
+                        {isFromSuggestedPrompt(conv.initialQuestion) && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                            suggested prompt
+                          </span>
+                        )}
+                      </div>
                       <div className="text-sm text-gray-600 mb-2 line-clamp-2">
                         {conv.initialQuestion}
                       </div>
