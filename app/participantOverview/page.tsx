@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import styles from '../styles/promptbuilder.module.css';
 import MessageFrequencyChart from '@/app/components/messageFrequencyChart';
+import { AnyARecord } from 'dns';
 
 interface StudyParticipant {
   username: string;
@@ -147,7 +148,7 @@ export default function ParticipantOverviewPage() {
       const data = await response.json();
       const usernames = data.participants?.map((p: any) => p.username) || [];
       setStudyParticipants(usernames);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching study participants:', error);
     } finally {
       setLoading(false);
@@ -185,6 +186,11 @@ export default function ParticipantOverviewPage() {
       setLoading(false);
     }
   };
+
+  const isFromSuggestedPrompt = useCallback((initialQuestion: string) => {
+    return conversationStarters.some(starter => starter.text === initialQuestion);
+  }, [conversationStarters]);
+
 
   // Process daily message data when conversations change
   useEffect(() => {
@@ -283,7 +289,7 @@ export default function ParticipantOverviewPage() {
         );
 
         setDailyMessageData(sortedData);
-      } catch (error) {
+      } catch (error: any) {
         if (error.name === 'AbortError') {
           console.log('Chart processing aborted');
           return;
@@ -324,7 +330,7 @@ export default function ParticipantOverviewPage() {
         console.error('Error fetching user settings:', data.error);
         setUserSettings(null);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user settings:', error);
       setUserSettings(null);
     } finally {
@@ -538,10 +544,7 @@ export default function ParticipantOverviewPage() {
     return change;
   };
 
-  const isFromSuggestedPrompt = useCallback((initialQuestion: string) => {
-    return conversationStarters.some(starter => starter.text === initialQuestion);
-  }, [conversationStarters]);
-
+  
 
 
   return (
