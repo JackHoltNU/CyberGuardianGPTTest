@@ -10,6 +10,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const surveyId = searchParams.get('surveyId');
     const studyDay = searchParams.get('studyDay');
+    const compareDay1 = searchParams.get('compareDay1');
+    const compareDay2 = searchParams.get('compareDay2');
     
     // Build query based on filters
     const query: any = {};
@@ -30,6 +32,9 @@ export async function GET(request: NextRequest) {
     }
     if (studyDay) {
       query.studyDay = parseInt(studyDay);
+    } else if (compareDay1 && compareDay2) {
+      // For comparison mode, fetch both days
+      query.studyDay = { $in: [parseInt(compareDay1), parseInt(compareDay2)] };
     }
     
     // Fetch responses (no populate needed since surveyId is just a string)
@@ -60,7 +65,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       responses: responsesWithSurveyInfo,
       surveys: allSurveys,
-      studyDays: allStudyDays.sort((a, b) => a - b)
+      studyDays: allStudyDays.sort((a, b) => a - b),
+      isComparison: !!(compareDay1 && compareDay2),
+      compareDay1: compareDay1 ? parseInt(compareDay1) : null,
+      compareDay2: compareDay2 ? parseInt(compareDay2) : null
     });
     
   } catch (error) {
