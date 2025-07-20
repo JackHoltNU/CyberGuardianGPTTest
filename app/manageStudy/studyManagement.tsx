@@ -24,6 +24,7 @@ const StudyManagement = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [userToRemove, setUserToRemove] = useState("");
   const [exportLoading, setExportLoading] = useState(false);
+  const [wordExportLoading, setWordExportLoading] = useState(false);
 
   useEffect(() => {
     loadAllUsers();
@@ -162,6 +163,51 @@ const StudyManagement = () => {
     setExportLoading(false);
   };
 
+  const exportConversationsWord = async () => {
+    setWordExportLoading(true);
+    try {
+      // Create URL with study participants filter
+      const participantUsernames = studyParticipants.map(p => p.username);
+      const params = new URLSearchParams();
+      if (participantUsernames.length > 0) {
+        params.append('participants', participantUsernames.join(','));
+      }
+
+      const response = await fetch(`/api/admin/exportConversationsWord?${params}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to export Word documents');
+        return;
+      }
+
+      // Create download link
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filename = contentDisposition 
+        ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
+        : `study_conversations_word_export_${new Date().toISOString().split('T')[0]}.zip`;
+      
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Error exporting Word documents:', error);
+      alert('Failed to export Word documents');
+    }
+    setWordExportLoading(false);
+  };
+
   return (
     <main className="users">
       <h1 className="text-2xl font-bold mb-6 text-gray-800">Study Management</h1>
@@ -253,42 +299,75 @@ const StudyManagement = () => {
       {/* Export Study Data */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
         <h2 className="text-xl font-bold mb-4 text-gray-800">Export Study Data</h2>
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex-1">
-            <p className="text-gray-600 mb-2">
-              Export all conversation data for study participants as JSON files.
+        <p className="text-gray-600 mb-4">
+          Export conversation data for all study participants.
+          {studyParticipants.length > 0 && (
+            <span className="ml-1">
+              ({studyParticipants.length} participant{studyParticipants.length !== 1 ? 's' : ''} will be included)
+            </span>
+          )}
+        </p>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* JSON Export */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-800 mb-2">JSON Format</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Raw conversation data in JSON format. Ideal for data analysis, programming, and preserving complete metadata.
             </p>
-            <p className="text-sm text-gray-500">
-              Downloads a ZIP file containing one JSON file per participant with their complete conversation history.
-              {studyParticipants.length > 0 && (
-                <span className="ml-1">
-                  ({studyParticipants.length} participant{studyParticipants.length !== 1 ? 's' : ''} will be included)
-                </span>
+            <button 
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              onClick={exportConversations}
+              disabled={exportLoading || studyParticipants.length === 0}
+            >
+              {exportLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Export as JSON
+                </>
               )}
-            </p>
+            </button>
           </div>
-          <button 
-            className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            onClick={exportConversations}
-            disabled={exportLoading || studyParticipants.length === 0}
-          >
-            {exportLoading ? (
-              <>
-                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Exporting...
-              </>
-            ) : (
-              <>
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Export Conversations
-              </>
-            )}
-          </button>
+
+          {/* Word Export */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-800 mb-2">Word Documents</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Formatted Word documents for thematic analysis. Readable format with clear conversation boundaries, perfect for qualitative coding.
+            </p>
+            <button 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              onClick={exportConversationsWord}
+              disabled={wordExportLoading || studyParticipants.length === 0}
+            >
+              {wordExportLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating Documents...
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Export as Word
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
