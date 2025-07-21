@@ -225,7 +225,7 @@ export async function GET(request: NextRequest) {
         );
         
         // Add messages
-        messages.forEach((message) => {
+        messages.forEach((message: any) => {
           const messageTime = message.timestamp ? formatTime(new Date(message.timestamp)) : '';
           const senderLabel = message.sender === 'user' ? 'USER' : 
                              message.sender === 'assistant' ? 'ASSISTANT' : 'SYSTEM';
