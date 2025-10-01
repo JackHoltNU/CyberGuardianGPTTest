@@ -25,6 +25,7 @@ const StudyManagement = () => {
   const [userToRemove, setUserToRemove] = useState("");
   const [exportLoading, setExportLoading] = useState(false);
   const [wordExportLoading, setWordExportLoading] = useState(false);
+  const [excelExportLoading, setExcelExportLoading] = useState(false);
 
   useEffect(() => {
     loadAllUsers();
@@ -208,6 +209,51 @@ const StudyManagement = () => {
     setWordExportLoading(false);
   };
 
+  const exportConversationsExcel = async () => {
+    setExcelExportLoading(true);
+    try {
+      // Create URL with study participants filter
+      const participantUsernames = studyParticipants.map(p => p.username);
+      const params = new URLSearchParams();
+      if (participantUsernames.length > 0) {
+        params.append('participants', participantUsernames.join(','));
+      }
+
+      const response = await fetch(`/api/admin/exportConversationsExcel?${params}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to export Excel file');
+        return;
+      }
+
+      // Create download link
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filename = contentDisposition 
+        ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
+        : `study_conversations_excel_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+      
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Error exporting Excel file:', error);
+      alert('Failed to export Excel file');
+    }
+    setExcelExportLoading(false);
+  };
+
   return (
     <main className="users">
       <h1 className="text-2xl font-bold mb-6 text-gray-800">Study Management</h1>
@@ -308,7 +354,7 @@ const StudyManagement = () => {
           )}
         </p>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* JSON Export */}
           <div className="border border-gray-200 rounded-lg p-4">
             <h3 className="font-semibold text-gray-800 mb-2">JSON Format</h3>
@@ -364,6 +410,36 @@ const StudyManagement = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   Export as Word
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Excel Export */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-800 mb-2">Excel Format</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Structured Excel spreadsheet with multiple worksheets for comprehensive data analysis. Perfect for statistical analysis and reporting.
+            </p>
+            <button 
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              onClick={exportConversationsExcel}
+              disabled={excelExportLoading || studyParticipants.length === 0}
+            >
+              {excelExportLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating Excel...
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  Export as Excel
                 </>
               )}
             </button>

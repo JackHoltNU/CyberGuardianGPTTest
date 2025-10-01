@@ -22,8 +22,7 @@ const DailyInteractionSchema = new Schema<IDailyInteraction>({
   day: {
     type: Number,
     required: true,
-    min: 1,
-    max: 14
+    min: 1
   },
   date: {
     type: Date,
@@ -55,14 +54,12 @@ const UserProgressSchema = new Schema<IUserProgress>({
   currentDay: {
     type: Number,
     default: 1,
-    min: 1,
-    max: 14
+    min: 1
   },
   completedDays: {
     type: Number,
     default: 0,
-    min: 0,
-    max: 14
+    min: 0
   },
   isStudyComplete: {
     type: Boolean,
